@@ -1,4 +1,4 @@
-.venv/
+bookenv/
 __pycache__/
 *.pyc
 .env
