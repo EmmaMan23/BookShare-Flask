@@ -1,6 +1,7 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 import os
+from routes.auth import auth
 
 
 user = os.environ.get("MYSQL_USER")
@@ -18,4 +19,6 @@ def create_app():
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
     db.init_app(app)
+
+    app.register_blueprint(auth)
     return app
