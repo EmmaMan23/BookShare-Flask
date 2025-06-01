@@ -8,65 +8,81 @@
     <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
 </head>
 <body class="p-3 m-0 border-0 bd-example m-0 border-0">
-    <div >
-    <button type="submit" class="btn btn-primary" onclick="showLogin()">Login</button>
-    <button type="submit" class="btn btn-primary" onclick="showRegister()">Register</button>
+    {% set show_register = show_register if show_register is defined else False %}
+
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div>
+        {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+        </div>
+    {% endif %}
+    {% endwith %}
+
+
+    <div>
+    <button type="button" class="btn btn-primary" onclick="showLogin()">Login</button>
+    <button type="button" class="btn btn-primary" onclick="showRegister()">Register</button>
     </div>
-    <form id="loginForm" method="POST" action="/login">
+    <form id="loginForm" method="POST" action="/login" class="{% if show_register %}d-none{% endif %}">
 
     <div class="row mb-3">
         <label for="inputusername3" class="col-sm-2 col-form-label">Username</label>
         <div class="col-sm-10">
-        <input type="username" class="form-control" id="inputUsername">
+        <input type="username" name="username" class="form-control" id="inputUsername">
         </div>
     </div>
     <div class="row mb-3">
         <label for="inputPassword3" class="col-sm-2 col-form-label">Password</label>
         <div class="col-sm-10">
-        <input type="password" class="form-control" id="inputPassword">
+        <input type="password" name="password" class="form-control" id="inputPassword">
         </div>
     </div>
     <button type="submit" class="btn btn-primary">Submit</button>
 
     </form>
     
-    <form id="registerForm" method="POST" action="/register" class="d-none">
+    <form id="registerForm" method="POST" action="/register" class="{% if not show_register %}d-none{% endif %}">
     <div class="row mb-3">
         <label for="inputusername3" class="col-sm-2 col-form-label">Username</label>
         <div class="col-sm-10">
-        <input type="username" class="form-control" id="registerUsername">
+        <input type="username" name="username" class="form-control" id="registerUsername">
         </div>
     </div>
     <div class="row mb-3">
         <label for="inputPassword3" class="col-sm-2 col-form-label">Password</label>
         <div class="col-sm-10">
-        <input type="password" class="form-control" id="registerPassword">
+        <input type="password" name="password" class="form-control" id="registerPassword">
         </div>
     </div>
     <div class="row mb-3">
         <label for="re-inputPassword3" class="col-sm-2 col-form-label">Re-enter Password</label>
         <div class="col-sm-10">
-        <input type="password" class="form-control" id="re-inputPassword">
+        <input type="password" name="re_password" class="form-control" id="re-inputPassword">
         </div>
     </div>
     <fieldset class="row mb-3">
         <legend class="col-form-label col-sm-2 pt-0">User Type</legend>
         <div class="col-sm-10">
         <div class="form-check">
-            <input class="form-check-input" type="radio" name="gridRadios" id="gridRadios1" value="option1" checked="">
+            <input class="form-check-input" type="radio" name="user_type" id="gridRadios1" value="admin" checked="">
             <label class="form-check-label" for="gridRadios1">
             Admin
             </label>
         </div>
         <div class="form-check">
-            <input class="form-check-input" type="radio" name="gridRadios" id="gridRadios2" value="option2">
+            <input class="form-check-input" type="radio" name="user_type" id="gridRadios2" value="regular">
             <label class="form-check-label" for="gridRadios2">
             Regular
             </label>
         </div>
         <button type="submit" class="btn btn-primary">Submit</button>
         
-        </div>
         </div>
     </fieldset>
     </div>
@@ -75,6 +91,7 @@
     </form>
 
     <script>
+      
         function showLogin(){
             document.getElementById("loginForm").classList.remove("d-none");
             document.getElementById("registerForm").classList.add("d-none");
