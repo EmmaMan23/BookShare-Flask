@@ -30,4 +30,24 @@ def register_user(form):
     db.session.commit()
 
     return Result(True)
+
+def login_user(form):
+
+    username = form.get('username')
+    password = form.get('password')
+
+    if not username or not password:
+        return Result(False, "All fields are required.")
+    
+    existing_user = User.query.filter_by(username=username).first()
+    if existing_user and existing_user.verify_password(password):
+        return Result(True, "Successful login")
+    else:
+        return Result(success=False, message="Invalid username or password")
+        
+    
+
+
+
+
     
