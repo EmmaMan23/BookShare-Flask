@@ -2,6 +2,7 @@ from flask import Flask
 from extensions import db, login_manager
 import os
 from routes.auth import auth
+from routes.dashboard import dash
 from models import User
 from dotenv import load_dotenv
 
@@ -31,4 +32,5 @@ def create_app():
         return User.query.get(int(user_id))
 
     app.register_blueprint(auth)
+    app.register_blueprint(dash)
     return app
