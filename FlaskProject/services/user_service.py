@@ -31,7 +31,7 @@ def register_user(form):
 
     return Result(True)
 
-def authenticate_user(form):
+def user_login(form):
 
     username = form.get('username')
     password = form.get('password')

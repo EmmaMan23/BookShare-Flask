@@ -28,7 +28,7 @@ def register():
 def login():
     if request.method == 'POST':
         form_data = request.form
-        result = user_service.authenticate_user(form_data)
+        result = user_service.user_login(form_data)
 
         if result.success:
             login_user(result.data)
