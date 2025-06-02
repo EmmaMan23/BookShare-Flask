@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, request
-from flask import redirect, url_for, flash
+from flask import redirect, url_for, flash, session
 from services import user_service
+from flask_login import login_user, logout_user
 
 auth = Blueprint('auth', __name__)
 
@@ -27,9 +28,10 @@ def register():
 def login():
     if request.method == 'POST':
         form_data = request.form
-        result = user_service.login_user(form_data)
+        result = user_service.user_login(form_data)
 
         if result.success:
+            login_user(result.data)
             flash("Successful login", "success")
             return redirect(url_for('dash.dashboard'))
         else:
@@ -38,4 +40,7 @@ def login():
         
     return render_template('login.html', show_register=False)
 
-
+@auth.route('/logout')
+def logout():
+    logout_user()
+    return redirect('login')

@@ -31,7 +31,7 @@ def register_user(form):
 
     return Result(True)
 
-def login_user(form):
+def user_login(form):
 
     username = form.get('username')
     password = form.get('password')
@@ -41,10 +41,11 @@ def login_user(form):
     
     existing_user = User.query.filter_by(username=username).first()
     if existing_user and existing_user.verify_password(password):
-        return Result(True, "Successful login")
+        return Result(True, "Successful login", existing_user)
     else:
         return Result(success=False, message="Invalid username or password")
         
+
     
 
 
