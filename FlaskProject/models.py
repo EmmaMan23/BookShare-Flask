@@ -57,4 +57,4 @@ class Genre(db.Model):
     genre_id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(20), nullable=False)
     image = db.Column(db.String(255), nullable=True)
-    marked_for_deletion = db.Column(db.Boolean, default=False) #user can mark fo deletion
+    inactive = db.Column(db.Boolean, default=False) 
