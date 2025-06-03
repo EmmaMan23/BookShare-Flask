@@ -1,8 +1,11 @@
 from app import create_app
 from routes import auth
+from seed import seeding
 
 
 app = create_app()
+
+seeding()
 
 
 @app.route('/')
