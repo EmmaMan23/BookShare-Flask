@@ -2,9 +2,9 @@ from flask import Blueprint, render_template, request
 from flask import redirect, url_for, flash
 from flask_login import login_required, current_user
 
-listings = Blueprint ('list', __name__)
+listings = Blueprint ('listings', __name__)
 
-@listings.route('/create_listing')
+@listings.route('/create_listing', methods=['POST', 'GET'])
 @login_required
 def create_listing():
     return("List books here")
