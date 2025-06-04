@@ -40,7 +40,8 @@ class Listing(db.Model):
     
 
     def __repr__(self):
-        return f"<Listing {self.title} by User {self.listed_by} (Available: {self.is_available})>"
+        username = self.user.username if self.user else "No user"
+        return f"<Listing {self.title} by User {username} (Available: {self.is_available})>"
     
 class Loan(db.Model):
     loan_id = db.Column(db.Integer, primary_key=True)
