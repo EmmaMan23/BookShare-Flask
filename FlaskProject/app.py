@@ -3,6 +3,7 @@ from extensions import db, login_manager
 import os
 from routes.auth import auth
 from routes.dashboard import dash
+from routes.listings import listings
 from models import User
 from dotenv import load_dotenv
 import sqlite3
@@ -10,7 +11,6 @@ from models import User, Loan, Listing, Genre
 
 
 load_dotenv()
-
 
 
 def create_app():
@@ -36,4 +36,5 @@ def create_app():
 
     app.register_blueprint(auth)
     app.register_blueprint(dash)
+    app.register_blueprint(listings)
     return app
