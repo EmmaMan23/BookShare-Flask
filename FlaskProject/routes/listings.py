@@ -29,9 +29,12 @@ def view_all():
 @listings.route('/view_my_books')
 @login_required
 def view_mine():
-    return("View my books and manage")
+    listings_data = listing_service.get_all_listings()
+    return render_template('show_user_listings.html', listings=listings_data, existing_user=current_user) 
 
 @listings.route('/view_loans')
 @login_required
 def view_loans():
-    return("View past loans")
+    loans_data = listing_service.get_all_loans()
+    listings_data = listing_service.get_all_listings()
+    return render_template('view_loans.html', loans=loans_data, listings=listings_data)
