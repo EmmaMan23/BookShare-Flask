@@ -23,3 +23,6 @@ def list_book(form):
     db.session.add(new_listing)
     db.session.commit()
     print(new_listing.user.username)
+
+def get_all_listings():
+    return Listing.query.all()
