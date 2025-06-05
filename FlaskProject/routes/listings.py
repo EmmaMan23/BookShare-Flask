@@ -23,7 +23,8 @@ def create_listing():
 @listings.route('/view_listings')
 @login_required
 def view_all():
-    return("View all books and reserve")
+    listings_data = listing_service.get_all_listings()
+    return render_template('view_books.html', listings=listings_data)
 
 @listings.route('/view_my_books')
 @login_required
