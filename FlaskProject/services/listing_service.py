@@ -1,4 +1,4 @@
-from models import Listing
+from models import Listing, Loan
 from utils import Result
 from extensions import db
 from flask_login import current_user
@@ -26,3 +26,7 @@ def list_book(form):
 
 def get_all_listings():
     return Listing.query.all()
+
+def get_all_loans():
+    return Loan.query.all()
+
