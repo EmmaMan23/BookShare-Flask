@@ -9,6 +9,17 @@
   </head>
   
  <body class="p-3 m-0 border-0 bd-example m-0 border-0">
+  {% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+      {% for message in messages %}
+        {{ message }}
+      {% endfor %}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  {% endif %}
+{% endwith %}
+
   {% for listing in listings %}
     {% if listing.user_id == current_user.user_id %}
   <div class="card mb-3" style="max-width: 540px;">
@@ -32,6 +43,7 @@
             <label class="form-check-label" for="checkDefault">Reserve this book</label>
           </div>
         </div>
+        <a href="{{ url_for('listings.edit_listing', listing_id=listing.listing_id)}}" class="btn btn-primary" >Edit book details</a>
         <div class="card-footer text-end">
           <span class="badge bg-secondary">{{ listing.genre.name }}</span>
         </div>
