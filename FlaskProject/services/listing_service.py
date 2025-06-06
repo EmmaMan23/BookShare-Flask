@@ -27,6 +27,25 @@ def list_book(form):
 def get_all_listings():
     return Listing.query.all()
 
+def get_listing_by_id(listing_id):
+    return Listing.query.get(listing_id)
+
+def edit_listing(listing_id, form):
+    listing = get_listing_by_id(listing_id)
+
+    if listing.user_id != current_user.user_id:
+        raise PermissionError("You can't edit someone else's listing")
+    else:
+        listing.title = form.get('title')
+        listing.author = form.get('author')
+        listing.description = form.get('description')
+        listing.genre_id = int(form.get('genre_id'))
+        listing.is_available = form.get('is_available')
+
+        db.session.commit()
+
+    
+
 def get_all_loans():
     return Loan.query.all()
 

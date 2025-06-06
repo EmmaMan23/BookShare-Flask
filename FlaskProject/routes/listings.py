@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request
 from flask import redirect, url_for, flash
 from flask_login import login_required, current_user
-from models import Genre
+from models import Genre, Listing
 from services import listing_service
 from datetime import date, timedelta
 
@@ -30,6 +30,41 @@ def view_all():
 def view_mine():
     listings_data = listing_service.get_all_listings()
     return render_template('show_user_listings.html', listings=listings_data, existing_user=current_user) 
+
+@listings.route('/edit_listing', methods=['POST', 'GET'])
+@login_required
+def edit_listing():
+    genres = Genre.query.filter_by(inactive=False).all()
+    if request.method == 'POST':
+        form_data = request.form
+        listing_id = form_data.get('listing_id')
+        listing = listing_service.get_listing_by_id(listing_id)
+        if listing.user_id != current_user.user_id:
+            flash("You can't edit someone else's listing")
+            return redirect(url_for('listings.view_mine'))
+        
+        try:
+            listing_service.edit_listing(listing_id, form_data)
+            flash("Listing updated successfully!")
+        except Exception as e:
+            flash(f"An error occurred: {e}")
+        
+        return redirect(url_for('listings.view_mine'))
+    
+    else:
+        listing_id = request.args.get('listing_id')
+        listing = listing = listing_service.get_listing_by_id(listing_id)
+
+        if listing.user_id != current_user.user_id:
+            flash("You can't edit someone else's listing")
+            return redirect(url_for('listings.view_mine'))
+        
+        return render_template('edit_listing.html', genres=genres, listing=listing)
+
+
+        
+
+
 
 @listings.route('/view_loans')
 @login_required
