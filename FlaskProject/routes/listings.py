@@ -3,6 +3,7 @@ from flask import redirect, url_for, flash
 from flask_login import login_required, current_user
 from models import Genre
 from services import listing_service
+from datetime import date, timedelta
 
 listings = Blueprint ('listings', __name__)
 
@@ -15,8 +16,6 @@ def create_listing():
     if request.method == 'POST':
         form_data = request.form
         result = listing_service.list_book(form_data)
-        
-        #print(request.form.get('Title'))
 
     return render_template('create_listing.html', genres=genres)
 
@@ -35,6 +34,22 @@ def view_mine():
 @listings.route('/view_loans')
 @login_required
 def view_loans():
-    loans_data = listing_service.get_all_loans()
+    loans_data = listing_service.get_loans_current_user(current_user.user_id)
     listings_data = listing_service.get_all_listings()
-    return render_template('view_loans.html', loans=loans_data, listings=listings_data)
+    today = date.today()
+    return render_template('view_loans.html', loans=loans_data, listings=listings_data, today=today)
+
+@listings.route('/reserve_book', methods=['POST'])
+def reserve_book():
+
+    
+    form_data = request.form
+    if 'reserve' in form_data:
+        listing_id = form_data.get('listing_id')
+        user_id = current_user.user_id
+        listing_service.reserve_book(user_id, int(listing_id))
+        return redirect(url_for('listings.view_all'))
+
+
+
+    
