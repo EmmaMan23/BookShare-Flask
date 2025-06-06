@@ -10,7 +10,7 @@
   
  <body class="p-3 m-0 border-0 bd-example m-0 border-0">
   {% for loan in loans %}
-    {% if loan.user_id == current_user.user_id %}
+    
   <div class="card mb-3" style="max-width: 540px;">
     <div class="row g-0">
       <div class="col-md-4">
@@ -24,7 +24,7 @@
           <p class="card-text">Listed by: {{ loan.listing.user.username }}</p>
           <p class="card-text">
             <small class="text-body-secondary">
-              {% if loan.listing.is_available %} Available {% else %} Unavailable {% endif %}
+              {% if loan.return_date >= today%} Return date is: {{loan.return_date}} {% else %} Book returned on {{loan.return_date}} {% endif %}
             </small>
           </p>
           <div class="form-check">
@@ -38,7 +38,7 @@
       </div>
     </div>
   </div>
-  {% endif %}
+
   {% endfor %}
 </body>
 </html>

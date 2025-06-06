@@ -2,6 +2,7 @@ from models import Listing, Loan
 from utils import Result
 from extensions import db
 from flask_login import current_user
+from datetime import date, timedelta
 
 def list_book(form):
 
@@ -22,7 +23,6 @@ def list_book(form):
         )
     db.session.add(new_listing)
     db.session.commit()
-    print(new_listing.user.username)
 
 def get_all_listings():
     return Listing.query.all()
@@ -30,3 +30,30 @@ def get_all_listings():
 def get_all_loans():
     return Loan.query.all()
 
+def get_loans_current_user(user_id):
+    return (Loan.query
+            .filter_by(user_id=user_id)
+            .order_by(Loan.return_date.desc())
+            .all())
+
+def reserve_book(user_id, listing_id):
+
+    start_date = date.today() + timedelta(days=1)
+    return_date = start_date + timedelta(days=21)
+
+    loan = Loan(
+        user_id=user_id,
+        listing_id=listing_id,
+        start_date=start_date,
+        return_date=return_date,
+        is_returned= False
+    )
+    
+    db.session.add(loan)
+
+    listing = Listing.query.get(listing_id)
+    if listing:
+        listing.is_available = False
+
+    db.session.commit()
+    return loan
