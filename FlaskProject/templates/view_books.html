@@ -9,34 +9,65 @@
   </head>
   
  <body class="p-3 m-0 border-0 bd-example m-0 border-0">
-  {% for listing in listings %}
-  <div class="card mb-3" style="max-width: 540px;">
-    <div class="row g-0">
-      <div class="col-md-4">
-        <img src="{{ url_for('static', filename=listing.genre.image) }}" class="img-fluid rounded-start" style="height: 200px; object-fit: cover;">
+  <nav class="navbar" data-bs-theme="dark"style="background-color: #114870"> 
+      <div class="container-fluid">
+        <a class="navbar-brand" href="#">Fixed top</a>
+        <ul class="nav nav-underline">
+  <li class="nav-item">
+    <a class="nav-link active" aria-current="page" href="{{ url_for('listings.view_all') }}">View Books</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="{{ url_for('listings.view_loans') }}">View loans</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="{{ url_for('listings.view_mine') }}">Show my books</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link " href="{{ url_for('listings.create_listing') }}">Create Listing</a>
+  </li>
+</ul>
+
       </div>
-      <div class="col-md-8">
-        <div class="card-body">
-          <h4 class="card-title">{{ listing.title }}</h4>
-          <h5>{{ listing.author }}</h5>
-          <p class="card-text">{{ listing.description }}</p>
-          <p class="card-text">Listed by: {{ listing.user.username }}</p>
-          <p class="card-text">
-            <small class="text-body-secondary">
-              {% if listing.is_available %} Available {% else %} Unavailable {% endif %}
-            </small>
-          </p>
-          <div class="form-check">
-            <input class="form-check-input" type="checkbox" value="" id="checkDefault" {% if not listing.is_available %}disabled{% endif %}>
-            <label class="form-check-label" for="checkDefault">Reserve this book</label>
+    </nav>
+    <div class="container mt-4">
+  <div class="row gx-4 gy-4">
+    {% for listing in listings %}
+    <div class="col-md-6">
+      <div class="card mb-3">
+        <div class="row g-0">
+          <div class="col-md-4">
+            <img src="{{ url_for('static', filename=listing.genre.image) }}" class="img-fluid rounded-start" style="height: 200px; object-fit: cover;">
+          </div>
+          <div class="col-md-8">
+            <div class="card-body">
+              <h4 class="card-title">{{ listing.title }}</h4>
+              <h5>{{ listing.author }}</h5>
+              <p class="card-text">{{ listing.description }}</p>
+              <p class="card-text">Listed by: {{ listing.user.username }}</p>
+              <p class="card-text">
+                <small class="text-body-secondary">
+                  {% if listing.is_available %} Available {% else %} Unavailable {% endif %}
+                </small>
+              </p>
+              <form action="{{ url_for('listings.reserve_book' )}}" method="post">
+                <input type="hidden" name="listing_id" value="{{ listing.listing_id }}">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" name="reserve" id="checkDefault" {% if not listing.is_available %}disabled{% endif %}>
+                  <label class="form-check-label" id="checkDefault{{ listing.id }}">Reserve this book</label>
+                </div>
+                <button type="submit" class="btn btn-primary mt-2" {% if not listing.is_available %}disabled{% endif %}>Submit</button>
+              </form>
+            </div>
+            <div class="card-footer text-end">
+              <span class="badge bg-secondary">{{ listing.genre.name }}</span>
+            </div>
           </div>
         </div>
-        <div class="card-footer text-end">
-          <span class="badge bg-secondary">{{ listing.genre.name }}</span>
-        </div>
       </div>
-    </div>
+    </div> <!-- col-md-6 -->
+    {% endfor %}
   </div>
-  {% endfor %}
+</div>
+
 </body>
 </html>
