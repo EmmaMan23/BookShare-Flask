@@ -40,7 +40,7 @@ def edit_listing(listing_id, form):
         listing.author = form.get('author')
         listing.description = form.get('description')
         listing.genre_id = int(form.get('genre_id'))
-        listing.is_available = form.get('is_available')
+       # listing.is_available = form.get('is_available')
 
         db.session.commit()
 
