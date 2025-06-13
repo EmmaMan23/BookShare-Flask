@@ -48,6 +48,13 @@
               Return date: {{loan.return_date.strftime("%d/%m/%Y")}} {% else %} Book returned on {{loan.return_date.strftime("%d/%m/%Y")}} {% endif %}
             </small>
           </p>
+          <form method="POST" action="{{ url_for('listings.update_loan') }}">
+          <input type="hidden" name="loan_id" value="{{ loan.loan_id }}">
+
+          <div class="form-check">
+                  <input class="form-check-input" type="checkbox"  id="checkDefault{{ loan.loan_id }}" name="returned" onchange="this.form.submit()" >
+                  <label class="form-check-label" >Mark as returned</label>
+          </div>
         <div class="card-footer text-end">
           <span class="badge bg-secondary">{{ loan.listing.genre.name }}</span>
         </div>

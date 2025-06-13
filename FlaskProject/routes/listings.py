@@ -87,4 +87,13 @@ def reserve_book():
 
 
 
-    
+@listings.route('/update_loan', methods=['POST'])
+def update_loan():
+
+    form_data = request.form
+    if 'returned' in form_data:
+        loan_id = form_data.get('loan_id')
+        user_id = current_user.user_id
+        listing_service.update_loan(user_id, int(loan_id))
+    return redirect(url_for('listings.view_loans'))
+        
