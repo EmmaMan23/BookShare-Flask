@@ -55,6 +55,13 @@ def get_loans_current_user(user_id):
             .order_by(Loan.return_date.desc())
             .all())
 
+def update_loan(user_id, loan_id):
+    loan = Loan.query.get(loan_id)
+
+    loan.is_returned = True
+    db.session.commit()
+
+
 def reserve_book(user_id, listing_id):
 
     start_date = date.today() + timedelta(days=1)
