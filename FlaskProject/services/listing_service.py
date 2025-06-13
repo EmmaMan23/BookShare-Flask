@@ -40,7 +40,7 @@ def edit_listing(listing_id, form):
         listing.author = form.get('author')
         listing.description = form.get('description')
         listing.genre_id = int(form.get('genre_id'))
-        listing.is_available = form.get('is_available')
+       # listing.is_available = form.get('is_available')
 
         db.session.commit()
 
@@ -54,6 +54,13 @@ def get_loans_current_user(user_id):
             .filter_by(user_id=user_id)
             .order_by(Loan.return_date.desc())
             .all())
+
+def update_loan(user_id, loan_id):
+    loan = Loan.query.get(loan_id)
+
+    loan.is_returned = True
+    db.session.commit()
+
 
 def reserve_book(user_id, listing_id):
 
