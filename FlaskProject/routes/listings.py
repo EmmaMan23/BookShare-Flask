@@ -96,4 +96,12 @@ def update_loan():
         user_id = current_user.user_id
         listing_service.update_loan(user_id, int(loan_id))
     return redirect(url_for('listings.view_loans'))
+
+@listings.route('/create_genre', methods=['POST', 'GET'])
+def create_genre():
+    form_data = request.form
+    if request.method == 'GET':
+        print("hey")
+
+        return render_template('add_genre.html')
         
