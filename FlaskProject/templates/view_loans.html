@@ -28,10 +28,28 @@
   <li class="nav-item">
     <a class="nav-link " href="{{ url_for('listings.create_listing') }}">Create Listing</a>
   </li>
+  {% if current_user.is_admin %}
+  <li class="nav-item">
+    <a class="nav-link" href="{{ url_for('listings.view_loans') }}">View All loans</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="{{ url_for('listings.create_genre') }}">Create Genre</a>
+  </li>
+  {% endif %}
 </ul>
 
       </div>
     </nav>
+    <div class="container mt-4">
+  <h2>
+    {% if scope == 'self' %}
+      My Loans
+    {% else %}
+      All loans 
+    {% endif %}
+  </h2>
+</div>
+
   {% for loan in loans %}
     
   <div class="card mb-3" style="max-width: 540px;">

@@ -72,7 +72,7 @@ def view_loans():
     loans_data = listing_service.get_loans_current_user(current_user.user_id)
     listings_data = listing_service.get_all_listings()
     today = date.today()
-    return render_template('view_loans.html', loans=loans_data, listings=listings_data, today=today)
+    return render_template('view_loans.html', loans=loans_data, listings=listings_data, today=today, scope="self")
 
 @listings.route('/reserve_book', methods=['POST'])
 def reserve_book():
