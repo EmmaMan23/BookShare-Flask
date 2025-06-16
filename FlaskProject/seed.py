@@ -182,7 +182,7 @@ def seeding():
                 "description": "A sad story ",
                 "genre_id": 3,
                 "is_available": True,
-                "marked_for_deletion": False,
+                "marked_for_deletion": True,
                 "user_id": 2
             },
             {

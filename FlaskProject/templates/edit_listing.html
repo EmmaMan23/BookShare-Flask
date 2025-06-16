@@ -14,6 +14,9 @@
         <a class="navbar-brand" href="#">Fixed top</a>
         <ul class="nav nav-underline">
   <li class="nav-item">
+    <a class="nav-link active" aria-current="page" href="{{ url_for('dash.dashboard') }}">Dashboard</a>
+  </li>
+  <li class="nav-item">
     <a class="nav-link active" aria-current="page" href="{{ url_for('listings.view_all') }}">View Books</a>
   </li>
   <li class="nav-item">
@@ -25,6 +28,14 @@
   <li class="nav-item">
     <a class="nav-link " href="{{ url_for('listings.create_listing') }}">Create Listing</a>
   </li>
+  {% if current_user.is_admin %}
+  <li class="nav-item">
+    <a class="nav-link" href="{{ url_for('listings.view_loans') }}">View All loans</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="{{ url_for('listings.create_genre') }}">Create Genre</a>
+  </li>
+  {% endif %}
 </ul>
 
       </div>
