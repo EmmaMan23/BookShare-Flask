@@ -34,7 +34,7 @@
     <a class="nav-link" href="{{ url_for('listings.view_all_loans') }}">View All loans</a>
   </li>
   <li class="nav-item">
-    <a class="nav-link" href="{{ url_for('listings.create_genre') }}">Create Genre</a>
+    <a class="nav-link" href="{{ url_for('admin.create_genre') }}">Create Genre</a>
   </li>
   {% endif %}
 </ul>
@@ -75,13 +75,14 @@
                   {% if listing.marked_for_deletion %} Deletion requested <i class="fa fa-exclamation-triangle" style="font-size:24px"></i> {% endif %}
             </small>
 
-          <form method="POST" >
-          <input type="hidden" name="listing_id" value="{{ listing.listing_id }}">
-
+          <form method="POST" action="{{ url_for('admin.delete') }}">
+          <input type="hidden" name="model" value="listing">
+          <input type="hidden" name="id" value="{{ listing.listing_id }}">
           <div class="form-check">
                   <input class="form-check-input" type="checkbox"  id="checkDefault{{ listing.listing_id }}" name="delete" onchange="this.form.submit()" >
-                  <label class="form-check-label" >Delete record</label>
+                  <label class="form-check-label" for="checkDefault{{ listing.listing_id}}">Delete record</label>
           </div>
+          </form>
           {% endif %}
             <div class="card-footer text-end">
               <span class="badge bg-secondary">{{ listing.genre.name }}</span>

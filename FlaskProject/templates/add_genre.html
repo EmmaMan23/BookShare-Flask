@@ -41,10 +41,10 @@
   </li>
   {% if current_user.is_admin %}
   <li class="nav-item">
-    <a class="nav-link" href="{{ url_for('listings.view_loans') }}">View All loans</a>
+    <a class="nav-link" href="{{ url_for('listings.view_all_loans') }}">View All loans</a>
   </li>
   <li class="nav-item">
-    <a class="nav-link" href="{{ url_for('listings.create_genre') }}">Create Genre</a>
+    <a class="nav-link" href="{{ url_for('admin.create_genre') }}">Create Genre</a>
   </li>
   {% endif %}
 </ul>
@@ -53,24 +53,24 @@
 </nav>
     
 
-<form  action="{{ url_for('listings.create_genre') }}" method="POST" >
+<form  action="{{ url_for('admin.create_genre') }}" method="POST" >
     <div class="mb-3">
         <label for="name" class="form-label">Genre Name</label>
         <input type="text" class="form-control" id="name" name="name" required>
     </div>
-  <label class="form-label">Select Image</label>
-  <div class="row">
-    {% for genre in genres %}
+  <label class="form-label">Select An Image:</label>
+  <div class="row" style="display: flex; gap: 20px;">
+    {% for image in genre_images %}
     <div class="col-md-4 text-center mb-3">
         <label style="cursor: pointer;">
-            <input type="radio" name="image_filename" value="{{ genre.image }}" required>
-            <img src="{{ url_for('static', filename=genre.image) }}" class="img-fluid rounded-start" style="height: 200px; object-fit: cover;">
+            <input type="radio" name="image" value="{{ image }}" required>
+            <img src="{{ url_for('static', filename= image) }}" class="img-fluid rounded-start" style="height: 200px; object-fit: cover;">
             </label>
     </div>
     {% endfor %}
   </div>
     
-<button type="submit" class="btn btn-primary">Submit</button>
+<button type="submit" class="btn btn-primary">Add Genre</button>
 </form>
  
   </body>
