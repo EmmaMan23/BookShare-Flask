@@ -31,15 +31,16 @@
   <li class="nav-item">
     <a class="nav-link " href="{{ url_for('listings.create_listing') }}">Create Listing</a>
   </li>
-  {{% if current_user.is_admin %}}
+  {% if current_user.is_admin %}
   <li class="nav-item">
     <a class="nav-link" href="{{ url_for('listings.view_loans') }}">View All loans</a>
   </li>
   <li class="nav-item">
     <a class="nav-link" href="{{ url_for('listings.create_genre') }}">Create Genre</a>
   </li>
-  {{% endif %}}
+  {% endif %}
 </ul>
+</nav>
 
 {% for user in users %}
     
@@ -58,16 +59,13 @@
                   {% if user.marked_for_deletion %} Deletion requested <i class="fa fa-exclamation-triangle" style="font-size:24px"></i> {% endif %}
             </small>
           <form method="POST" >
-          <input type="hidden" name="loan_id" value="{{ loan.loan_id }}">
+          <input type="hidden" name="user_id" value="{{ user.user_id }}">
 
           <div class="form-check">
-                  <input class="form-check-input" type="checkbox"  id="checkDefault{{ loan.loan_id }}" name="delete" onchange="this.form.submit()" >
+                  <input class="form-check-input" type="checkbox"  id="checkDefault{{ user.user_id }}" name="delete" onchange="this.form.submit()" >
                   <label class="form-check-label" >Delete record</label>
           </div>
           {% endif %}
-        <div class="card-footer text-end">
-          <span class="badge bg-secondary">{{ loan.listing.genre.name }}</span>
-        </div>
       </div>
     </div>
   </div>

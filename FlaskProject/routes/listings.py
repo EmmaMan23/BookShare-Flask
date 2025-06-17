@@ -74,9 +74,16 @@ def view_loans():
     today = date.today()
     return render_template('view_loans.html', loans=loans_data, listings=listings_data, today=today, scope="self")
 
+@listings.route('/view_all_loans')
+@login_required
+def view_all_loans():
+    loans_data = listing_service.get_all_loans()
+    listings_data = listing_service.get_all_listings()
+    today = date.today()
+    return render_template('view_loans.html', loans=loans_data, listings=listings_data, today=today, scope="all")
+
 @listings.route('/reserve_book', methods=['POST'])
 def reserve_book():
-
     
     form_data = request.form
     if 'reserve' in form_data:

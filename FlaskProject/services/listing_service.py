@@ -47,7 +47,7 @@ def edit_listing(listing_id, form):
     
 
 def get_all_loans():
-    return Loan.query.all()
+    return Loan.query.order_by(Loan.return_date.desc()).all()
 
 def get_loans_current_user(user_id):
     return (Loan.query
