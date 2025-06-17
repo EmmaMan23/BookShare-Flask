@@ -36,7 +36,6 @@ def delete():
 
 @admin.route('/create_genre', methods=['POST', 'GET'])
 def create_genre():
-    form_data = request.form
 
     genre_images = [
         'images/adventure.png',
@@ -48,8 +47,14 @@ def create_genre():
         'images/science.png',
     ]
     if request.method == 'POST':
+        form_data = request.form
         admin_service.create_genre(form_data)
-        return render_template('view_users.html')
+        return redirect(url_for('admin.create_genre'))
         
+    genres = admin_service.get_genres()
+    return render_template('add_genre.html', genre_images=genre_images, genres=genres)
 
-    return render_template('add_genre.html', genre_images=genre_images)
+# @admin.route('/view_genres')
+# def view_genres():
+#     genres = admin_service.get_genres()
+#     return render_template('add_genre.html', genres=genres)

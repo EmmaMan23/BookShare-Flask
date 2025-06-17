@@ -33,7 +33,7 @@ class Listing(db.Model):
     title = db.Column(db.String(255), nullable=False)
     author = db.Column(db.String(255))
     description = db.Column(db.String (400))
-    genre_id = db.Column(db.Integer, db.ForeignKey('genre.genre_id'))
+    genre_id = db.Column(db.Integer, db.ForeignKey('genre.genre_id'), nullable=True)
     is_available = db.Column(db.Boolean, default=True, nullable=False)
     marked_for_deletion = db.Column(db.Boolean, default=False) #user can mark fo deletion
     user_id = db.Column(db.Integer, db.ForeignKey('user.user_id', ondelete='CASCADE'), nullable=False)

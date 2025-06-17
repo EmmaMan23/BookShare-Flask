@@ -3,6 +3,7 @@ from utils import Result
 from extensions import db
 from flask_login import current_user
 from datetime import date, timedelta
+from flask import url_for
 
 def list_book(form):
 
@@ -66,8 +67,6 @@ def edit_listing(listing_id, form):
 
 
     db.session.commit()
-
-    
 
 def get_all_loans():
     return Loan.query.order_by(Loan.return_date.desc()).all()

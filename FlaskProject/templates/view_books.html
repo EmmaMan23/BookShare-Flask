@@ -9,9 +9,9 @@
     <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
   </head>
   
- <body class="p-3 m-0 border-0 bd-example m-0 border-0">
+<body class="p-3 m-0 border-0 bd-example m-0 border-0">
   <nav class="navbar" data-bs-theme="dark"style="background-color: #114870"> 
-      <div class="container-fluid">
+      <class="container-fluid">
         <a class="navbar-brand" href="#">Fixed top</a>
         <ul class="nav nav-underline">
   <li class="nav-item">
@@ -41,63 +41,68 @@
   </li>
   {% endif %}
 </ul>
+</nav>
 
+<div class="container mt-4">
+<div class="row gx-4 gy-4">
+  {% for listing in listings %}
+<div class="col-md-6">
+  <div class="card mb-3 ">
+    <div class="row g-0">
+      <div class="col-md-4">
+        <img src="{{ url_for('static', filename=listing.genre.image) if listing.genre else url_for('static', filename='images/fallback.png') }}" class="img-fluid rounded-start" style="height: 200px; object-fit: cover;">
       </div>
-    </nav>
-    <div class="container mt-4">
-  <div class="row gx-4 gy-4">
-    {% for listing in listings %}
-    <div class="col-md-6">
-      <div class="card mb-3">
-        <div class="row g-0">
-          <div class="col-md-4">
-            <img src="{{ url_for('static', filename=listing.genre.image) }}" class="img-fluid rounded-start" style="height: 200px; object-fit: cover;">
-          </div>
-          <div class="col-md-8">
-            <div class="card-body">
-              <h4 class="card-title">{{ listing.title }}</h4>
-              <h5>{{ listing.author }}</h5>
-              <p class="card-text">{{ listing.description }}</p>
-              <p class="card-text">Listed by: {{ listing.user.username }}</p>
-              <p class="card-text">
-                <small class="text-body-secondary">
-                  {% if listing.is_available %} Available {% else %} Unavailable {% endif %}
-                </small>
-              </p>
-              <form action="{{ url_for('listings.reserve_book' )}}" method="post">
-                <input type="hidden" name="listing_id" value="{{ listing.listing_id }}">
-                <div class="form-check">
-                  <input class="form-check-input" type="checkbox" name="reserve" id="checkDefault" {% if not listing.is_available %}disabled{% endif %}>
-                  <label class="form-check-label" id="checkDefault{{ listing.id }}">Reserve this book</label>
-                </div>
-                <button type="submit" class="btn btn-primary mt-2" {% if not listing.is_available %}disabled{% endif %}>Submit</button>
-              </form>
-            </div>
-            {% if current_user.is_admin %}
+      <div class="col-md-8">
+        <div class="card-body">
+          <h4 class="card-title">{{ listing.title }}</h4>
+          <h5>{{ listing.author }}</h5>
+          <p class="card-text">{{ listing.description }}</p>
+          <p class="card-text">Listed by: {{ listing.user.username }}</p>
+          <p class="card-text">
             <small class="text-body-secondary">
-                  {% if listing.marked_for_deletion %} Deletion requested <i class="fa fa-exclamation-triangle" style="font-size:24px"></i> {% endif %}
+              {% if listing.is_available and not listing.marked_for_deletion%} Available 
+              {% else %} Unavailable 
+              {% endif %}
+              {% if listing.marked_for_deletion %} - Marked for Deletion <i class="fa fa-exclamation-triangle" style="font-size:24px"></i>{% endif %}
             </small>
-
-          <form method="POST" action="{{ url_for('admin.delete') }}">
+          </p>
+          <form action="{{ url_for('listings.reserve_book' )}}" method="post">
+            <input type="hidden" name="listing_id" value="{{ listing.listing_id }}">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" name="reserve" id="checkDefault{{ listing.listing_id }}" 
+                {% if not listing.is_available or listing.marked_for_deletion %}disabled{% endif %}>
+              <label class="form-check-label" for="checkDefault{{ listing.listing_id }}">Reserve this book</label>
+            </div>
+            <button type="submit" class="btn btn-primary mt-2" 
+              {% if not listing.is_available or listing.marked_for_deletion %}disabled{% endif %}>
+              Submit
+            </button>
+          </form>
+        </div>
+        {% if current_user.is_admin %}
+        <small class="text-body-secondary">
+          {% if listing.marked_for_deletion %}
+            Deletion requested <i class="fa fa-exclamation-triangle" style="font-size:24px"></i>
+          {% endif %}
+        </small>
+        <form method="POST" action="{{ url_for('admin.delete') }}">
           <input type="hidden" name="model" value="listing">
           <input type="hidden" name="id" value="{{ listing.listing_id }}">
-          <button type="submit" class="btn btn-danger btn-sm mt-2"
+          <button type="submit" class="btn btn-danger btn-sm mt-2" 
             onclick="return confirm('Are you sure you want to delete this listing?')">
-      Delete
-    </button>
-  </form>
-          </form>
-          {% endif %}
-            <div class="card-footer text-end">
-              <span class="badge bg-secondary">{{ listing.genre.name }}</span>
-            </div>
-          </div>
+            Delete
+          </button>
+        </form>
+        {% endif %}
+        <div class="card-footer text-end">
+          <span class="badge bg-secondary">{{ listing.genre.name }}</span>
         </div>
       </div>
-    </div> 
-    {% endfor %}
+    </div>
   </div>
 </div>
-
+{% endfor %}
+</div>
+</div>
 </body>
 </html>

@@ -5,6 +5,7 @@ from models import Genre, Listing
 from services import listing_service
 from datetime import date, timedelta
 
+
 listings = Blueprint ('listings', __name__)
 
 @listings.route('/create_listing', methods=['POST', 'GET'])

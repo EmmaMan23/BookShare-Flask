@@ -35,3 +35,6 @@ class AdminService:
 
         db.session.add(new_genre)
         db.session.commit()
+
+    def get_genres(self):
+        return Genre.query.all()
