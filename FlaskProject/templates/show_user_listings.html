@@ -30,10 +30,13 @@
   </li>
   {% if current_user.is_admin %}
   <li class="nav-item">
-    <a class="nav-link" href="{{ url_for('listings.view_loans') }}">View All loans</a>
+    <a class="nav-link" href="{{ url_for('listings.view_all_loans') }}">View All loans</a>
   </li>
   <li class="nav-item">
-    <a class="nav-link" href="{{ url_for('listings.create_genre') }}">Create Genre</a>
+    <a class="nav-link" href="{{ url_for('admin.create_genre') }}">Create Genre</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="{{ url_for('admin.view_users') }}">Users</a>
   </li>
   {% endif %}
 </ul>
@@ -69,11 +72,15 @@
               {% if listing.is_available %} Available {% else %} Unavailable {% endif %}
             </small>
           </p>
-          <div class="form-check">
-            <input class="form-check-input" type="checkbox" value="" id="checkDefault" {% if not listing.is_available %}disabled{% endif %}>
-            <label class="form-check-label" for="checkDefault">Reserve this book</label>
-          </div>
         </div>
+       <form action="{{ url_for('listings.edit_listing' )}}" method="post">
+                <input type="hidden" name="listing_id" value="{{ listing.listing_id }}">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" name="marked_for_deletion" id="deleteCheck{{ listing.listing_id}}" >
+                  <label class="form-check-label" id="deleteCheck{{ listing.listing_id}}">Request Deletion</label>
+                </div>
+                <button type="submit" class="btn btn-primary mt-2" {% if not listing.is_available %}disabled{% endif %}>Submit</button>
+              </form>
         <a href="{{ url_for('listings.edit_listing', listing_id=listing.listing_id)}}" class="btn btn-primary" >Edit book details</a>
         <div class="card-footer text-end">
           <span class="badge bg-secondary">{{ listing.genre.name }}</span>

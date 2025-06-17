@@ -9,3 +9,4 @@ dash = Blueprint('dash', __name__)
 @login_required
 def dashboard():
     return render_template('dashboard.html')
+

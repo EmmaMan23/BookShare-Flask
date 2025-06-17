@@ -5,6 +5,7 @@ from models import Genre, Listing
 from services import listing_service
 from datetime import date, timedelta
 
+
 listings = Blueprint ('listings', __name__)
 
 @listings.route('/create_listing', methods=['POST', 'GET'])
@@ -74,9 +75,16 @@ def view_loans():
     today = date.today()
     return render_template('view_loans.html', loans=loans_data, listings=listings_data, today=today, scope="self")
 
+@listings.route('/view_all_loans')
+@login_required
+def view_all_loans():
+    loans_data = listing_service.get_all_loans()
+    listings_data = listing_service.get_all_listings()
+    today = date.today()
+    return render_template('view_loans.html', loans=loans_data, listings=listings_data, today=today, scope="all")
+
 @listings.route('/reserve_book', methods=['POST'])
 def reserve_book():
-
     
     form_data = request.form
     if 'reserve' in form_data:
@@ -97,11 +105,5 @@ def update_loan():
         listing_service.update_loan(user_id, int(loan_id))
     return redirect(url_for('listings.view_loans'))
 
-@listings.route('/create_genre', methods=['POST', 'GET'])
-def create_genre():
-    form_data = request.form
-    if request.method == 'GET':
-        print("hey")
 
-        return render_template('add_genre.html')
         

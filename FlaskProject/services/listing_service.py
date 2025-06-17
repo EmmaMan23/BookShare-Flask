@@ -3,6 +3,7 @@ from utils import Result
 from extensions import db
 from flask_login import current_user
 from datetime import date, timedelta
+from flask import url_for
 
 def list_book(form):
 
@@ -35,19 +36,40 @@ def edit_listing(listing_id, form):
 
     if listing.user_id != current_user.user_id:
         raise PermissionError("You can't edit someone else's listing")
-    else:
-        listing.title = form.get('title')
-        listing.author = form.get('author')
-        listing.description = form.get('description')
-        listing.genre_id = int(form.get('genre_id'))
-       # listing.is_available = form.get('is_available')
-
-        db.session.commit()
-
     
+    title = form.get('title')
+    author = form.get('author')
+    description = form.get('description')
+    genre = form.get('genre_id')
+    if genre is not None and genre != '':
+        listing.genre_id = int(genre)
+    else:
+        genre_id = None
+    is_available = form.get('is_available')
+    marked_for_deletion = form.get('marked_for_deletion')
+
+    if title:
+        listing.title = title
+    if author:
+        listing.author = author
+    if description:
+        listing.description = description
+    if genre_id is not None:
+        listing.genre_id = int(genre_id)
+    if is_available is not None:
+        listing.is_available = True
+    else:
+        listing.is_available = False
+    if marked_for_deletion is not None:
+        listing.marked_for_deletion = marked_for_deletion in ['true', 'on', '1']
+    else:
+        listing.marked_for_deletion = False
+
+
+    db.session.commit()
 
 def get_all_loans():
-    return Loan.query.all()
+    return Loan.query.order_by(Loan.return_date.desc()).all()
 
 def get_loans_current_user(user_id):
     return (Loan.query
