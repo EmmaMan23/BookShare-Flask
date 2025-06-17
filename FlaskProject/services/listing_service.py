@@ -35,14 +35,37 @@ def edit_listing(listing_id, form):
 
     if listing.user_id != current_user.user_id:
         raise PermissionError("You can't edit someone else's listing")
+    
+    title = form.get('title')
+    author = form.get('author')
+    description = form.get('description')
+    genre = form.get('genre_id')
+    if genre is not None and genre != '':
+        listing.genre_id = int(genre)
     else:
-        listing.title = form.get('title')
-        listing.author = form.get('author')
-        listing.description = form.get('description')
-        listing.genre_id = int(form.get('genre_id'))
-       # listing.is_available = form.get('is_available')
+        genre_id = None
+    is_available = form.get('is_available')
+    marked_for_deletion = form.get('marked_for_deletion')
 
-        db.session.commit()
+    if title:
+        listing.title = title
+    if author:
+        listing.author = author
+    if description:
+        listing.description = description
+    if genre_id is not None:
+        listing.genre_id = int(genre_id)
+    if is_available is not None:
+        listing.is_available = True
+    else:
+        listing.is_available = False
+    if marked_for_deletion is not None:
+        listing.marked_for_deletion = marked_for_deletion in ['true', 'on', '1']
+    else:
+        listing.marked_for_deletion = False
+
+
+    db.session.commit()
 
     
 
