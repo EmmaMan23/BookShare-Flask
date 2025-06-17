@@ -81,10 +81,11 @@
           <form method="POST" action="{{ url_for('admin.delete') }}">
           <input type="hidden" name="model" value="listing">
           <input type="hidden" name="id" value="{{ listing.listing_id }}">
-          <div class="form-check">
-                  <input class="form-check-input" type="checkbox"  id="checkDefault{{ listing.listing_id }}" name="delete" onchange="this.form.submit()" >
-                  <label class="form-check-label" for="checkDefault{{ listing.listing_id}}">Delete record</label>
-          </div>
+          <button type="submit" class="btn btn-danger btn-sm mt-2"
+            onclick="return confirm('Are you sure you want to delete this listing?')">
+      Delete
+    </button>
+  </form>
           </form>
           {% endif %}
             <div class="card-footer text-end">
