@@ -17,6 +17,14 @@
       border-radius: 8px;
       box-shadow: 0 0 10px rgba(0, 123, 255, 0.5);
     }
+    /* Highlight genre form when editing */
+    #createGenreForm.editing {
+    border: 3px solid #ffc107; /* Bootstrap yellow (warning) */
+    box-shadow: 0 0 15px rgba(255, 193, 7, 0.6);
+    transition: all 0.3s ease-in-out;
+    }
+
+
   </style>
   </head>
   <body class="p-3 m-0 border-0 bd-example m-0 border-0">
@@ -54,37 +62,59 @@
 
 </div>
 </nav>
+
+
 <div class="mb-5">
     <h5>Current Genres</h5>
     <a href="#createGenreForm" class="btn btn-outline-primary mb-4">+ Add New Genre</a>
-<div class="d-flex flex-wrap gap-3">
+  <div class="d-flex flex-wrap gap-3">
     {% for genre in genres %}
       <div class="card genre-card" style="width: 180px;">
         <img src="{{ url_for('static', filename=genre.image) }}" alt="{{ genre.name }}" />
-        <div class="card-body p-2 text-center">
-          <h5 class="card-title mb-0">{{ genre.name }}</h5>
-          <form action="{{url_for('admin.delete')}}" method='POST' onsubmit="return confirm('Are you sure you want to delete this genre?');">
-          <input type="hidden" name="id" value={{genre.genre_id}}>
-          <input type="hidden" name="model" value="genre">
-            <button type="submit" class="btn btn-danger btn-sm mt-2">
-            Delete
-          </button>
-          </form>
+          <div class="card-body p-2 text-center">
+            <h5 class="card-title mb-0">{{ genre.name }}</h5>
+
+
+          
+          <div class="d-flex gap-2 align-items-center justify-content-center">
+          <div class="d-flex align-items-center">
+            <button
+              class="btn btn-outline-secondary btn-sm edit-btn"
+              data-id="{{genre.genre_id}}"
+              data-name="{{genre.name}}"
+              data-image="{{genre.image}}">
+              Edit
+            </button>
+          </div>
+          <div class="d-flex align-items-center">
+            <form action="{{url_for('admin.delete')}}" method='POST' onsubmit="return confirm('Are you sure you want to delete this genre?');" style="margin:0; display: inline-flex; align-items: center;">
+              <input type="hidden" name="id" value={{genre.genre_id}}>
+              <input type="hidden" name="model" value="genre">
+              <button type="submit" class="btn btn-danger btn-sm">
+                Delete
+              </button>
+            </form>
+          </div>
+          </div>
+
+
         </div>
       </div>
     {% endfor %}
   </div>
-  </div>
-<div id="createGenreForm" class="card">
-<div class="card mb-4 shadow-sm" style="max-width: 600px;">
-  <div class="card-body">
-    <h5 class="card-title">Create a New Genre</h5>
+</div>
 
-<form  action="{{ url_for('admin.create_genre') }}" method="POST" >
-    <div class="mb-3">
-        <label for="name" class="form-label">Genre Name</label>
-        <input type="text" class="form-control" id="name" name="name" required>
-    </div>
+
+<div id="createGenreForm" class="card mb-4 shadow-sm" style="max-width: 600px;">
+  <div class="card-body">
+    <h5 class="card-title" id="genreFormHeading">Create a New Genre</h5>
+    <form id="genreForm" action="{{ url_for('admin.create_genre') }}" method="POST">
+
+      <input type="hidden" id="genre_id" name="id">
+        <div class="mb-3">
+          <label for="name" class="form-label">Genre Name</label>
+          <input type="text" class="form-control" id="name" name="name" required>
+        </div>
   <label class="form-label">Select an Image:</label>
 <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-5 g-3">
   {% for image in genre_images %}
@@ -98,10 +128,70 @@
   {% endfor %}
 </div>
 
-<button type="submit" class="btn btn-primary">Add Genre</button>
+  <button type="submit" id="genreFormSubmit" class="btn btn-primary mt-3">Add Genre</button>
+  <button type="button" id="cancelEditBtn" class="btn btn-secondary mt-3 ms-2" style="display:none;">
+  Cancel
+</button>
 </form>
 </div>
 </div>
 </div>
+<script>
+  document.querySelectorAll('.edit-btn').forEach(button => {
+    button.addEventListener('click', () => {
+      const genreId = button.dataset.id;
+      const genreName = button.dataset.name;
+      const genreImage = button.dataset.image;
+
+      // Update form fields
+      document.getElementById('genre_id').value = genreId;
+      document.getElementById('name').value = genreName;
+
+      // Update radio selection
+      const radios = document.querySelectorAll('input[name="image"]');
+      radios.forEach(radio => {
+        radio.checked = (radio.value === genreImage);
+      });
+
+      // Change form action and labels
+      const form = document.getElementById('genreForm');
+      form.action = "{{ url_for('admin.edit_genre') }}";
+
+      document.getElementById('genreFormHeading').innerText = "Edit Genre";
+      document.getElementById('genreFormSubmit').innerText = "Update Genre";
+
+      document.getElementById('createGenreForm').classList.add('editing');
+      //document.getElementById('createGenreForm').classList.remove('editing');
+
+      // Scroll to form
+      document.getElementById('createGenreForm').scrollIntoView({ behavior: 'smooth' });
+
+      document.getElementById('cancelEditBtn').style.display = 'inline-block';
+    });
+  });
+
+  // Cancel button
+  const cancelBtn = document.getElementById('cancelEditBtn');
+  const genreForm = document.getElementById('genreForm');
+
+  cancelBtn.addEventListener('click', () => {
+  // Reset form fields
+    genreForm.reset();
+  
+  // Clear hidden genre_id input
+    document.getElementById('genre_id').value = '';
+
+  // Reset form action and UI texts
+    genreForm.action = "{{ url_for('admin.create_genre') }}";
+    document.getElementById('genreFormHeading').innerText = "Create a New Genre";
+    document.getElementById('genreFormSubmit').innerText = "Add Genre";
+
+  // Hide cancel button and remove editing class
+    cancelBtn.style.display = 'none';
+    document.getElementById('createGenreForm').classList.remove('editing');
+  });
+
+</script>
+
   </body>
 </html>

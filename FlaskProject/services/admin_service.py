@@ -22,10 +22,8 @@ class AdminService:
         self.db_session.commit()
         return True
 
-    def create_genre(self, form):
-        name = form.get('name')
-        image = form.get('image')
-        inactive = False
+    def create_genre(self, name, image, inactive):
+        
 
         new_genre = Genre(
             name = name,
@@ -38,3 +36,17 @@ class AdminService:
 
     def get_genres(self):
         return Genre.query.all()
+    
+    def edit_genre(self, genre_id, name, image):
+        
+        if not genre_id:
+            return None
+        
+        genre = Genre.query.get(genre_id)
+        if not genre:
+            return None
+        
+        genre.name = name
+        genre.image = image 
+        db.session.commit()
+
