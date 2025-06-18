@@ -36,9 +36,42 @@
   </li>
   {% endif %}
 </ul>
+</div>
+</nav>
+  {% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="container mt-2">
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+<div class="card-body">
+  <h5 class="card-title" id="welcome">Welcome {{ current_user.username }}</h5>
+  <form action="{{ url_for('auth.edit_user' )}}" method="POST">
+    <input type="hidden" name="user_id" value="{{ current_user.user_id }}">
+  <div class="form-check">
+    <input 
+      class="form-check-input"
+      type="checkbox"
+      value="yes"
+      name="marked_for_deletion"
+      id="deleteCheck{{ current_user.user_id}}"
+      {% if current_user.marked_for_deletion %} checked {% endif %} >
+    <label class="form-check-label" for="deleteCheck{{ current_user.user_id}}">Request Deletion</label>
+    
+  </div>
+  <button type="submit" class="btn btn-primary mt-2" >Submit</button>
+  <a href="{{ url_for('auth.edit_user', user_id=current_user.user_id)}}" class="btn btn-primary" >Edit user details</a>
 
-      </div>
-    </nav>
+</form>
+
+</div>
+
     <a href="{{ url_for('listings.create_listing') }}" class="text-decoration-none">
   <div class="card h-100 shadow-sm border-0 hover-effect" style="border-radius: 1rem;">
     <div class="card-body">
@@ -79,16 +112,10 @@
     </div>
   </div>
 </a>
-  </body>
-</html>
-
-
-<html>
-    <body>
-        <div>
-            <form action="{{ url_for('auth.logout') }}" method="get">
+<div>
+            <form action="{{ url_for('auth.logout') }}" method="POST">
                 <button type="submit" class="btn btn-danger" >Logout</button>
             </form>
         </div>
-    </body>
+  </body>
 </html>
