@@ -36,7 +36,6 @@ def delete():
 
 @admin.route('/create_genre', methods=['POST', 'GET'])
 def create_genre():
-
     genre_images = [
         'images/adventure.png',
         'images/children.png',
@@ -48,13 +47,34 @@ def create_genre():
     ]
     if request.method == 'POST':
         form_data = request.form
-        admin_service.create_genre(form_data)
+        name = form_data.get('name')
+        image = form_data.get('image')
+        inactive = False
+        admin_service.create_genre(name, image, inactive)
         return redirect(url_for('admin.create_genre'))
         
     genres = admin_service.get_genres()
     return render_template('add_genre.html', genre_images=genre_images, genres=genres)
 
-# @admin.route('/view_genres')
-# def view_genres():
-#     genres = admin_service.get_genres()
-#     return render_template('add_genre.html', genres=genres)
+@admin.route('/edit_genre', methods=['POST'])
+
+def edit_genre():
+    form_data = request.form
+    genre_id = form_data.get('id')
+    name = form_data.get('name')
+    image = form_data.get('image')
+
+    updated_genre = admin_service.edit_genre(genre_id, name, image)
+
+    if not updated_genre:
+        flash("Genre not found or missing data.", "danger")
+
+    else:
+        flash("Genre updated successfully!", "success")
+
+    return redirect(url_for('admin.create_genre'))
+
+
+    
+    
+    
