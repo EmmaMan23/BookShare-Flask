@@ -11,10 +11,10 @@ class AdminService:
         self.db_session = db_session
     
     def view_users(self):
-        return User.query.all()
+        return self.db_session.query(User).all()
     
     def delete_record(self, model_class,  record_id):
-        record = model_class.query.get(record_id)
+        record = self.db_session.get(model_class, record_id)
         if not record:
             return False #Record not found
 
@@ -31,22 +31,23 @@ class AdminService:
             inactive = inactive
         )
 
-        db.session.add(new_genre)
-        db.session.commit()
+        self.db_session.add(new_genre)
+        self.db_session.commit()
 
     def get_genres(self):
-        return Genre.query.all()
+        return self.db_session.query(Genre).all()
     
     def edit_genre(self, genre_id, name, image):
         
         if not genre_id:
             return None
         
-        genre = Genre.query.get(genre_id)
+        genre = self.db_session.get(Genre, genre_id)
         if not genre:
             return None
         
         genre.name = name
         genre.image = image 
-        db.session.commit()
+        self.db_session.commit()
+        return genre
 
