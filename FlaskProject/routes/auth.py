@@ -2,21 +2,28 @@ from flask import Blueprint, render_template, request
 from flask import redirect, url_for, flash, session, request, render_template
 from services import user_service
 from flask_login import login_user, logout_user, current_user, login_required
+from services.user_service import UserService
+from extensions import db
+
 
 auth = Blueprint('auth', __name__)
 
-
+user_service = UserService(db.session)
 
 
 @auth.route('/register', methods=['GET', 'POST'])
 def register():
-
     if request.method == 'POST':
         form_data = request.form
-        result = user_service.register_user(form_data)
+        username = form_data.get('username')
+        password = form_data.get('password')
+        re_password = form_data.get('re_password')
+        user_type = form_data.get('user_type')
+
+        result = user_service.register_user(username, password, re_password, user_type)
 
         if result.success:
-            flash("Registration successful, please log in", "success")
+            flash(result.message, "success")
             return redirect(url_for('auth.login'))
         else:
             flash(result.message, "danger")
@@ -28,22 +35,26 @@ def register():
 def login():
     if request.method == 'POST':
         form_data = request.form
-        result = user_service.user_login(form_data)
+
+        username = form_data.get('username')
+        password = form_data.get('password')
+
+        result = user_service.user_login(username, password)
 
         if result.success:
             login_user(result.data)
-            flash("Successful login", "success")
+            flash(result.message, "success")
             return redirect(url_for('dash.dashboard'))
         else:
             flash(result.message, "danger")
             return render_template('login.html', show_register=False)
-        
     return render_template('login.html', show_register=False)
 
 @auth.route('/edit_user', methods=['POST', 'GET'])
 def edit_user():
-    form_data = request.form
+    
     if request.method == 'POST':
+        form_data = request.form
         new_username = form_data.get('username', '').strip()
         old_password = form_data.get('old_password', '').strip()
         new_password = form_data.get('new_password', '').strip()

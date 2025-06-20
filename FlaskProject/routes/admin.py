@@ -17,10 +17,10 @@ def view_users():
 
 @admin.route('/delete_record', methods=['POST'])
 def delete():
-    data = request.form
+    form_data = request.form
 
-    model = data.get('model')
-    record_id = data.get('id')
+    model = form_data.get('model')
+    record_id = form_data.get('id')
 
     model_map ={
         'user': User,
@@ -30,8 +30,12 @@ def delete():
     }
 
     model_class = model_map.get(model.lower())
-    admin_service.delete_record(model_class, int(record_id))
-
+    if not model_class:
+        flash("Invalid model type.", "danger")
+        return redirect(url_for('listings.view_all'))
+    
+    result = admin_service.delete_record(model_class, int(record_id))
+    flash(result.message, "success" if result.success else "danger")
     return redirect(url_for('listings.view_all'))
 
 @admin.route('/create_genre', methods=['POST', 'GET'])
@@ -50,7 +54,9 @@ def create_genre():
         name = form_data.get('name')
         image = form_data.get('image')
         inactive = False
-        admin_service.create_genre(name, image, inactive)
+
+        result = admin_service.create_genre(name, image, inactive)
+        flash(result.message, "success" if result.success else "danger")
         return redirect(url_for('admin.create_genre'))
         
     genres = admin_service.get_genres()
@@ -64,14 +70,10 @@ def edit_genre():
     name = form_data.get('name')
     image = form_data.get('image')
 
-    updated_genre = admin_service.edit_genre(genre_id, name, image)
+    result = admin_service.edit_genre(genre_id, name, image)
 
-    if not updated_genre:
-        flash("Genre not found or missing data.", "danger")
-
-    else:
-        flash("Genre updated successfully!", "success")
-
+    
+    flash(result.message, "success" if result.success else "danger")
     return redirect(url_for('admin.create_genre'))
 
 

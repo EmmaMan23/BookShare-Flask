@@ -5,6 +5,8 @@ from models import Genre, Listing, User
 from services import listing_service
 from datetime import date, timedelta
 from extensions import db
+from utils import Result
+from .validators import validate_non_empty_string
 
 class AdminService:
     def __init__(self, db_session):
@@ -13,17 +15,20 @@ class AdminService:
     def view_users(self):
         return self.db_session.query(User).all()
     
-    def delete_record(self, model_class,  record_id):
+    def delete_record(self, model_class, record_id):
         record = self.db_session.get(model_class, record_id)
         if not record:
-            return False #Record not found
+            return Result(False, "Record not found.")
 
         self.db_session.delete(record)
         self.db_session.commit()
-        return True
+        return Result(True, "Record deleted successfully")
 
     def create_genre(self, name, image, inactive):
-        
+        try:
+            name = validate_non_empty_string(name, "Genre name")
+        except ValueError as e:
+            return Result(False, str(e))
 
         new_genre = Genre(
             name = name,
@@ -33,6 +38,7 @@ class AdminService:
 
         self.db_session.add(new_genre)
         self.db_session.commit()
+        return Result(True, "Genre created successfully")
 
     def get_genres(self):
         return self.db_session.query(Genre).all()
@@ -40,14 +46,19 @@ class AdminService:
     def edit_genre(self, genre_id, name, image):
         
         if not genre_id:
-            return None
+            return Result(False, "No genre ID provided.")
         
         genre = self.db_session.get(Genre, genre_id)
         if not genre:
-            return None
+            return Result(False, "Genre not found.")
+        
+        try:
+            name = validate_non_empty_string(name, "Genre name")
+        except ValueError as e:
+            return Result(False, str(e))
         
         genre.name = name
         genre.image = image 
         self.db_session.commit()
-        return genre
+        return Result(True, "Genre updated successfully")
 
