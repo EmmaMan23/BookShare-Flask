@@ -5,25 +5,30 @@ from models import Genre, Listing, User
 from services import listing_service
 from datetime import date, timedelta
 from extensions import db
+from utils import Result
+from .validators import validate_non_empty_string
 
 class AdminService:
     def __init__(self, db_session):
         self.db_session = db_session
     
     def view_users(self):
-        return User.query.all()
+        return self.db_session.query(User).all()
     
-    def delete_record(self, model_class,  record_id):
-        record = model_class.query.get(record_id)
+    def delete_record(self, model_class, record_id):
+        record = self.db_session.get(model_class, record_id)
         if not record:
-            return False #Record not found
+            return Result(False, "Record not found.")
 
         self.db_session.delete(record)
         self.db_session.commit()
-        return True
+        return Result(True, "Record deleted successfully")
 
     def create_genre(self, name, image, inactive):
-        
+        try:
+            name = validate_non_empty_string(name, "Genre name")
+        except ValueError as e:
+            return Result(False, str(e))
 
         new_genre = Genre(
             name = name,
@@ -31,22 +36,29 @@ class AdminService:
             inactive = inactive
         )
 
-        db.session.add(new_genre)
-        db.session.commit()
+        self.db_session.add(new_genre)
+        self.db_session.commit()
+        return Result(True, "Genre created successfully")
 
     def get_genres(self):
-        return Genre.query.all()
+        return self.db_session.query(Genre).all()
     
     def edit_genre(self, genre_id, name, image):
         
         if not genre_id:
-            return None
+            return Result(False, "No genre ID provided.")
         
-        genre = Genre.query.get(genre_id)
+        genre = self.db_session.get(Genre, genre_id)
         if not genre:
-            return None
+            return Result(False, "Genre not found.")
+        
+        try:
+            name = validate_non_empty_string(name, "Genre name")
+        except ValueError as e:
+            return Result(False, str(e))
         
         genre.name = name
         genre.image = image 
-        db.session.commit()
+        self.db_session.commit()
+        return Result(True, "Genre updated successfully")
 

@@ -4,104 +4,113 @@ from extensions import db
 from flask_login import current_user
 from datetime import date, timedelta
 from flask import url_for
+from .validators import validate_non_empty_string
 
-def list_book(form):
+class ListingService:
+    def __init__(self, db_session):
+        self.db_session = db_session
 
-    title = form.get('title')
-    author = form.get('author')
-    description = form.get('description')
-    genre_id = int(form.get('genre_id'))
-    user_id = current_user.user_id
-    is_available = True
+    def list_book(self, title, author, description, genre_id, user_id, is_available: True):
+        try:
 
-    new_listing = Listing(
-        title=title,
-        author=author,
-        description=description,
-        genre_id=genre_id,
-        user_id=user_id,
-        is_available=is_available
-        )
-    db.session.add(new_listing)
-    db.session.commit()
+            new_listing = Listing(
+                title=title,
+                author=author,
+                description=description,
+                genre_id=genre_id,
+                user_id=user_id,
+                is_available=is_available
+                )
+            self.db_session.add(new_listing)
+            self.db_session.commit()
+            return Result(True, "Listing created successfully", new_listing)
+        except Exception as e:
+            return Result(False, f"Error creating Listing: {str(e)}")
 
-def get_all_listings():
-    return Listing.query.all()
+    def get_all_listings(self):
+        return self.db_session.query(Listing).all()
 
-def get_listing_by_id(listing_id):
-    return Listing.query.get(listing_id)
+    def get_listing_by_id(self, listing_id):
+        return self.db_session.get(Listing, listing_id)
 
-def edit_listing(listing_id, form):
-    listing = get_listing_by_id(listing_id)
+    def edit_listing(
+            self,
+            listing_id,
+            user_id,
+            title=None,
+            author=None,
+            description=None,
+            genre_id=None,
+            is_available=None,
+            marked_for_deletion=None):
 
-    if listing.user_id != current_user.user_id:
-        raise PermissionError("You can't edit someone else's listing")
-    
-    title = form.get('title')
-    author = form.get('author')
-    description = form.get('description')
-    genre = form.get('genre_id')
-    if genre is not None and genre != '':
-        listing.genre_id = int(genre)
-    else:
-        genre_id = None
-    is_available = form.get('is_available')
-    marked_for_deletion = form.get('marked_for_deletion')
+        
+        listing = self.get_listing_by_id(listing_id)
+        if not listing:
+            return Result(False, "Listing not found")
 
-    if title:
-        listing.title = title
-    if author:
-        listing.author = author
-    if description:
-        listing.description = description
-    if genre_id is not None:
-        listing.genre_id = int(genre_id)
-    if is_available is not None:
-        listing.is_available = True
-    else:
-        listing.is_available = False
-    if marked_for_deletion is not None:
-        listing.marked_for_deletion = marked_for_deletion in ['true', 'on', '1']
-    else:
-        listing.marked_for_deletion = False
+        if listing.user_id != user_id:
+            return Result(False, "You can't edit someone else's listing")
+        try:
+            if title is not None:
+                listing.title = validate_non_empty_string(title, "Title")
+            if author is not None:
+                listing.author = author.strip()
+            if description is not None:
+                listing.description = description.strip()
+            if genre_id not in [None, '']:
+                listing.genre_id = int(genre_id)
+            else:
+                listing.genre_id = None
+            if is_available is not None:
+                listing.is_available = is_available in ['true', 'on', '1', True]
+            if marked_for_deletion is not None:
+                listing.marked_for_deletion = marked_for_deletion in ['true', 'on', '1', True]
 
+            self.db_session.commit()
+            return Result(True, "Listing updated successfully")
+        except Exception as e:
+            return Result(False, "An unexpected error occured while updating listing")
 
-    db.session.commit()
+    def get_all_loans(self):
+        return self.db_session.query(Loan).order_by(Loan.return_date.desc()).all()
 
-def get_all_loans():
-    return Loan.query.order_by(Loan.return_date.desc()).all()
+    def get_loans_current_user(self, user_id):
+        return self.db_session.query(Loan).filter_by(user_id=user_id).order_by(Loan.return_date.desc()).all()
 
-def get_loans_current_user(user_id):
-    return (Loan.query
-            .filter_by(user_id=user_id)
-            .order_by(Loan.return_date.desc())
-            .all())
-
-def update_loan(user_id, loan_id):
-    loan = Loan.query.get(loan_id)
-
-    loan.is_returned = True
-    db.session.commit()
+    def update_loan(self, user_id, loan_id):
+        loan = self.db_session.get(Loan, loan_id)
+        if not loan:
+            return Result(False, "Loan not found")
+        try:
+            loan.is_returned = True
+            self.db_session.commit()
+            return Result(True, "Loan marked as returned")
+        except Exception as e:
+            return Result(False, f"Error updating loan: {str(e)}")
 
 
-def reserve_book(user_id, listing_id):
+    def reserve_book(self, user_id, listing_id):
+        try:
+            start_date = date.today() + timedelta(days=1)
+            return_date = start_date + timedelta(days=21)
 
-    start_date = date.today() + timedelta(days=1)
-    return_date = start_date + timedelta(days=21)
+            loan = Loan(
+                user_id=user_id,
+                listing_id=listing_id,
+                start_date=start_date,
+                return_date=return_date,
+                is_returned= False
+            )
+            
+            self.db_session.add(loan)
 
-    loan = Loan(
-        user_id=user_id,
-        listing_id=listing_id,
-        start_date=start_date,
-        return_date=return_date,
-        is_returned= False
-    )
-    
-    db.session.add(loan)
+            listing = self.db_session.get(Listing, listing_id)
+            if listing:
+                listing.is_available = False
 
-    listing = Listing.query.get(listing_id)
-    if listing:
-        listing.is_available = False
-
-    db.session.commit()
-    return loan
+            self.db_session.commit()
+            return Result(True, "Book reserved successfully", loan)
+        except Exception as e:
+            return Result(False, f"Error reserving book: {str(e)}")
+            
