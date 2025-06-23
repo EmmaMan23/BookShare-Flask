@@ -1,6 +1,6 @@
 from app import create_app
-from routes import auth
-from seed import seeding
+from app.routes import auth
+from app.seed import seeding
 
 
 app = create_app()

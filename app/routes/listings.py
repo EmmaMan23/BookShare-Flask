@@ -1,11 +1,11 @@
 from flask import Blueprint, render_template, request
 from flask import redirect, url_for, flash
 from flask_login import login_required, current_user
-from models import Genre, Listing
-from services import listing_service
+from app.models import Genre, Listing
+from app.services import listing_service
 from datetime import date, timedelta
-from services.listing_service import ListingService
-from extensions import db
+from app.services.listing_service import ListingService
+from app.extensions import db
 
 
 listings = Blueprint ('listings', __name__)

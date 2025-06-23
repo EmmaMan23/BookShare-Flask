@@ -1,9 +1,9 @@
 from werkzeug.security import generate_password_hash, check_password_hash
-from models import User
-from utils import Result
-from extensions import db
+from app.models import User
+from app.utils import Result
+from app.extensions import db
 from flask_login import logout_user
-from .validators import validate_non_empty_string
+from app.services.validators import validate_non_empty_string
 
 
 
@@ -25,7 +25,7 @@ class UserService:
             
         existing_user = self.db_session.query(User).filter_by(username=username).first()
         if existing_user:
-            return Result(False, "username already taken")
+            return Result(False, "Username already taken")
             
         new_user = User(username=username, role=user_type)
         new_user.set_password(password)
@@ -54,7 +54,7 @@ class UserService:
 
         if new_username and new_username != user.username:
             try:
-                username = validate_non_empty_string(username, "Username")
+                new_username = validate_non_empty_string(new_username, "Username")
             except ValueError as e:
                 return Result(False, str(e))
 
@@ -92,7 +92,7 @@ class UserService:
         if deletion_requested is True:
             return Result(True, "Account deletion requested. An admin will review your request")
         elif deletion_requested is False:
-            return Result(True, "Account deletion has been cancelled.")
+            return Result(True, "Account deletion has been cancelled")
         else:
             return Result(True, "Details updated successfully")
         

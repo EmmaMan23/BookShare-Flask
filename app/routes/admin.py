@@ -1,9 +1,9 @@
 from flask import Blueprint, render_template, request
 from flask import redirect, url_for, flash
 from flask_login import login_required, current_user
-from models import Genre, Listing, User, Loan
-from services.admin_service import AdminService
-from extensions import db
+from app.models import Genre, Listing, User, Loan
+from app.services.admin_service import AdminService
+from app.extensions import db
 
 
 admin_service = AdminService(db.session)
@@ -12,11 +12,16 @@ admin = Blueprint('admin', __name__)
 
 @admin.route('/view_users')
 def view_users():
-    user_data = admin_service.view_users()
-    return render_template('view_users.html', users=user_data)
+    user_result = admin_service.view_users()
+    return render_template('view_users.html', users=user_result.data)
 
 @admin.route('/delete_record', methods=['POST'])
+@login_required
 def delete():
+    if not current_user.is_admin:
+        flash("Unauthorised: Admins only", "danger")
+        return redirect(url_for('dash.dashboard'))
+    
     form_data = request.form
 
     model = form_data.get('model')
@@ -59,8 +64,8 @@ def create_genre():
         flash(result.message, "success" if result.success else "danger")
         return redirect(url_for('admin.create_genre'))
         
-    genres = admin_service.get_genres()
-    return render_template('add_genre.html', genre_images=genre_images, genres=genres)
+    genres_result = admin_service.get_genres()
+    return render_template('add_genre.html', genre_images=genre_images, genres=genres_result.data)
 
 @admin.route('/edit_genre', methods=['POST'])
 

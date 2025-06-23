@@ -1,5 +1,5 @@
-from extensions import db
-from models import User, Genre, Listing, Loan
+from app.extensions import db
+from app.models import User, Genre, Listing, Loan
 from werkzeug.security import generate_password_hash
 from app import create_app
 from datetime import date

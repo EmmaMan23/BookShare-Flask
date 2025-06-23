@@ -1,9 +1,9 @@
 from flask import Blueprint, render_template, request
 from flask import redirect, url_for, flash, session, request, render_template
-from services import user_service
+from app.services import user_service
 from flask_login import login_user, logout_user, current_user, login_required
-from services.user_service import UserService
-from extensions import db
+from app.services.user_service import UserService
+from app.extensions import db
 
 
 auth = Blueprint('auth', __name__)

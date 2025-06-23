@@ -1,19 +1,21 @@
 from flask import Blueprint, render_template, request
 from flask import redirect, url_for, flash
 from flask_login import login_required, current_user
-from models import Genre, Listing, User
-from services import listing_service
+from app.models import Genre, Listing, User
+from app.services import listing_service
 from datetime import date, timedelta
-from extensions import db
-from utils import Result
-from .validators import validate_non_empty_string
+from app.extensions import db
+from app.utils import Result
+from app.services.validators import validate_non_empty_string
 
 class AdminService:
     def __init__(self, db_session):
         self.db_session = db_session
     
     def view_users(self):
-        return self.db_session.query(User).all()
+        users = self.db_session.query(User).all()
+        return Result(True, "Users retrieved successfully", users)
+    
     
     def delete_record(self, model_class, record_id):
         record = self.db_session.get(model_class, record_id)
@@ -41,7 +43,8 @@ class AdminService:
         return Result(True, "Genre created successfully")
 
     def get_genres(self):
-        return self.db_session.query(Genre).all()
+        genres = self.db_session.query(Genre).all()
+        return Result(True, "Genres returned successfully", genres)
     
     def edit_genre(self, genre_id, name, image):
         
