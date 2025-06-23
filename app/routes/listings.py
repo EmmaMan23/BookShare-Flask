@@ -118,8 +118,17 @@ def reserve_book():
     if 'reserve' in form_data:
         listing_id = int(form_data.get('listing_id'))
         user_id = current_user.user_id
-        result = listing_service.reserve_book(user_id, listing_id)
 
+        listing = listing_service.get_listing_by_id(listing_id)
+        if not listing:
+            flash("Listing not found.", "danger")
+            return redirect(url_for('listings.view_all'))
+
+        if listing.user_id == current_user.user_id:
+            flash("You cannot reserve your own book.", "warning")
+            return redirect(url_for('listings.view_all'))
+        
+        result = listing_service.reserve_book(user_id, listing_id)
         flash(result.message, "success" if result.success else "danger")
         return redirect(url_for('listings.view_all'))
 
