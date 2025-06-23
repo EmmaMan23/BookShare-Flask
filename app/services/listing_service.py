@@ -5,6 +5,7 @@ from flask_login import current_user
 from datetime import date, timedelta
 from flask import url_for
 from app.services.validators import validate_non_empty_string
+from sqlalchemy.orm import joinedload
 
 class ListingService:
     def __init__(self, db_session):
@@ -27,8 +28,25 @@ class ListingService:
         except Exception as e:
             return Result(False, f"Error creating Listing: {str(e)}")
 
-    def get_all_listings(self):
-        return self.db_session.query(Listing).all()
+
+    def get_all_listings(self, genre=None, available=None, search=None):
+        query = self.db_session.query(Listing).options(joinedload(Listing.loans))
+
+        if genre:
+            query = query.filter(Listing.genre.has(name=genre))
+        if available is not None:
+            query = query.filter(Listing.is_available == available)
+        if search:
+            search_query = f"%{search}%"
+            query = query.filter(
+                (Listing.title.ilike(search_query)) |
+                (Listing.author.ilike(search_query))
+            )
+
+        return query.all()
+
+
+
 
     def get_listing_by_id(self, listing_id):
         return self.db_session.get(Listing, listing_id)
@@ -77,6 +95,7 @@ class ListingService:
 
     def get_loans_current_user(self, user_id):
         return self.db_session.query(Loan).filter_by(user_id=user_id).order_by(Loan.return_date.desc()).all()
+
 
     def update_loan(self, user_id, loan_id):
         loan = self.db_session.get(Loan, loan_id)

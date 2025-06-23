@@ -24,10 +24,6 @@ class User(db.Model, UserMixin):
     def get_id(self):
         return str(self.user_id)
 
-
-    def __repr__(self):
-        return f'<Users {self.username} ({self.role})>'
-    
 class Listing(db.Model):
     listing_id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(255), nullable=False)
@@ -41,11 +37,10 @@ class Listing(db.Model):
     genre = db.relationship('Genre', backref='listings')
     loans = db.relationship('Loan', back_populates='listing', cascade='all, delete-orphan', passive_deletes=True)
     
+    @property
+    def active_loan(self):
+        return next((loan for loan in self.loans if not loan.is_returned), None)
 
-    def __repr__(self):
-        username = self.user.username if self.user else "No user"
-        return f"<Listing {self.title} by User {username} (Available: {self.is_available})>"
-    
 class Loan(db.Model):
     loan_id = db.Column(db.Integer, primary_key=True)
     listing_id = db.Column(db.Integer, db.ForeignKey('listing.listing_id', ondelete='CASCADE'), nullable=False)
