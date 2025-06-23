@@ -78,7 +78,12 @@
   <div class="d-flex flex-wrap gap-3">
     {% for genre in genres %}
       <div class="card genre-card" style="width: 180px;">
-        <img src="{{ url_for('static', filename=genre.image) }}" alt="{{ genre.name }}" />
+        {% if genre.image %}
+          <img src="{{ url_for('static', filename=genre.image) }}" alt="{{ genre.name }}">
+        {% else %}
+          <img src="{{ url_for('static', filename='images/default.png') }}" alt="{{ genre.name }}">
+        {% endif %}
+
           <div class="card-body p-2 text-center">
             <h5 class="card-title mb-0">{{ genre.name }}</h5>
 

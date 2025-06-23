@@ -24,7 +24,7 @@ load_dotenv()
 
 
 def create_app(testing=False):
-    app = Flask(__name__)
+    app = Flask(__name__, static_folder='static')
 
     app.secret_key = os.environ.get('SECRET_KEY', 'testing_secret_key')
 
@@ -47,7 +47,7 @@ def create_app(testing=False):
 
     @login_manager.user_loader
     def load_user(user_id):
-        return User.query.get(int(user_id))
+        return db.session.get(User, int(user_id))
 
     app.register_blueprint(auth)
     app.register_blueprint(dash)

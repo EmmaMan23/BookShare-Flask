@@ -16,7 +16,12 @@ def view_users():
     return render_template('view_users.html', users=user_result.data)
 
 @admin.route('/delete_record', methods=['POST'])
+@login_required
 def delete():
+    if not current_user.is_admin:
+        flash("Unauthorised: Admins only", "danger")
+        return redirect(url_for('dash.dashboard'))
+    
     form_data = request.form
 
     model = form_data.get('model')
