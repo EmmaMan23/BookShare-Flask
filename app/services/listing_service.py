@@ -101,15 +101,24 @@ class ListingService:
         loan = self.db_session.get(Loan, loan_id)
         if not loan:
             return Result(False, "Loan not found")
+
         try:
             loan.is_returned = True
+
+            
+            listing = self.db_session.get(Listing, loan.listing_id)
+            if listing:
+                listing.is_available = True
+
             self.db_session.commit()
             return Result(True, "Loan marked as returned")
         except Exception as e:
             return Result(False, f"Error updating loan: {str(e)}")
 
 
+
     def reserve_book(self, user_id, listing_id):
+        
         try:
             start_date = date.today() + timedelta(days=1)
             return_date = start_date + timedelta(days=21)

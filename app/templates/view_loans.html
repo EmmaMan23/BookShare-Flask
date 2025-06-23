@@ -82,7 +82,7 @@
               <p class="card-text">Borrowed by: {{ loan.user.username }}</p>
               <p class="card-text">
                 <small class="text-body-secondary">
-                  {% if loan.return_date >= today %}
+                  {% if loan.return_date >= today %} Loan Period: <br>
                     Start date: {{ loan.start_date.strftime("%d/%m/%Y") }}<br>
                     Return date: {{ loan.return_date.strftime("%d/%m/%Y") }}
                   {% else %}
@@ -90,13 +90,37 @@
                   {% endif %}
                 </small>
               </p>
+
               <form method="POST" action="{{ url_for('listings.update_loan') }}">
-                <input type="hidden" name="loan_id" value="{{ loan.loan_id }}">
-                <div class="form-check">
-                  <input class="form-check-input" type="checkbox" id="checkReturned{{ loan.loan_id }}" name="returned" onchange="this.form.submit()">
-                  <label class="form-check-label">Mark as returned</label>
-                </div>
-              </form>
+  <input type="hidden" name="loan_id" value="{{ loan.loan_id }}">
+
+{% if loan.is_returned %}
+  <p><strong>Book returned on:</strong>
+    {% if loan.return_date > today %}
+      {{ today.strftime("%d/%m/%Y") }}
+    {% else %}
+      {{ loan.return_date.strftime("%d/%m/%Y") }}
+    {% endif %}
+  </p>
+{% else %}
+
+  <form method="POST" action="{{ url_for('listings.update_loan') }}">
+    <input type="hidden" name="loan_id" value="{{ loan.loan_id }}">
+
+    <div class="form-check">
+      <input class="form-check-input" type="checkbox"
+             id="checkReturned{{ loan.loan_id }}"
+             name="returned">
+      <label class="form-check-label" for="checkReturned{{ loan.loan_id }}">
+        Mark as returned
+      </label>
+    </div>
+
+    <button type="submit" class="btn btn-sm btn-success mt-2">Submit</button>
+  </form>
+{% endif %}
+
+
               {% if current_user.is_admin %}
                 <form method="POST" action="{{ url_for('admin.delete') }}">
     
