@@ -1,10 +1,10 @@
-from models import Listing, Loan
-from utils import Result
-from extensions import db
+from app.models import Listing, Loan
+from app.utils import Result
+from app.extensions import db
 from flask_login import current_user
 from datetime import date, timedelta
 from flask import url_for
-from .validators import validate_non_empty_string
+from app.services.validators import validate_non_empty_string
 
 class ListingService:
     def __init__(self, db_session):

@@ -1,9 +1,9 @@
 from flask import Blueprint, render_template, request
 from flask import redirect, url_for, flash
 from flask_login import login_required, current_user
-from models import Genre, Listing, User, Loan
-from services.admin_service import AdminService
-from extensions import db
+from app.models import Genre, Listing, User, Loan
+from app.services.admin_service import AdminService
+from app.extensions import db
 
 
 admin_service = AdminService(db.session)

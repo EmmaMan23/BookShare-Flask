@@ -1,12 +1,12 @@
 from flask import Blueprint, render_template, request
 from flask import redirect, url_for, flash
 from flask_login import login_required, current_user
-from models import Genre, Listing, User
-from services import listing_service
+from app.models import Genre, Listing, User
+from app.services import listing_service
 from datetime import date, timedelta
-from extensions import db
-from utils import Result
-from .validators import validate_non_empty_string
+from app.extensions import db
+from app.utils import Result
+from app.services.validators import validate_non_empty_string
 
 class AdminService:
     def __init__(self, db_session):
