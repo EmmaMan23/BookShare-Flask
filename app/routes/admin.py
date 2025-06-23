@@ -12,8 +12,8 @@ admin = Blueprint('admin', __name__)
 
 @admin.route('/view_users')
 def view_users():
-    user_data = admin_service.view_users()
-    return render_template('view_users.html', users=user_data)
+    user_result = admin_service.view_users()
+    return render_template('view_users.html', users=user_result.data)
 
 @admin.route('/delete_record', methods=['POST'])
 def delete():
@@ -59,8 +59,8 @@ def create_genre():
         flash(result.message, "success" if result.success else "danger")
         return redirect(url_for('admin.create_genre'))
         
-    genres = admin_service.get_genres()
-    return render_template('add_genre.html', genre_images=genre_images, genres=genres)
+    genres_result = admin_service.get_genres()
+    return render_template('add_genre.html', genre_images=genre_images, genres=genres_result.data)
 
 @admin.route('/edit_genre', methods=['POST'])
 

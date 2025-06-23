@@ -13,7 +13,9 @@ class AdminService:
         self.db_session = db_session
     
     def view_users(self):
-        return self.db_session.query(User).all()
+        users = self.db_session.query(User).all()
+        return Result(True, "Users retrieved successfully", users)
+    
     
     def delete_record(self, model_class, record_id):
         record = self.db_session.get(model_class, record_id)
@@ -41,7 +43,8 @@ class AdminService:
         return Result(True, "Genre created successfully")
 
     def get_genres(self):
-        return self.db_session.query(Genre).all()
+        genres = self.db_session.query(Genre).all()
+        return Result(True, "Genres returned successfully", genres)
     
     def edit_genre(self, genre_id, name, image):
         

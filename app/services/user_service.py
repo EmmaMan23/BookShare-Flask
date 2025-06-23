@@ -54,7 +54,7 @@ class UserService:
 
         if new_username and new_username != user.username:
             try:
-                username = validate_non_empty_string(new_username, "Username")
+                new_username = validate_non_empty_string(new_username, "Username")
             except ValueError as e:
                 return Result(False, str(e))
 
@@ -92,7 +92,7 @@ class UserService:
         if deletion_requested is True:
             return Result(True, "Account deletion requested. An admin will review your request")
         elif deletion_requested is False:
-            return Result(True, "Account deletion has been cancelled.")
+            return Result(True, "Account deletion has been cancelled")
         else:
             return Result(True, "Details updated successfully")
         
