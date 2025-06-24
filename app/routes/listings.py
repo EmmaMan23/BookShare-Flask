@@ -35,17 +35,35 @@ def create_listing():
 
     return render_template('create_listing.html', genres=genres)
 
-@listings.route('/view_listings')
+@listings.route('/view_listings', methods=['GET'])
 @login_required
 def view_all():
-    listings_data = listing_service.get_all_listings()
-    return render_template('view_books.html', listings=listings_data)
+    search_query = request.args.get('search')
+    genre_filter = request.args.get('genre')
+    availability_filter = request.args.get('availability')
+
+    listings_data = listing_service.get_all_listings(
+        genre=genre_filter,
+        availability=(availability_filter == "available") if availability_filter else None,
+        search=search_query
+    )
+
+    genres = listing_service.get_all_genres()
+
+    return render_template(
+        'view_books.html',
+        listings=listings_data,
+        search=search_query,
+        genre=genre_filter,
+        availability=availability_filter,
+        genres=genres
+    )
 
 @listings.route('/view_my_books')
 @login_required
 def view_mine():
-    listings_data = listing_service.get_all_listings()
-    return render_template('show_user_listings.html', listings=listings_data, existing_user=current_user) 
+    listings_data = listing_service.get_all_listings(user_id=current_user.user_id)
+    return render_template('show_user_listings.html', listings=listings_data, existing_user=current_user)
 
 @listings.route('/edit_listing', methods=['POST', 'GET'])
 @login_required
@@ -98,7 +116,7 @@ def edit_listing():
 def mark_for_deletion():
     listing_id = int(request.form.get('listing_id'))
 
-    is_marked = request.form.get('marked_for_deletion') == 'true' 
+    is_marked = request.form.get('marked_for_deletion') == 'true'
     
     listing = listing_service.get_listing_by_id(listing_id)
     if not listing:
