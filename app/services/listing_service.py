@@ -1,4 +1,4 @@
-from app.models import Listing, Loan
+from app.models import Listing, Loan, Genre
 from app.utils import Result
 from app.extensions import db
 from flask_login import current_user
@@ -29,13 +29,15 @@ class ListingService:
             return Result(False, f"Error creating Listing: {str(e)}")
 
 
-    def get_all_listings(self, genre=None, available=None, search=None):
+    def get_all_listings(self, user_id = None, genre=None, availability=None, search=None):
         query = self.db_session.query(Listing).options(joinedload(Listing.loans))
 
+        if user_id:
+            query = query.filter(Listing.user_id == user_id)
         if genre:
             query = query.filter(Listing.genre.has(name=genre))
-        if available is not None:
-            query = query.filter(Listing.is_available == available)
+        if availability is not None:
+            query = query.filter(Listing.is_available == availability)
         if search:
             search_query = f"%{search}%"
             query = query.filter(
@@ -45,6 +47,8 @@ class ListingService:
 
         return query.all()
 
+    def get_all_genres(self):
+        return self.db_session.query(Genre).order_by(Genre.name).all()
 
 
 
@@ -85,6 +89,7 @@ class ListingService:
             if marked_for_deletion is not None:
                 listing.marked_for_deletion = marked_for_deletion in ['true', 'on', '1', True]
 
+
             self.db_session.commit()
             return Result(True, "Listing updated successfully")
         except Exception as e:
@@ -96,7 +101,8 @@ class ListingService:
             return Result(False, "Listing not found.")
         
         try:
-            listing.marked_for_deletion = is_marked 
+            listing.marked_for_deletion = is_marked
+            listing.is_available = False
             self.db_session.commit()
             
             status_message = "marked for deletion" if is_marked else "unmarked for deletion"

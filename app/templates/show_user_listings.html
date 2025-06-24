@@ -85,10 +85,12 @@
           {% endif %}
 
           <div class="form-check">
-            <input class="form-check-input" type="checkbox" name="marked_for_deletion"
-              id="deleteCheck{{ listing.listing_id}}" value="true">
 
-            <label class="form-check-label" id="deleteCheck{{ listing.listing_id}}">
+            <input class="form-check-input" type="checkbox" name="marked_for_deletion"
+              id="deleteCheck{{ listing.listing_id }}" value="true">
+
+
+            <label class="form-check-label" id="deleteCheck{{ listing.listing_id }}">
               {% if listing.marked_for_deletion %}
               Cancel Deletion
               {% else %}
@@ -96,8 +98,7 @@
               {% endif %}
             </label>
           </div>
-          <button type="submit" class="btn btn-primary mt-2" {% if not listing.is_available %}disabled{% endif
-            %}>Submit</button>
+          <button type="submit" class="btn btn-primary mt-2">Submit</button>
         </form>
         <a href="{{ url_for('listings.edit_listing', listing_id=listing.listing_id)}}" class="btn btn-primary">Edit book
           details</a>

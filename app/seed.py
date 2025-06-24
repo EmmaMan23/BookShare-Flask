@@ -181,7 +181,7 @@ def seeding():
                 "author": " Author 5",
                 "description": "A sad story ",
                 "genre_id": 3,
-                "is_available": True,
+                "is_available": False,
                 "marked_for_deletion": True,
                 "user_id": 2
             },
