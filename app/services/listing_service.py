@@ -89,6 +89,21 @@ class ListingService:
             return Result(True, "Listing updated successfully")
         except Exception as e:
             return Result(False, "An unexpected error occured while updating listing")
+        
+    def update_marked_for_deletion(self, listing_id, is_marked):
+        listing = self.db_session.get(Listing, listing_id)
+        if not listing:
+            return Result(False, "Listing not found.")
+        
+        try:
+            listing.marked_for_deletion = is_marked 
+            self.db_session.commit()
+            
+            status_message = "marked for deletion" if is_marked else "unmarked for deletion"
+            return Result(True, f"Listing successfully {status_message}.")
+        except Exception as e:
+            self.db_session.rollback() 
+            return Result(False, f"Error updating deletion status: {str(e)}")
 
     def get_all_loans(self):
         return self.db_session.query(Loan).order_by(Loan.return_date.desc()).all()
@@ -97,14 +112,14 @@ class ListingService:
         return self.db_session.query(Loan).filter_by(user_id=user_id).order_by(Loan.return_date.desc()).all()
 
 
-    def update_loan(self, user_id, loan_id):
+    def update_loan(self, user_id, loan_id, actual_return_date):
         loan = self.db_session.get(Loan, loan_id)
         if not loan:
             return Result(False, "Loan not found")
 
         try:
             loan.is_returned = True
-
+            loan.actual_return_date = actual_return_date
             
             listing = self.db_session.get(Listing, loan.listing_id)
             if listing:

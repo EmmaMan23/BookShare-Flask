@@ -260,6 +260,7 @@ def seeding():
                 "user_id": 7,
                 "start_date": date(2025, 5, 14),
                 "return_date": date(2025, 6, 11),
+                "actual_return_date": None,
                 "is_returned": False
             },
             {
@@ -267,6 +268,7 @@ def seeding():
                 "user_id": 10,
                 "start_date": date(2024, 12, 10),
                 "return_date": date(2025, 1, 7),
+                "actual_return_date": date(2025, 1, 7),
                 "is_returned": True
             },
             {
@@ -274,6 +276,7 @@ def seeding():
                 "user_id": 6,
                 "start_date": date(2025, 6, 1),
                 "return_date": date(2025, 6, 29),
+                "actual_return_date": None,
                 "is_returned": False
             },
             {
@@ -281,6 +284,7 @@ def seeding():
                 "user_id": 5,
                 "start_date": date(2024, 12, 1),
                 "return_date": date(2024, 12, 28),
+                "actual_return_date": date(2024, 12, 27),
                 "is_returned": True
             },
             {
@@ -288,6 +292,7 @@ def seeding():
                 "user_id": 2,
                 "start_date": date(2025, 1, 1),
                 "return_date": date(2025, 1, 29),
+                "actual_return_date": date(2025, 1, 28),
                 "is_returned": True
             },
             {
@@ -295,6 +300,7 @@ def seeding():
                 "user_id": 3,
                 "start_date": date(2025, 5, 30),
                 "return_date": date(2025, 6, 27),
+                "actual_return_date": None,
                 "is_returned": False
             },
             {
@@ -302,6 +308,7 @@ def seeding():
                 "user_id": 5,
                 "start_date": date(2025, 3, 14),
                 "return_date": date(2025, 4, 11),
+                "actual_return_date": date(2025, 4, 11),
                 "is_returned": True
             },
             {
@@ -309,6 +316,7 @@ def seeding():
                 "user_id": 1,
                 "start_date": date(2025, 2, 1),
                 "return_date": date(2025, 2, 28),
+                "actual_return_date": date(2025, 2, 28),
                 "is_returned": True
             },
             {
@@ -316,6 +324,7 @@ def seeding():
                 "user_id": 10,
                 "start_date": date(2025, 5, 10),
                 "return_date": date(2025, 6, 7),
+                "actual_return_date": None,
                 "is_returned": False
             },
             {
@@ -323,6 +332,7 @@ def seeding():
                 "user_id": 9,
                 "start_date": date(2025, 4, 1),
                 "return_date": date(2025, 4, 28),
+                "actual_return_date": date(2025, 4, 28),
                 "is_returned": True
             }
         ]
@@ -333,6 +343,7 @@ def seeding():
                 user_id = i["user_id"],
                 start_date = i["start_date"],
                 return_date = i["return_date"],
+                actual_return_date = i["actual_return_date"],
                 is_returned = i["is_returned"]
             )
             db.session.add(loan)

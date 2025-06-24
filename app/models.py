@@ -47,6 +47,7 @@ class Loan(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.user_id', ondelete='CASCADE'), nullable=False)
     start_date = db.Column(db.Date)
     return_date = db.Column(db.Date)
+    actual_return_date = db.Column(db.Date, nullable=True)
     is_returned = db.Column(db.Boolean, default=True)
     user = db.relationship('User', back_populates='loans')
     listing = db.relationship('Listing', back_populates='loans')

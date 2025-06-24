@@ -92,8 +92,27 @@ def edit_listing():
             return redirect(url_for('listings.view_mine'))
         
         return render_template('edit_listing.html', genres=genres, listing=listing)
-        
-        
+    
+@listings.route('/mark_for_deletion', methods=['POST'])
+@login_required
+def mark_for_deletion():
+    listing_id = int(request.form.get('listing_id'))
+
+    is_marked = request.form.get('marked_for_deletion') == 'true' 
+    
+    listing = listing_service.get_listing_by_id(listing_id)
+    if not listing:
+        flash("Listing not found.", "danger")
+        return redirect(url_for('listings.view_mine'))
+    if listing.user_id != current_user.user_id: 
+        flash("You are not authorised to mark this listing for deletion.", "danger")
+        return redirect(url_for('listings.view_mine'))
+
+    result = listing_service.update_marked_for_deletion(listing_id, is_marked)
+
+    flash(result.message, "success" if result.success else "danger")
+    return redirect(url_for('listings.view_mine'))
+
 
 @listings.route('/view_loans')
 @login_required
@@ -139,8 +158,9 @@ def update_loan():
     if 'returned' in form_data:
         loan_id = int(form_data.get('loan_id'))
         user_id = current_user.user_id
+        today = date.today()
 
-        result = listing_service.update_loan(user_id, loan_id)
+        result = listing_service.update_loan(user_id, loan_id, actual_return_date=today)
 
         flash(result.message, "success" if result.success else "danger")
     return redirect(url_for('listings.view_loans'))
