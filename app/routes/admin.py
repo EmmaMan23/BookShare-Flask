@@ -11,6 +11,7 @@ admin_service = AdminService(db.session)
 admin = Blueprint('admin', __name__)
 
 @admin.route('/view_users')
+@login_required
 def view_users():
     user_result = admin_service.view_users()
     return render_template('view_users.html', users=user_result.data)
