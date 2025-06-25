@@ -118,8 +118,8 @@
           <ul>
             <li>Total listings: {{ metrics.total_overall_books }}</li>
             <li>Total loans: {{metrics.total_overall_loans}}</li>
-            <li>You have listed {{ metrics.user_total_listings }}  {% if current_user.total_listings > 1 or 0 %} books! {% else %} book! {% endif %}</li>
-            <li>You have borrowed {{ metrics.user_total_loans }} books!</li>
+            <li>You have listed {{ metrics.user_total_listings }} {% if current_user.total_listings != 1 %} books! {% else %} book! {% endif %}</li>
+            <li>You have borrowed {{ metrics.user_total_loans }} {% if current_user.total_loans != 1  %} books! {% else %} book! {% endif %}</li>
         </p>
       </div>
     </div>

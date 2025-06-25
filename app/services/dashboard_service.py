@@ -30,3 +30,15 @@ class DashboardService:
                 json.dump(data, f, indent=4)
         except Exception as e:
             return Result(False, f"Error updating metrics JSON: {e}")
+        
+    def update_overall_loans(self):
+        try:
+            with open(self.metrics_file, "r") as f:
+                data = json.load(f)
+
+            data['total_overall_loans'] = data.get('total_overall_loans', 0) +1 
+
+            with open(self.metrics_file, "w") as f:
+                json.dump(data, f, indent=4)
+        except Exception as e:
+            return Result(False, f"Error updating metrics JSON: {e}")

@@ -169,8 +169,15 @@ class ListingService:
             listing = self.db_session.get(Listing, listing_id)
             if listing:
                 listing.is_available = False
+            
+            user = self.db_session.query(User).get(user_id)
+            if user.total_loans is None:
+                user.total_loans = 1
+            else:
+                user.total_loans += 1
 
             self.db_session.commit()
+            self.dashboard_service.update_overall_loans()
             return Result(True, "Book reserved successfully", loan)
         except Exception as e:
             return Result(False, f"Error reserving book: {str(e)}")
