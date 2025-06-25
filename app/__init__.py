@@ -11,6 +11,8 @@ import sqlite3
 from app.models import User, Loan, Listing, Genre
 from sqlalchemy import event
 from sqlalchemy.engine import Engine
+from app.services.dashboard_service import DashboardService
+from app.services.listing_service import ListingService
 
 @event.listens_for(Engine, "connect")
 def set_sqlite_pragma(dbapi_connection, connection_record):
@@ -40,6 +42,7 @@ def create_app(testing=False):
     with app.app_context():
         db.drop_all()
         db.create_all()
+
 
 
     login_manager.login_view = 'auth.login'

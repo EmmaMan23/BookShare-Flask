@@ -13,7 +13,6 @@ import os
 
 class AdminService:
 
-    metrics_file = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "static", "metrics.json"))
 
     def __init__(self, db_session):
         self.db_session = db_session
@@ -71,11 +70,6 @@ class AdminService:
         self.db_session.commit()
         return Result(True, "Genre updated successfully")
     
-    def metrics(self):
     
-        with open(self.metrics_file, "r") as f:
-            data = json.load(f)
-        print(data)
-        return data
         
 

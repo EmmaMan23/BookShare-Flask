@@ -1,17 +1,20 @@
-from app.models import Listing, Loan, Genre
+from app.models import Listing, Loan, Genre, User
 from app.utils import Result
 from app.extensions import db
-from flask_login import current_user
 from datetime import date, timedelta
 from flask import url_for
 from app.services.validators import validate_non_empty_string
 from sqlalchemy.orm import joinedload
+from app.services.dashboard_service import DashboardService
 
 class ListingService:
-    def __init__(self, db_session):
+    def __init__(self, db_session, dashboard_service):
         self.db_session = db_session
+        self.dashboard_service = dashboard_service
 
-    def list_book(self, title, author, description, genre_id, user_id, is_available: True):
+
+    def list_book(self, title, author, description, genre_id, user_id, is_available=True):
+        
         try:
 
             new_listing = Listing(
@@ -20,10 +23,19 @@ class ListingService:
                 description=description,
                 genre_id=genre_id,
                 user_id=user_id,
-                is_available=is_available
+                is_available=is_available,
                 )
+            
+            user = self.db_session.query(User).get(user_id)
+            if user.total_listings is None:
+                user.total_listings = 1
+            else:
+                user.total_listings += 1
             self.db_session.add(new_listing)
+            
             self.db_session.commit()
+            self.dashboard_service.update_overall_listings()
+
             return Result(True, "Listing created successfully", new_listing)
         except Exception as e:
             return Result(False, f"Error creating Listing: {str(e)}")
@@ -157,8 +169,15 @@ class ListingService:
             listing = self.db_session.get(Listing, listing_id)
             if listing:
                 listing.is_available = False
+            
+            user = self.db_session.query(User).get(user_id)
+            if user.total_loans is None:
+                user.total_loans = 1
+            else:
+                user.total_loans += 1
 
             self.db_session.commit()
+            self.dashboard_service.update_overall_loans()
             return Result(True, "Book reserved successfully", loan)
         except Exception as e:
             return Result(False, f"Error reserving book: {str(e)}")

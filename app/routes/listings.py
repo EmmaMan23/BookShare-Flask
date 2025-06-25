@@ -5,12 +5,13 @@ from app.models import Genre, Listing
 from app.services import listing_service
 from datetime import date, timedelta
 from app.services.listing_service import ListingService
+from app.services import listing_service, dashboard_service
 from app.extensions import db
 
 
 listings = Blueprint ('listings', __name__)
 
-listing_service = ListingService(db.session)
+listing_service = ListingService(db.session, dashboard_service)
 
 @listings.route('/create_listing', methods=['POST', 'GET'])
 @login_required

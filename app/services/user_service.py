@@ -4,6 +4,7 @@ from app.utils import Result
 from app.extensions import db
 from flask_login import logout_user
 from app.services.validators import validate_non_empty_string
+from datetime import date
 
 
 
@@ -11,12 +12,15 @@ class UserService:
     def __init__(self, db_session):
         self.db_session = db_session
 
-    def register_user(self, username, password, re_password, user_type):
+    def register_user(self, username, password, re_password, user_type,):
         
         try:
             username = validate_non_empty_string(username, "Username")
             password = validate_non_empty_string(password, "Password")
             re_password = validate_non_empty_string(re_password, "Password Confirmation")
+            join_date = date.today()
+            total_loans = 0
+            total_listings = 0
         except ValueError as e:
             return Result(False, str(e))
         
@@ -27,7 +31,7 @@ class UserService:
         if existing_user:
             return Result(False, "Username already taken")
             
-        new_user = User(username=username, role=user_type)
+        new_user = User(username=username, role=user_type, join_date=join_date, total_loans=total_loans, total_listings=total_listings)
         new_user.set_password(password)
 
 
