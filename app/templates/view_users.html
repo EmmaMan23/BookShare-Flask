@@ -69,9 +69,9 @@
         <div class="card-body">
           <h4 class="card-title">Username:{{ user.username }}</h4>
           <h5>Role: {{user.role}} </h5>
-          <p class="card-text">Books listed:</p>
-          <p class="card-text">Books Borrowed:</p>
-          <p class="card-text">Join date:</p>
+          <p class="card-text">Books listed: {{ user.total_listings }}</p>
+          <p class="card-text">Books Borrowed: {{ user.total_loans }}</p>
+          <p class="card-text">Join date: {{ user.join_date.strftime("%d/%m/%Y") }}</p>
         
           {% if current_user.is_admin %}
           <small class="text-body-secondary">
