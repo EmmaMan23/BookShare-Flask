@@ -7,8 +7,14 @@ from datetime import date, timedelta
 from app.extensions import db
 from app.utils import Result
 from app.services.validators import validate_non_empty_string
+import json
+import os
+
 
 class AdminService:
+
+    metrics_file = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "static", "metrics.json"))
+
     def __init__(self, db_session):
         self.db_session = db_session
     
@@ -64,4 +70,12 @@ class AdminService:
         genre.image = image 
         self.db_session.commit()
         return Result(True, "Genre updated successfully")
+    
+    def metrics(self):
+    
+        with open(self.metrics_file, "r") as f:
+            data = json.load(f)
+        print(data)
+        return data
+        
 
