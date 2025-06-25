@@ -77,61 +77,92 @@ def seeding():
                 "username": "Clive",
                 "password": "Shoes123",
                 "role": "admin",
-                "marked_for_deletion": False
+                "marked_for_deletion": False,
+                "total_loans": 0,
+                "total_listings": 1,
+                "join_date": date(2024, 12, 10)
+
             },
             {
                 "username": "Sally",
                 "password": "Shoes345",
                 "role": "regular",
-                "marked_for_deletion": False
+                "marked_for_deletion": False,
+                "total_loans": 5,
+                "total_listings": 7,
+                "join_date": date(2024, 12, 10)
             },
             {
                 "username": "John",
                 "password": "Cat57",
                 "role": "regular",
-                "marked_for_deletion": False
+                "marked_for_deletion": False,
+                "total_loans": 4,
+                "total_listings": 6,
+                "join_date": date(2024, 12, 10)
             },
             {
                 "username": "Emily",
                 "password": "Cats700",
                 "role": "regular",
-                "marked_for_deletion": False
+                "marked_for_deletion": False,
+                "total_loans": 8,
+                "total_listings": 3,
+                "join_date": date(2024, 12, 10)
             },
             {
                 "username": "Sebastian",
                 "password": "Dogs",
                 "role": "regular",
-                "marked_for_deletion": False
+                "marked_for_deletion": False,
+                "total_loans": 9,
+                "total_listings": 3,
+                "join_date": date(2024, 12, 10)
             },
             {
                 "username": "Sam",
                 "password": "Ducks",
                 "role": "admin",
-                "marked_for_deletion": False
+                "marked_for_deletion": False,
+                "total_loans": 2,
+                "total_listings": 4,
+                "join_date": date(2024, 12, 10)
             },
             {
                 "username": "Sophie",
                 "password": "Llamas45",
                 "role": "regular",
-                "marked_for_deletion": False
+                "marked_for_deletion": False,
+                "total_loans": 5,
+                "total_listings": 2,
+                "join_date": date(2024, 12, 10)
             },
             {
                 "username": "Charlie",
                 "password": "Piesforever",
                 "role": "regular",
-                "marked_for_deletion": False
+                "marked_for_deletion": False,
+                "total_loans":5 ,
+                "total_listings": 1,
+                "join_date": date(2024, 12, 10)
             },
             {
                 "username": "Chantelle",
                 "password": "Gingerfluff",
                 "role": "regular",
-                "marked_for_deletion": False
+                "marked_for_deletion": False,
+                "total_loans": 6,
+                "total_listings": 8,
+                "join_date": date(2024, 12, 10)
             },
             {
                 "username": "Nathan",
                 "password": "Ilovefootball",
                 "role": "regular",
-                "marked_for_deletion": False
+                "marked_for_deletion": False,
+                "total_loans": 5 ,
+                "total_listings": 1,
+                "join_date": date(2024, 12, 10)
             }
         ]
 
@@ -141,7 +172,10 @@ def seeding():
                 username = i["username"],
                 password_hash = hashed_password,
                 role = i["role"],
-                marked_for_deletion = i["marked_for_deletion"]
+                marked_for_deletion = i["marked_for_deletion"],
+                total_loans = i["total_loans"],
+                total_listings = i["total_listings"],
+                join_date = i["join_date"],
             )
 
             db.session.add(user)
@@ -157,6 +191,7 @@ def seeding():
                 "is_available": True,
                 "marked_for_deletion": False,
                 "user_id": 3
+                
             },
             {
                 "title": "Alice in Wonderland ",

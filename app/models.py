@@ -5,9 +5,12 @@ from flask_login import UserMixin
 class User(db.Model, UserMixin):
     user_id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(255), unique=True, nullable=False)
-    password_hash = db.Column(db.String(255), nullable=False)  # Store hashed passwords 
+    password_hash = db.Column(db.String(255), nullable=False)  # Store hashed passwords
     role = db.Column(db.String(50), nullable=False)       # e.g., 'admin', 'user'
     marked_for_deletion = db.Column(db.Boolean, default=False) #user can mark fo deletion
+    total_loans = db.Column(db.Integer)
+    total_listings = db.Column(db.Integer)
+    join_date = db.Column(db.Date)
     listings = db.relationship('Listing', back_populates='user', cascade='all, delete-orphan', passive_deletes=True)
     loans = db.relationship('Loan', back_populates='user', cascade='all, delete-orphan', passive_deletes=True)
 
