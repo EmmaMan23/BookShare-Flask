@@ -37,7 +37,7 @@ def login():
     if request.method == 'POST':
         form_data = request.form
 
-        username = form_data.get('username')
+        username = form_data.get('username').lower()
         password = form_data.get('password')
 
         result = user_service.user_login(username, password)

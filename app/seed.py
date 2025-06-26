@@ -74,7 +74,7 @@ def seeding():
 
         users = [
             {
-                "username": "Clive",
+                "username": "clive",
                 "password": "Shoes123",
                 "role": "admin",
                 "marked_for_deletion": False,
@@ -84,7 +84,7 @@ def seeding():
 
             },
             {
-                "username": "Sally",
+                "username": "sally",
                 "password": "Shoes345",
                 "role": "regular",
                 "marked_for_deletion": False,
@@ -93,7 +93,7 @@ def seeding():
                 "join_date": date(2024, 12, 10)
             },
             {
-                "username": "John",
+                "username": "john",
                 "password": "Cat57",
                 "role": "regular",
                 "marked_for_deletion": False,
@@ -102,7 +102,7 @@ def seeding():
                 "join_date": date(2024, 12, 10)
             },
             {
-                "username": "Emily",
+                "username": "emily",
                 "password": "Cats700",
                 "role": "regular",
                 "marked_for_deletion": False,
@@ -111,7 +111,7 @@ def seeding():
                 "join_date": date(2024, 12, 10)
             },
             {
-                "username": "Sebastian",
+                "username": "sebastian",
                 "password": "Dogs",
                 "role": "regular",
                 "marked_for_deletion": False,
@@ -120,7 +120,7 @@ def seeding():
                 "join_date": date(2024, 12, 10)
             },
             {
-                "username": "Sam",
+                "username": "sam",
                 "password": "Ducks",
                 "role": "admin",
                 "marked_for_deletion": False,
@@ -129,7 +129,7 @@ def seeding():
                 "join_date": date(2024, 12, 10)
             },
             {
-                "username": "Sophie",
+                "username": "sophie",
                 "password": "Llamas45",
                 "role": "regular",
                 "marked_for_deletion": False,
@@ -138,7 +138,7 @@ def seeding():
                 "join_date": date(2024, 12, 10)
             },
             {
-                "username": "Charlie",
+                "username": "charlie",
                 "password": "Piesforever",
                 "role": "regular",
                 "marked_for_deletion": False,
@@ -147,7 +147,7 @@ def seeding():
                 "join_date": date(2024, 12, 10)
             },
             {
-                "username": "Chantelle",
+                "username": "chantelle",
                 "password": "Gingerfluff",
                 "role": "regular",
                 "marked_for_deletion": False,
@@ -156,7 +156,7 @@ def seeding():
                 "join_date": date(2024, 12, 10)
             },
             {
-                "username": "Nathan",
+                "username": "nathan",
                 "password": "Ilovefootball",
                 "role": "regular",
                 "marked_for_deletion": False,

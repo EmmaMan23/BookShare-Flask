@@ -15,7 +15,7 @@ class UserService:
     def register_user(self, username, password, re_password, user_type, admin_code):
         
         try:
-            username = validate_non_empty_string(username, "Username")
+            username = validate_non_empty_string(username, "Username").lower()
             password = validate_non_empty_string(password, "Password")
             re_password = validate_non_empty_string(re_password, "Password Confirmation")
             join_date = date.today()
