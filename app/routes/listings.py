@@ -116,21 +116,28 @@ def edit_listing():
 @login_required
 def mark_for_deletion():
     listing_id = int(request.form.get('listing_id'))
-
-    is_marked = request.form.get('marked_for_deletion') == 'true'
-    
     listing = listing_service.get_listing_by_id(listing_id)
+
     if not listing:
         flash("Listing not found.", "danger")
         return redirect(url_for('listings.view_mine'))
-    if listing.user_id != current_user.user_id: 
-        flash("You are not authorised to mark this listing for deletion.", "danger")
+
+    if listing.user_id != current_user.user_id:
+        flash("You are not authorised to change this listing.", "danger")
         return redirect(url_for('listings.view_mine'))
 
-    result = listing_service.update_marked_for_deletion(listing_id, is_marked)
+    # Only take action if the checkbox was checked
+    if request.form.get('marked_for_deletion') == 'true':
+        # Flip the current deletion status
+        is_marked = not listing.marked_for_deletion
+        result = listing_service.update_marked_for_deletion(listing_id, is_marked)
+        flash(result.message, "success" if result.success else "danger")
 
-    flash(result.message, "success" if result.success else "danger")
+    else:
+        flash("Please check the box to confirm your action.", "warning")
+
     return redirect(url_for('listings.view_mine'))
+
 
 
 @listings.route('/view_loans')

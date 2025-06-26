@@ -85,12 +85,15 @@ class UserService:
             user.password_hash = generate_password_hash(new_password)
             changes_made = True
 
-        marked = (marked_for_deletion == 'yes')
         deletion_requested = None
-        if marked != user.marked_for_deletion:
-            user.marked_for_deletion = marked
+
+        # Only do anything if checkbox is actually checked
+        if marked_for_deletion in ['true', 'on', '1', True]:
+            # Toggle the deletion state
+            user.marked_for_deletion = not user.marked_for_deletion
+            deletion_requested = user.marked_for_deletion
             changes_made = True
-            deletion_requested = marked
+
 
         self.db_session.commit()
         
