@@ -87,9 +87,8 @@ class UserService:
 
         deletion_requested = None
 
-        # Only do anything if checkbox is actually checked
         if marked_for_deletion in ['true', 'on', '1', True]:
-            # Toggle the deletion state
+        
             user.marked_for_deletion = not user.marked_for_deletion
             deletion_requested = user.marked_for_deletion
             changes_made = True
