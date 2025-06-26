@@ -12,7 +12,7 @@ class UserService:
     def __init__(self, db_session):
         self.db_session = db_session
 
-    def register_user(self, username, password, re_password, user_type,):
+    def register_user(self, username, password, re_password, user_type, admin_code):
         
         try:
             username = validate_non_empty_string(username, "Username")
@@ -26,6 +26,10 @@ class UserService:
         
         if password != re_password:
             return Result(False, "Passwords do not match!")
+
+        if user_type == "admin":
+            if admin_code != "Secretadmin3":
+                return Result(False, "Invalid admin registration code!")
             
         existing_user = self.db_session.query(User).filter_by(username=username).first()
         if existing_user:
