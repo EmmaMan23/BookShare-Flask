@@ -19,8 +19,9 @@ def register():
         password = form_data.get('password')
         re_password = form_data.get('re_password')
         user_type = form_data.get('user_type')
+        admin_code = form_data.get('admin_code')
 
-        result = user_service.register_user(username, password, re_password, user_type)
+        result = user_service.register_user(username, password, re_password, user_type, admin_code)
 
         if result.success:
             flash(result.message, "success")
