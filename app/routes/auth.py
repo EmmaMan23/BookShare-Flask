@@ -15,11 +15,11 @@ user_service = UserService(db.session)
 def register():
     if request.method == 'POST':
         form_data = request.form
-        username = form_data.get('username')
-        password = form_data.get('password')
-        re_password = form_data.get('re_password')
-        user_type = form_data.get('user_type')
-        admin_code = form_data.get('admin_code')
+        username = form_data.get('username', '').lower()
+        password = form_data.get('password', '')
+        re_password = form_data.get('re_password', '')
+        user_type = form_data.get('user_type', '')
+        admin_code = form_data.get('admin_code', '')
 
         result = user_service.register_user(username, password, re_password, user_type, admin_code)
 
@@ -37,8 +37,8 @@ def login():
     if request.method == 'POST':
         form_data = request.form
 
-        username = form_data.get('username').lower()
-        password = form_data.get('password')
+        username = form_data.get('username', '').lower()
+        password = form_data.get('password', '')
 
         result = user_service.user_login(username, password)
 
