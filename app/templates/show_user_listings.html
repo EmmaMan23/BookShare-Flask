@@ -1,5 +1,10 @@
 {% extends 'base.html' %}
 {% block content %}
+<div class="container mt-4">
+  <h2>
+    Manage your listings
+  </h2>
+</div>
 {% for listing in listings %}
 {% if listing.user_id == current_user.user_id %}
 <div class="card mb-3" style="max-width: 540px;">
@@ -52,6 +57,13 @@
     </div>
   </div>
 </div>
+{% else %}
+<div class="container mt-4">
+  <h2>
+    You haven't listed any books yet!
+  </h2>
+</div>
 {% endif %}
+
 {% endfor %}
 {% endblock %}

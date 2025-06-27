@@ -1,5 +1,10 @@
 {% extends 'base.html' %}
 {% block content %}
+<div class="container mt-4">
+  <h2>
+    Edit your login details 
+  </h2>
+</div>
 <form method="POST" action="{{url_for('auth.edit_user')}}">
   <input type="hidden" name="user_id" value="{{ current_user.user_id }}">
   <div class="row">

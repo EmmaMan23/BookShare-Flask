@@ -1,5 +1,10 @@
 {% extends 'base.html' %}
 {% block content %}
+<div class="container mt-4">
+  <h2>
+    Create a new listing
+  </h2>
+</div>
 
 <form id="listingForm" method="POST" action="{{url_for('listings.create_listing')}}">
   <div class="row">
