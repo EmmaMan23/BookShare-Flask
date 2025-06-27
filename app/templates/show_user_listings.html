@@ -11,10 +11,10 @@
     </div>
     <div class="col-md-8">
       <div class="card-body">
-        <h4 class="card-title">{{ listing.title }}</h4>
-        <h5>{{ listing.author }}</h5>
+        <h4 class="card-title">{{ listing.title | capitalize }}</h4>
+        <h5>{{ listing.author | capitalize }}</h5>
         <p class="card-text">{{ listing.description }}</p>
-        <p class="card-text">Listed by: {{ listing.user.username }}</p>
+        <p class="card-text">Listed by: {{ listing.user.username | capitalize}}</p>
         <p class="card-text">
           <small class="text-body-secondary">
             {% if listing.is_available %} Available {% else %} Unavailable {% endif %}
@@ -47,7 +47,7 @@
       <a href="{{ url_for('listings.edit_listing', listing_id=listing.listing_id)}}" class="btn btn-primary">Edit book
         details</a>
       <div class="card-footer text-end">
-        <span class="badge bg-secondary">{{ listing.genre.name }}</span>
+        <span class="badge bg-secondary">{{ listing.genre.name | capitalize }}</span>
       </div>
     </div>
   </div>

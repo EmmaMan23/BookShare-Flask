@@ -7,8 +7,8 @@
   <div class="row g-0">
     <div class="col-md-8">
       <div class="card-body">
-        <h4 class="card-title">Username:{{ user.username }}</h4>
-        <h5>Role: {{user.role}} </h5>
+        <h4 class="card-title">Username:{{ user.username | capitalize }}</h4>
+        <h5>Role: {{user.role | capitalize}} </h5>
         <p class="card-text">Books listed: {{ user.total_listings }}</p>
         <p class="card-text">Books Borrowed: {{ user.total_loans }}</p>
         <p class="card-text">Join date: {{ user.join_date.strftime("%d/%m/%Y") }}</p>

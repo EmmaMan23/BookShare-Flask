@@ -21,7 +21,7 @@
     <label for="genre" class="form-label">Genre</label>
     <select class="form-select" id="genre" name="genre_id" required>
       {% for genre in genres %}
-      <option value="{{ genre.genre_id }}" {% if genre.genre_id==listing.genre_id %}selected{% endif %}>{{ genre.name }}
+      <option value="{{ genre.genre_id }}" {% if genre.genre_id==listing.genre_id %}selected{% endif %}>{{ genre.name | capitalize }}
       </option>
       {% endfor %}
     </select>

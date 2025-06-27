@@ -23,11 +23,11 @@
           </div>
           <div class="col-md-8">
             <div class="card-body">
-              <h4 class="card-title">{{ loan.listing.title }}</h4>
-              <h5>{{ loan.listing.author }}</h5>
+              <h4 class="card-title">{{ loan.listing.title | capitalize }}</h4>
+              <h5>{{ loan.listing.author | capitalize }}</h5>
               <p class="card-text">{{ loan.listing.description }}</p>
-              <p class="card-text">Listed by: {{ loan.listing.user.username }}</p>
-              <p class="card-text">Borrowed by: {{ loan.user.username }}</p>
+              <p class="card-text">Listed by: {{ loan.listing.user.username | capitalize }}</p>
+              <p class="card-text">Borrowed by: {{ loan.user.username | capitalize }}</p>
               <p class="card-text">
                 <small class="text-body-secondary">
                   Loan Period:<br>
@@ -78,7 +78,7 @@
                 {% endif %}
             </div>
             <div class="card-footer text-end">
-              <span class="badge bg-secondary">{{ loan.listing.genre.name }}</span>
+              <span class="badge bg-secondary">{{ loan.listing.genre.name | capitalize }}</span>
             </div>
           </div>
         </div>

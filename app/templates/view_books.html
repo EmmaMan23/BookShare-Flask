@@ -12,7 +12,7 @@
         <select class="form-select" id="genre" name="genre">
           <option value="">All</option>
           {% for g in genres %}
-          <option value="{{ g.name }}" {% if genre==g.name %}selected{% endif %}>{{ g.name }}</option>
+          <option value="{{ g.name }}" {% if genre==g.name %}selected{% endif %}>{{ g.name | capitalize }}</option>
           {% endfor %}
         </select>
       </div>
@@ -67,10 +67,10 @@
           </div>
           <div class="col-md-8">
             <div class="card-body">
-              <h4 class="card-title">{{ listing.title }}</h4>
-              <h5>{{ listing.author }}</h5>
+              <h4 class="card-title">{{ listing.title | capitalize }}</h4>
+              <h5>{{ listing.author | capitalize }}</h5>
               <p class="card-text">{{ listing.description }}</p>
-              <p class="card-text">Listed by: {{ listing.user.username }}</p>
+              <p class="card-text">Listed by: {{ listing.user.username | capitalize }}</p>
               <p class="card-text">
                 <small class="text-body-secondary">
                   {% if listing.is_available and not listing.marked_for_deletion%} Available
@@ -124,7 +124,7 @@
             </form>
             {% endif %}
             <div class="card-footer text-end">
-              <span class="badge bg-secondary">{{ listing.genre.name }}</span>
+              <span class="badge bg-secondary">{{ listing.genre.name | capitalize }}</span>
             </div>
           </div>
         </div>
