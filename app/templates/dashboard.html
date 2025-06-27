@@ -1,4 +1,4 @@
-<!doctype html>
+<!-- <!doctype html>
 <html lang="en">
 
 <head>
@@ -51,98 +51,102 @@
     {% endfor %}
   </div>
   {% endif %}
-  {% endwith %}
-  <div class="card-body">
-    <h5 class="card-title" id="welcome">Welcome {{ current_user.username }}</h5>
-    <form action="{{ url_for('auth.edit_user' )}}" method="POST">
-      <input type="hidden" name="user_id" value="{{ current_user.user_id }}">
-          <input type="hidden" name="listing_id" value="{{ current_user.user_id }}">
-          {% if current_user.marked_for_deletion %}
-          <p class="text-danger">Deletion requested <i class="fa fa-exclamation-triangle" style="font-size:18px"></i>
-          </p>
-          {% endif %}
-
-          <div class="form-check">
-
-            <input class="form-check-input" type="checkbox" name="marked_for_deletion"
-              id="deleteCheck{{ current_user.user_id }}" value="true">
+  {% endwith %} -->
 
 
-            <label class="form-check-label" id="deleteCheck{{ current_user.user_id }}">
-              {% if current_user.marked_for_deletion %}
-              Cancel Deletion
-              {% else %}
-              Request Deletion
-              {% endif %}
-            </label>
-          </div>
-          <button type="submit" class="btn btn-primary mt-2">Submit</button>
-      <a href="{{ url_for('auth.edit_user', user_id=current_user.user_id)}}" class="btn btn-primary">Edit user
-        details</a>
+{% extends 'base.html' %}
+{% block content %}
+<div class="card-body">
+  <h5 class="card-title" id="welcome">Welcome {{ current_user.username }}</h5>
+  <form action="{{ url_for('auth.edit_user' )}}" method="POST">
+    <input type="hidden" name="user_id" value="{{ current_user.user_id }}">
+    <input type="hidden" name="listing_id" value="{{ current_user.user_id }}">
+    {% if current_user.marked_for_deletion %}
+    <p class="text-danger">Deletion requested <i class="fa fa-exclamation-triangle" style="font-size:18px"></i>
+    </p>
+    {% endif %}
 
-    </form>
+    <div class="form-check">
 
+      <input class="form-check-input" type="checkbox" name="marked_for_deletion"
+        id="deleteCheck{{ current_user.user_id }}" value="true">
+
+
+      <label class="form-check-label" id="deleteCheck{{ current_user.user_id }}">
+        {% if current_user.marked_for_deletion %}
+        Cancel Deletion
+        {% else %}
+        Request Deletion
+        {% endif %}
+      </label>
+    </div>
+    <button type="submit" class="btn btn-primary mt-2">Submit</button>
+    <a href="{{ url_for('auth.edit_user', user_id=current_user.user_id)}}" class="btn btn-primary">Edit user
+      details</a>
+
+  </form>
+
+</div>
+
+<a href="{{ url_for('listings.create_listing') }}" class="text-decoration-none">
+  <div class="card h-100 shadow-sm border-0 hover-effect" style="border-radius: 1rem;">
+    <div class="card-body">
+      <h5 class="card-title text-primary">Create Book Listing</h5>
+      <p class="card-text text-muted">
+        List a new book so others can borrow it.
+      </p>
+    </div>
   </div>
-
-  <a href="{{ url_for('listings.create_listing') }}" class="text-decoration-none">
-    <div class="card h-100 shadow-sm border-0 hover-effect" style="border-radius: 1rem;">
-      <div class="card-body">
-        <h5 class="card-title text-primary">Create Book Listing</h5>
-        <p class="card-text text-muted">
-          List a new book so others can borrow it.
-        </p>
-      </div>
+</a>
+<a href="{{ url_for('listings.view_all') }}" class="text-decoration-none">
+  <div class="card h-100 shadow-sm border-0 hover-effect" style="border-radius: 1rem;">
+    <div class="card-body">
+      <h5 class="card-title text-primary">View all books</h5>
+      <p class="card-text text-muted">
+        Pick a new book.
+      </p>
     </div>
-  </a>
-  <a href="{{ url_for('listings.view_all') }}" class="text-decoration-none">
-    <div class="card h-100 shadow-sm border-0 hover-effect" style="border-radius: 1rem;">
-      <div class="card-body">
-        <h5 class="card-title text-primary">View all books</h5>
-        <p class="card-text text-muted">
-          Pick a new book.
-        </p>
-      </div>
-    </div>
-  </a>
-  <a href="{{ url_for('listings.view_mine') }}" class="text-decoration-none">
-    <div class="card h-100 shadow-sm border-0 hover-effect" style="border-radius: 1rem;">
-      <div class="card-body">
-        <h5 class="card-title text-primary">View all my Listings</h5>
-        <p class="card-text text-muted">
-          view and manage your lisintgs.
-        </p>
-      </div>
-    </div>
-  </a>
-  <a href="{{ url_for('listings.view_loans') }}" class="text-decoration-none">
-    <div class="card h-100 shadow-sm border-0 hover-effect" style="border-radius: 1rem;">
-      <div class="card-body">
-        <h5 class="card-title text-primary">View Loans</h5>
-        <p class="card-text text-muted">
-          View your previous loans.
-        </p>
-      </div>
-    </div>
-  </a>
-  <a href="{{ url_for('dash.dashboard') }}" class="text-decoration-none">
-    <div class="card h-100 shadow-sm border-0 hover-effect" style="border-radius: 1rem;">
-      <div class="card-body">
-        <h5 class="card-title text-primary">Metrics</h5>
-        <p class="card-text text-muted">
-          <ul>
-            <li>Total listings: {{ metrics.total_overall_books }}</li>
-            <li>Total loans: {{metrics.total_overall_loans}}</li>
-            <li>You have listed {{ metrics.user_total_listings }} {% if current_user.total_listings != 1 %} books! {% else %} book! {% endif %}</li>
-            <li>You have borrowed {{ metrics.user_total_loans }} {% if current_user.total_loans != 1  %} books! {% else %} book! {% endif %}</li>
-        </p>
-      </div>
-    </div>
-  </a>
-  <div>
-    <form action="{{ url_for('auth.logout') }}" method="POST">
-      <button type="submit" class="btn btn-danger">Logout</button>
-    </form>
   </div>
-</body>
+</a>
+<a href="{{ url_for('listings.view_mine') }}" class="text-decoration-none">
+  <div class="card h-100 shadow-sm border-0 hover-effect" style="border-radius: 1rem;">
+    <div class="card-body">
+      <h5 class="card-title text-primary">View all my Listings</h5>
+      <p class="card-text text-muted">
+        view and manage your lisintgs.
+      </p>
+    </div>
+  </div>
+</a>
+<a href="{{ url_for('listings.view_loans') }}" class="text-decoration-none">
+  <div class="card h-100 shadow-sm border-0 hover-effect" style="border-radius: 1rem;">
+    <div class="card-body">
+      <h5 class="card-title text-primary">View Loans</h5>
+      <p class="card-text text-muted">
+        View your previous loans.
+      </p>
+    </div>
+  </div>
+</a>
+<a href="{{ url_for('dash.dashboard') }}" class="text-decoration-none">
+  <div class="card h-100 shadow-sm border-0 hover-effect" style="border-radius: 1rem;">
+    <div class="card-body">
+      <h5 class="card-title text-primary">Metrics</h5>
+      <p class="card-text text-muted" \>
+      <ul>
+        <li>Total listings: {{ metrics.total_overall_books }}</li>
+        <li>Total loans: {{metrics.total_overall_loans}}</li>
+        <li>You have listed {{ metrics.user_total_listings }} {% if current_user.total_listings != 1 %} books! {% else
+          %} book! {% endif %}</li>
+        <li>You have borrowed {{ metrics.user_total_loans }} {% if current_user.total_loans != 1 %} books! {% else %}
+          book! {% endif %}</li>
 
-</html>
+    </div>
+  </div>
+</a>
+<div>
+  <form action="{{ url_for('auth.logout') }}" method="POST">
+    <button type="submit" class="btn btn-danger">Logout</button>
+  </form>
+</div>
+{% endblock %}
