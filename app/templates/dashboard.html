@@ -7,231 +7,216 @@
   <h2 class="mb-4">
     Welcome, {{ current_user.username | capitalize }}
     {% if current_user.is_admin %}
-    <span class="badge bg-warning text-dark ms-2">Admin</span>
+    <span class="badge bg-pale-blue text-dark ms-2">Admin</span>
     {% endif %}
   </h2>
+  <div class="row gy-4 gx-5 mt-4">
+  <h3>User Metrics</h3>
+    <div class="col-lg-4">
 
-  <div class="row gy-4">
-    <div class="row mt-4">
-      <!-- Left column: Account info and metrics -->
-      <div class="col-lg-4">
-
-        <!-- User Stats -->
-        <div class="row g-2">
-          <div class="col-6">
-            <div class="card bg-pale-green text-center small shadow-sm">
-              <div class="card-body p-2">
-                <div class="text-muted">Listed</div>
-                <div class="fw-bold">{{ metrics.user_total_listings }}</div>
-              </div>
-            </div>
-          </div>
-          <div class="col-6">
-            <div class="card bg-pale-yellow text-center small shadow-sm">
-              <div class="card-body p-2">
-                <div class="text-muted">Borrowed</div>
-                <div class="fw-bold">{{ metrics.user_total_loans }}</div>
-              </div>
-            </div>
-          </div>
-          <div class="col-6">
-            <div class="card bg-pale-blue text-center small shadow-sm">
-              <div class="card-body p-2">
-                <div class="text-muted">Active Listings</div>
-                <div class="fw-bold">{{ metrics.user_active_listings }}</div>
-              </div>
-            </div>
-          </div>
-          <div class="col-6">
-            <div class="card bg-pale-pink text-center small shadow-sm">
-              <div class="card-body p-2">
-                <div class="text-muted">Active Loans</div>
-                <div class="fw-bold">{{ metrics.user_active_loans }}</div>
-              </div>
+      <!-- User Stats -->
+      <div class="row g-2">
+        <div class="col-6">
+          <div class="card bg-pale-green text-center small shadow-sm">
+            <div class="card-body p-2">
+              <div class="text-muted">Listed</div>
+              <div class="fw-bold">{{ metrics.user_total_listings }}</div>
             </div>
           </div>
         </div>
-        <!-- Action Cards -->
-        <!-- Edit Details Card -->
-        <a href="{{ url_for('auth.edit_user', user_id=current_user.user_id) }}"
-          class="text-decoration-none mb-3 d-block">
-          <div class="card shadow-sm border-0 hover-effect">
-            <div class="card-body d-flex justify-content-between align-items-center">
-              <div>
-                <h6 class="mb-1 text-dark">Edit Username or Password</h6>
-                <p class="text-muted small mb-0">Update your login details</p>
-              </div>
-              <i class="bi bi-pencil-square fs-4 text-primary"></i>
+        <div class="col-6">
+          <div class="card bg-pale-yellow text-center small shadow-sm">
+            <div class="card-body p-2">
+              <div class="text-muted">Borrowed</div>
+              <div class="fw-bold">{{ metrics.user_total_loans }}</div>
             </div>
           </div>
-        </a>
+        </div>
+        <div class="col-6">
+          <div class="card bg-pale-blue text-center small shadow-sm">
+            <div class="card-body p-2">
+              <div class="text-muted">Active Listings</div>
+              <div class="fw-bold">{{ metrics.user_active_listings }}</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6">
+          <div class="card bg-pale-pink text-center small shadow-sm">
+            <div class="card-body p-2">
+              <div class="text-muted">Active Loans</div>
+              <div class="fw-bold">{{ metrics.user_active_loans }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Action Cards -->
+      <!-- Edit Details Card -->
+      <a href="{{ url_for('auth.edit_user', user_id=current_user.user_id) }}" class="text-decoration-none mb-3 d-block">
+        <div class="card shadow-sm border-0 hover-effect">
+          <div class="card-body d-flex justify-content-between align-items-center">
+            <div>
+              <h6 class="mb-1 text-dark">Edit Username or Password</h6>
+              <p class="text-muted small mb-0">Update your login details</p>
+            </div>
+            <i class="bi bi-pencil-square fs-4 text-primary"></i>
+          </div>
+        </div>
+      </a>
 
-        <!-- Deletion Request Card -->
-        <form action="{{ url_for('auth.edit_user') }}" method="POST">
-          <input type="hidden" name="user_id" value="{{ current_user.user_id }}">
-          <div class="card shadow-sm border-0">
-            <div class="card-body d-flex justify-content-between align-items-center">
-              <div class="form-check mb-0">
-                <input class="form-check-input darker-checkbox" type="checkbox" name="marked_for_deletion"
-                  id="deleteCheck{{ current_user.user_id }}" value="true">
-                <label class="form-check-label text-dark" for="deleteCheck{{ current_user.user_id }}">
-                  {% if current_user.marked_for_deletion %}
-                  Account listed for deletion <i class="fa fa-exclamation-triangle"
-                    style="font-size:24px"></i><br>
-                  <strong>Cancel Deletion Request</strong>
-                  {% else %}
-                  Request Account Deletion
-                  {% endif %}
-                </label>
-              </div>
-              <button type="submit" class="btn btn-light border">Submit</button>
+      <!-- Deletion Request Card -->
+      <form action="{{ url_for('auth.edit_user') }}" method="POST">
+        <input type="hidden" name="user_id" value="{{ current_user.user_id }}">
+        <div class="card shadow-sm border-0">
+          <div class="card-body d-flex justify-content-between align-items-center">
+            <div class="form-check mb-0">
+              <input class="form-check-input darker-checkbox" type="checkbox" name="marked_for_deletion"
+                id="deleteCheck{{ current_user.user_id }}" value="true">
+              <label class="form-check-label text-dark" for="deleteCheck{{ current_user.user_id }}">
+                {% if current_user.marked_for_deletion %}
+                Account listed for deletion <i class="fa fa-exclamation-triangle" style="font-size:24px"></i><br>
+                <strong>Cancel Deletion Request</strong>
+                {% else %}
+                Request Account Deletion
+                {% endif %}
+              </label>
             </div>
+            <button type="submit" class="btn btn-light border">Submit</button>
           </div>
-        </form>
+        </div>
+      </form>
+    </div>
+
+
+    {% if current_user.is_admin %}
+    <div class="col-md-8">
+      <h4 class="mt-5">Admin Tools</h4>
+      <div class="row g-3 mt-2">
+        <div class="col-md-6 col-lg-4">
+          <a href="{{ url_for('listings.view_all_loans') }}" class="text-decoration-none">
+            <div class="card h-100 shadow-sm rounded-3 text-center bg-light border-secondary">
+              <div class="card-body">
+                <h5 class="card-title fw-semibold">View All Loans</h5>
+                <p class="card-text text-muted">Manage user loan activity</p>
+              </div>
+            </div>
+          </a>
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+          <a href="{{ url_for('admin.create_genre') }}" class="text-decoration-none">
+            <div class="card h-100 shadow-sm rounded-3 text-center bg-light border-secondary">
+              <div class="card-body">
+                <h5 class="card-title fw-semibold">Manage Genres</h5>
+                <p class="card-text text-muted">Edit or create new genres</p>
+              </div>
+            </div>
+          </a>
+        </div>
+        <div class="col-md-6 col-lg-4">
+          <a href="{{ url_for('admin.view_users') }}" class="text-decoration-none">
+            <div class="card h-100 shadow-sm rounded-3 text-center bg-light border-secondary">
+              <div class="card-body">
+                <h5 class="card-title fw-semibold">User Management</h5>
+                <p class="card-text text-muted">View and manage registered users</p>
+              </div>
+            </div>
+          </a>
+        </div>
+      </div>
+    </div>
+    {% else %}
+  
+
+    <!-- Right column: Quick Actions cards -->
+    <div class="col-md-8">
+      <h4 class="mb-3">Get Started!</h4>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <a href="{{ url_for('listings.create_listing') }}" class="text-decoration-none">
+            <div class="card h-100 shadow-sm rounded-3 bg-light border-secondary hover-scale">
+              <div class="card-body ">
+                <h5 class="card-title text-dark">Create Book Listing</h5>
+                <p class="card-text text-muted">List a new book so others can borrow it.</p>
+              </div>
+            </div>
+          </a>
+        </div>
+
+        <div class="col-md-6">
+          <a href="{{ url_for('listings.view_all') }}" class="text-decoration-none">
+            <div class="card h-100 shadow-sm rounded-3 bg-light border-secondary hover-scale">
+              <div class="card-body ">
+                <h5 class="card-title text-dark">View All Books</h5>
+                <p class="card-text text-muted">Pick a new book to borrow.</p>
+              </div>
+            </div>
+          </a>
+        </div>
+
+        <div class="col-md-6">
+          <a href="{{ url_for('listings.view_mine') }}" class="text-decoration-none">
+            <div class="card h-100 shadow-sm rounded-3 bg-light border-secondary hover-scale">
+              <div class="card-body">
+                <h5 class="card-title text-dark">My Listings</h5>
+                <p class="card-text text-muted">View and manage your listed books.</p>
+              </div>
+            </div>
+          </a>
+        </div>
+
+        <div class="col-md-6">
+          <a href="{{ url_for('listings.view_loans') }}" class="text-decoration-none">
+            <div class="card h-100 shadow-sm rounded-3 bg-light border-secondary hover-scale">
+              <div class="card-body">
+                <h5 class="card-title text-dark">My Loans</h5>
+                <p class="card-text text-muted">View your borrowing history.</p>
+              </div>
+            </div>
+          </a>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="row g-3 mt-4">
+    <h4>Site Metrics</h4>
+    <div class="col-6 col-md-3">
+      <div class="card bg-pale-green text-center small shadow-sm">
+        <div class="card-body p-2">
+          <div class="text-muted">All-time book listing count!</div>
+          <div class="fw-bold">{{ metrics.total_overall_books }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card bg-pale-yellow text-center small shadow-sm">
+        <div class="card-body p-2">
+          <div class="text-muted">All-time book loan count!</div>
+          <div class="fw-bold">{{ metrics.total_overall_loans }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card bg-pale-blue text-center small shadow-sm">
+        <div class="card-body p-2">
+          <div class="text-muted">Number of books currently on Loan</div>
+          <div class="fw-bold">{{ metrics.active_loans }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card bg-pale-pink text-center small shadow-sm">
+        <div class="card-body p-2">
+          <div class="text-muted">Number of books currently listed</div>
+          <div class="fw-bold">{{ metrics.listed_books }}</div>
+        </div>
       </div>
     </div>
   </div>
 </div>
-</div>
-
-
-<!-- Right column: Quick Actions cards -->
-<div class="col-md-8">
-  <h4 class="mb-3">Quick Actions</h4>
-
-  <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3">
-    <div class="col">
-      <a href="{{ url_for('listings.create_listing') }}" class="text-decoration-none">
-        <div class="card h-100 shadow-sm rounded-3 border-0 hover-scale">
-          <div class="card-body">
-            <h5 class="card-title text-primary">Create Book Listing</h5>
-            <p class="card-text text-muted">List a new book so others can borrow it.</p>
-          </div>
-        </div>
-      </a>
-    </div>
-
-    <div class="col">
-      <a href="{{ url_for('listings.view_all') }}" class="text-decoration-none">
-        <div class="card h-100 shadow-sm rounded-3 border-0 hover-scale">
-          <div class="card-body">
-            <h5 class="card-title text-primary">View All Books</h5>
-            <p class="card-text text-muted">Pick a new book to borrow.</p>
-          </div>
-        </div>
-      </a>
-    </div>
-
-    <div class="col">
-      <a href="{{ url_for('listings.view_mine') }}" class="text-decoration-none">
-        <div class="card h-100 shadow-sm rounded-3 border-0 hover-scale">
-          <div class="card-body">
-            <h5 class="card-title text-primary">My Listings</h5>
-            <p class="card-text text-muted">View and manage your listed books.</p>
-          </div>
-        </div>
-      </a>
-    </div>
-
-    <div class="col">
-      <a href="{{ url_for('listings.view_loans') }}" class="text-decoration-none">
-        <div class="card h-100 shadow-sm rounded-3 border-0 hover-scale">
-          <div class="card-body">
-            <h5 class="card-title text-primary">My Loans</h5>
-            <p class="card-text text-muted">View your borrowing history.</p>
-          </div>
-        </div>
-      </a>
-    </div>
-  </div>
-</div>
-</div>
-
-<!-- Site-wide stats card -->
-<div class="card mt-5 shadow-sm rounded-3 text-center bg-light">
-  <div class="card-body">
-    <h5 class="card-title fw-semibold">
-      Booshare has listed {{ metrics.total_overall_books }} books so far! 🎉
-    </h5>
-    <p class="card-text">
-      You've listed {{ metrics.user_total_listings }}
-      {% if metrics.user_total_listings == 1 %}book{% else %}books{% endif %}
-      and borrowed {{ metrics.user_total_loans }}
-      {% if metrics.user_total_loans == 1 %}book{% else %}books{% endif %}.
-    </p>
-    <p class="text-muted mb-0">Why not add another and keep Booshare growing?</p>
-  </div>
-</div>
-
-<!-- Optional small hover scale effect -->
-<style>
-  .hover-scale:hover {
-    transform: scale(1.03);
-    transition: transform 0.15s ease-in-out;
-  }
-</style>
 
 
 
-<!-- Metrics Section
-  <h4 class="mt-5">Your Stats</h4>
-  <div class="card shadow-sm mt-2">
-    <div class="card-body">
-      <ul>
-        <li>Total books listed (site-wide): {{ metrics.total_overall_books }}</li>
-        <li>Total loans (site-wide): {{ metrics.total_overall_loans }}</li>
-        <li>You’ve listed {{ metrics.user_total_listings }} {% if metrics.user_total_listings == 1 %}book{% else
-          %}books{% endif %}.</li>
-        <li>You’ve borrowed {{ metrics.user_total_loans }} {% if metrics.user_total_loans == 1 %}book{% else %}books{%
-          endif %}.</li>
-      </ul>
-    </div>
-  </div> -->
-
-<!-- Admin Tools Section -->
-<h4 class="mt-5 text-danger">Admin Tools</h4>
-<div class="row g-3 mt-2">
-  <div class="col-md-6 col-lg-4">
-    <a href="{{ url_for('listings.view_all_loans') }}" class="text-decoration-none">
-      <div class="card h-100 shadow-sm border-0 bg-light border-danger">
-        <div class="card-body">
-          <h5 class="card-title text-danger">View All Loans</h5>
-          <p class="card-text text-muted">Manage loan activity across the platform.</p>
-        </div>
-      </div>
-    </a>
-  </div>
-
-  <div class="col-md-6 col-lg-4">
-    <a href="{{ url_for('admin.create_genre') }}" class="text-decoration-none">
-      <div class="card h-100 shadow-sm border-0 bg-light border-danger">
-        <div class="card-body">
-          <h5 class="card-title text-danger">Create Genre</h5>
-          <p class="card-text text-muted">Add new genres to the system.</p>
-        </div>
-      </div>
-    </a>
-  </div>
-
-  <div class="col-md-6 col-lg-4">
-    <a href="{{ url_for('admin.view_users') }}" class="text-decoration-none">
-      <div class="card h-100 shadow-sm border-0 bg-light border-danger">
-        <div class="card-body">
-          <h5 class="card-title text-danger">User Management</h5>
-          <p class="card-text text-muted">View and manage registered users.</p>
-        </div>
-      </div>
-    </a>
-  </div>
-</div>
-
-<!-- Logout -->
-<div class="mt-5">
-  <form action="{{ url_for('auth.logout') }}" method="POST">
-    <button type="submit" class="btn btn-danger">Logout</button>
-  </form>
-</div>
-
-</div>
 
 {% endblock %}

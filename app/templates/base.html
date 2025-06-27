@@ -10,6 +10,11 @@
     <title>Dashboard</title>
     <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
     <style>
+        .hover-scale:hover {
+            transform: scale(1.03);
+            transition: transform 0.15s ease-in-out;
+        }
+
         .bg-pale-pink {
             background-color: #ffe6eb;
         }
@@ -133,24 +138,11 @@
                             View My Listings
                         </a>
                     </li>
-
                     {% if current_user.is_admin %}
                     <li class="nav-item">
-                        <a class="nav-link {% if request.path == url_for('listings.view_all_loans') %}active{% endif %}"
-                            href="{{ url_for('listings.view_all_loans') }}">
-                            View All Loans
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.path == url_for('admin.create_genre') %}active{% endif %}"
-                            href="{{ url_for('admin.create_genre') }}">
-                            Manage Genres
-                        </a>
-                    </li>
-                    <li class="nav-item">
                         <a class="nav-link {% if request.path == url_for('admin.view_users') %}active{% endif %}"
-                            href="{{ url_for('admin.view_users') }}">
-                            View Users
+                            href="{{ url_for('dash.dashboard') }}">
+                            Admin tools
                         </a>
                     </li>
                     {% endif %}

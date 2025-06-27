@@ -3,16 +3,18 @@ from flask import redirect, url_for, flash, session, request, render_template
 from app.services import user_service
 from flask_login import login_user, logout_user, current_user, login_required
 from app.services.user_service import UserService
+from app.services.dashboard_service import DashboardService
 from app.extensions import db
 
 
 auth = Blueprint('auth', __name__)
-
+dashboard_service = DashboardService(db.session, "app/static/metrics.json")
 user_service = UserService(db.session)
 
 
 @auth.route('/register', methods=['GET', 'POST'])
 def register():
+    metrics = dashboard_service.read_metrics(user=None)
     if request.method == 'POST':
         form_data = request.form
         username = form_data.get('username', '').lower()
@@ -28,12 +30,13 @@ def register():
             return redirect(url_for('auth.login'))
         else:
             flash(result.message, "danger")
-            return render_template('login.html', show_register=True) #keep showing register form if registration failed
+            return render_template('login.html', show_register=True, metrics=metrics) #keep showing register form if registration failed
         
-    return render_template('login.html', show_register=False)
+    return render_template('login.html', show_register=False, metrics=metrics)
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
+    metrics = dashboard_service.read_metrics(user=None)
     if request.method == 'POST':
         form_data = request.form
 
@@ -49,10 +52,11 @@ def login():
         else:
             flash(result.message, "danger")
             return render_template('login.html', show_register=False)
-    return render_template('login.html', show_register=False)
+    return render_template('login.html', show_register=False, metrics=metrics)
 
 @auth.route('/edit_user', methods=['POST', 'GET'])
 def edit_user():
+    
     
     if request.method == 'POST':
         form_data = request.form
