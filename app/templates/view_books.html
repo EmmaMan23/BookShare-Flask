@@ -1,191 +1,137 @@
-<!doctype html>
-<html lang="en">
+{% extends 'base.html' %}
+{% block content %}
+<nav class="navbar navbar-expand-lg bg-body-tertiary">
+  <div class="container-fluid">
+    <form method="get" class="d-flex flex-wrap align-items-end gap-3 mb-4">
 
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-  <title>All Book Listings</title>
-  <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
-</head>
+      <span class="fw-semibold me-1">Filter&nbsp;by:</span>
 
-<body class="p-3 m-0 border-0 bd-example m-0 border-0">
-  <nav class="navbar" data-bs-theme="dark" style="background-color: #114870">
-    <class="container-fluid">
-      <a class="navbar-brand" href="#">Fixed top</a>
-      <ul class="nav nav-underline">
-        <li class="nav-item">
-          <a class="nav-link active" aria-current="page" href="{{ url_for('dash.dashboard') }}">Dashboard</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link active" aria-current="page" href="{{ url_for('listings.view_all') }}">View Books</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="{{ url_for('listings.view_loans') }}">View loans</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="{{ url_for('listings.view_mine') }}">Show my books</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link " href="{{ url_for('listings.create_listing') }}">Create Listing</a>
-        </li>
-        {% if current_user.is_admin %}
-        <li class="nav-item">
-          <a class="nav-link" href="{{ url_for('listings.view_all_loans') }}">View All loans</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="{{ url_for('admin.create_genre') }}">Create Genre</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="{{ url_for('admin.view_users') }}">Users</a>
-        </li>
-        {% endif %}
-      </ul>
-  </nav>
-  {% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-  {% for category, message in messages %}
-  <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-    {{ message }}
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      <!-- Genre filter -->
+      <div class="d-flex flex-column">
+        <label for="genre" class="form-label">Genre</label>
+        <select class="form-select" id="genre" name="genre">
+          <option value="">All</option>
+          {% for g in genres %}
+          <option value="{{ g.name }}" {% if genre==g.name %}selected{% endif %}>{{ g.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- Availability filter -->
+      <div class="d-flex flex-column">
+        <label for="availability" class="form-label mb-0">Availability</label>
+        <select name="availability" id="availability" class="form-select">
+          <option value="">All</option>
+          <option value="available" {% if availability=='available' %}selected{% endif %}>Available</option>
+          <option value="unavailable" {% if availability=='unavailable' %}selected{% endif %}>Unavailable</option>
+        </select>
+      </div>
+
+      <!-- Buttons -->
+      <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-primary">Apply</button>
+        <a href="{{ url_for(request.endpoint) }}" class="btn btn-outline-secondary">Clear</a>
+      </div>
+    </form>
+
+
+
+    <form class="d-flex ms-auto" role="search" method="GET" action="{{url_for('listings.view_all')}}">
+
+      <input class="form-control me-2 flex-grow-1" type="search" name="search" placeholder="Search"
+        aria-label="Search" />
+      <button class="btn btn-outline-success" type="submit">Search</button>
+      <a class="btn btn-outline-secondary ms-2" href="{{ url_for('listings.view_all') }}">Clear Results</a>
+    </form>
   </div>
-  {% endfor %}
-  {% endif %}
-  {% endwith %}
-  <nav class="navbar navbar-expand-lg bg-body-tertiary">
-    <div class="container-fluid">
-      <form method="get" class="d-flex flex-wrap align-items-end gap-3 mb-4">
+</nav>
 
-        <span class="fw-semibold me-1">Filter&nbsp;by:</span>
+{% if search %}
+<p class="d-inline me-2">Search term:</p>
+<span class="badge rounded-pill text-bg-light border d-inline-flex align-items-center">
+  {{ search }}
+  <a href="{{ url_for(request.endpoint) }}" class="btn-close btn-close-sm ms-2" aria-label="Remove"></a>
+</span>
+{% endif %}
 
-        <!-- Genre filter -->
-        <div class="d-flex flex-column">
-          <label for="genre" class="form-label">Genre</label>
-          <select class="form-select" id="genre" name="genre">
-            <option value="">All</option>
-            {% for g in genres %}
-            <option value="{{ g.name }}" {% if genre==g.name %}selected{% endif %}>{{ g.name }}</option>
-            {% endfor %}
-          </select>
-        </div>
+<div class="container mt-4">
+  <div class="row gx-4 gy-4">
+    {% for listing in listings %}
+    <div class="col-md-6">
+      <div class="card mb-3 ">
+        <div class="row g-0">
+          <div class="col-md-4">
+            <img
+              src="{{ url_for('static', filename=listing.genre.image) if listing.genre else url_for('static', filename='images/fallback.png') }}"
+              class="img-fluid rounded-start" style="height: 200px; object-fit: cover;">
+          </div>
+          <div class="col-md-8">
+            <div class="card-body">
+              <h4 class="card-title">{{ listing.title }}</h4>
+              <h5>{{ listing.author }}</h5>
+              <p class="card-text">{{ listing.description }}</p>
+              <p class="card-text">Listed by: {{ listing.user.username }}</p>
+              <p class="card-text">
+                <small class="text-body-secondary">
+                  {% if listing.is_available and not listing.marked_for_deletion%} Available
+                  {% elif listing.active_loan %}
+                  Unavailable – Please check back on: {{ listing.active_loan.return_date.strftime("%d/%m/%Y") }}
 
-        <!-- Availability filter -->
-        <div class="d-flex flex-column">
-          <label for="availability" class="form-label mb-0">Availability</label>
-          <select name="availability" id="availability" class="form-select">
-            <option value="">All</option>
-            <option value="available" {% if availability=='available' %}selected{% endif %}>Available</option>
-            <option value="unavailable" {% if availability=='unavailable' %}selected{% endif %}>Unavailable</option>
-          </select>
-        </div>
+                  {% else %} Unavailable
 
-        <!-- Buttons -->
-        <div class="d-flex gap-2">
-          <button type="submit" class="btn btn-primary">Apply</button>
-          <a href="{{ url_for(request.endpoint) }}" class="btn btn-outline-secondary">Clear</a>
-        </div>
-      </form>
-
-
-
-      <form class="d-flex ms-auto" role="search" method="GET" action="{{url_for('listings.view_all')}}">
-
-        <input class="form-control me-2 flex-grow-1" type="search" name="search" placeholder="Search"
-          aria-label="Search" />
-        <button class="btn btn-outline-success" type="submit">Search</button>
-        <a class="btn btn-outline-secondary ms-2" href="{{ url_for('listings.view_all') }}">Clear Results</a>
-      </form>
-    </div>
-  </nav>
-
-  {% if search %}
-  <p class="d-inline me-2">Search term:</p>
-  <span class="badge rounded-pill text-bg-light border d-inline-flex align-items-center">
-    {{ search }}
-    <a href="{{ url_for(request.endpoint) }}" class="btn-close btn-close-sm ms-2" aria-label="Remove"></a>
-  </span>
-  {% endif %}
-
-  <div class="container mt-4">
-    <div class="row gx-4 gy-4">
-      {% for listing in listings %}
-      <div class="col-md-6">
-        <div class="card mb-3 ">
-          <div class="row g-0">
-            <div class="col-md-4">
-              <img
-                src="{{ url_for('static', filename=listing.genre.image) if listing.genre else url_for('static', filename='images/fallback.png') }}"
-                class="img-fluid rounded-start" style="height: 200px; object-fit: cover;">
-            </div>
-            <div class="col-md-8">
-              <div class="card-body">
-                <h4 class="card-title">{{ listing.title }}</h4>
-                <h5>{{ listing.author }}</h5>
-                <p class="card-text">{{ listing.description }}</p>
-                <p class="card-text">Listed by: {{ listing.user.username }}</p>
-                <p class="card-text">
-                  <small class="text-body-secondary">
-                    {% if listing.is_available and not listing.marked_for_deletion%} Available
-                    {% elif listing.active_loan %}
-                    Unavailable – Please check back on: {{ listing.active_loan.return_date.strftime("%d/%m/%Y") }}
-
-                    {% else %} Unavailable
-
-                    {% endif %}
-                    {% if listing.marked_for_deletion %} - Marked for Deletion <i class="fa fa-exclamation-triangle"
-                      style="font-size:24px"></i>{% endif %}
-                  </small>
-                </p>
-                {% if listing.user_id == current_user.user_id %}
-                <button class="btn btn-secondary mt-2" disabled>
-                  You cannot reserve your own book
-                </button>
-                {% else %}
-                <form action="{{ url_for('listings.reserve_book' )}}" method="post">
-                  <input type="hidden" name="listing_id" value="{{ listing.listing_id }}">
-                  <div class="form-check">
-                    <input class="form-check-input" type="checkbox" name="reserve"
-                      id="checkDefault{{ listing.listing_id }}" {% if not listing.is_available or
-                      listing.marked_for_deletion %}disabled{% endif %}>
-                    <label class="form-check-label" for="checkDefault{{ listing.listing_id }}">Reserve this book</label>
-                  </div>
-                  <button type="submit" class="btn btn-primary mt-2" {% if not listing.is_available or
+                  {% endif %}
+                  {% if listing.marked_for_deletion %} - Marked for Deletion <i class="fa fa-exclamation-triangle"
+                    style="font-size:24px"></i>{% endif %}
+                </small>
+              </p>
+              {% if listing.user_id == current_user.user_id %}
+              <button class="btn btn-secondary mt-2" disabled>
+                You cannot reserve your own book
+              </button>
+              {% else %}
+              <form action="{{ url_for('listings.reserve_book' )}}" method="post">
+                <input type="hidden" name="listing_id" value="{{ listing.listing_id }}">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" name="reserve"
+                    id="checkDefault{{ listing.listing_id }}" {% if not listing.is_available or
                     listing.marked_for_deletion %}disabled{% endif %}>
-                    Submit
-                  </button>
-                </form>
-                {% endif %}
-
-
-
-              </div>
-
-              {% if current_user.is_admin %}
-              <small class="text-body-secondary">
-                {% if listing.marked_for_deletion %}
-                Deletion requested <i class="fa fa-exclamation-triangle" style="font-size:24px"></i>
-                {% endif %}
-              </small>
-              <form method="POST" action="{{ url_for('admin.delete') }}">
-                <input type="hidden" name="model" value="listing">
-                <input type="hidden" name="id" value="{{ listing.listing_id }}">
-                <button type="submit" class="btn btn-danger btn-sm mt-2"
-                  onclick="return confirm('Are you sure you want to delete this listing?')">
-                  Delete
+                  <label class="form-check-label" for="checkDefault{{ listing.listing_id }}">Reserve this book</label>
+                </div>
+                <button type="submit" class="btn btn-primary mt-2" {% if not listing.is_available or
+                  listing.marked_for_deletion %}disabled{% endif %}>
+                  Submit
                 </button>
               </form>
               {% endif %}
-              <div class="card-footer text-end">
-                <span class="badge bg-secondary">{{ listing.genre.name }}</span>
-              </div>
+
+
+
+            </div>
+
+            {% if current_user.is_admin %}
+            <small class="text-body-secondary">
+              {% if listing.marked_for_deletion %}
+              Deletion requested <i class="fa fa-exclamation-triangle" style="font-size:24px"></i>
+              {% endif %}
+            </small>
+            <form method="POST" action="{{ url_for('admin.delete') }}">
+              <input type="hidden" name="model" value="listing">
+              <input type="hidden" name="id" value="{{ listing.listing_id }}">
+              <button type="submit" class="btn btn-danger btn-sm mt-2"
+                onclick="return confirm('Are you sure you want to delete this listing?')">
+                Delete
+              </button>
+            </form>
+            {% endif %}
+            <div class="card-footer text-end">
+              <span class="badge bg-secondary">{{ listing.genre.name }}</span>
             </div>
           </div>
         </div>
       </div>
-      {% endfor %}
     </div>
+    {% endfor %}
   </div>
-</body>
+</div>
 
-</html>
+{% endblock %}

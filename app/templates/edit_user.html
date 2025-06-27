@@ -1,80 +1,21 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet">
- 
-    <title>Edit Listing</title>
-    <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
-  </head>
-  <body class="p-3 m-0 border-0 bd-example m-0 border-0">
-   
-
-    <nav class="navbar" data-bs-theme="dark"style="background-color: #114870"> 
-      <div class="container-fluid">
-        <a class="navbar-brand" href="#">Fixed top</a>
-        <ul class="nav nav-underline">
-  <li class="nav-item">
-    <a class="nav-link active" aria-current="page" href="{{ url_for('dash.dashboard') }}">Dashboard</a>
-  </li>
-  <li class="nav-item">
-    <a class="nav-link active" aria-current="page" href="{{ url_for('listings.view_all') }}">View Books</a>
-  </li>
-  <li class="nav-item">
-    <a class="nav-link" href="{{ url_for('listings.view_loans') }}">View loans</a>
-  </li>
-  <li class="nav-item">
-    <a class="nav-link" href="{{ url_for('listings.view_mine') }}">Show my books</a>
-  </li>
-  <li class="nav-item">
-    <a class="nav-link " href="{{ url_for('listings.create_listing') }}">Create Listing</a>
-  </li>
-  {% if current_user.is_admin %}
-  <li class="nav-item">
-    <a class="nav-link" href="{{ url_for('listings.view_all_loans') }}">View All loans</a>
-  </li>
-  <li class="nav-item">
-    <a class="nav-link" href="{{ url_for('admin.create_genre') }}">Create Genre</a>
-  </li>
-  <li class="nav-item">
-    <a class="nav-link" href="{{ url_for('admin.view_users') }}">Users</a>
-  </li>
-  {% endif %}
-</ul>
-
-      </div>
-    </nav>
-     {% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-    <div class="container mt-2">
-      {% for category, message in messages %}
-        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-          {{ message }}
-          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-      {% endfor %}
+{% extends 'base.html' %}
+{% block content %}
+<form method="POST" action="{{url_for('auth.edit_user')}}">
+  <input type="hidden" name="user_id" value="{{ current_user.user_id }}">
+  <div class="row">
+    <div class="col">
+      <label for="username" class="form-label">Username</label>
+      <input type="text" class="form-control" value="{{current_user.username}}" name="username">
+      <label for="old_password" class="form-label">Current Password</label>
+      <input type="password" class="form-control" name="old_password">
+      <label for="new_password" class="form-label">New Password</label>
+      <input type="password" class="form-control" name="new_password">
+      <label for="confirm_password" class="form-label">Confirm New Password</label>
+      <input type="password" class="form-control" name="confirm_password">
     </div>
-  {% endif %}
-{% endwith %}
-    <form method="POST" action="{{url_for('auth.edit_user')}}" >
-        <input type="hidden" name="user_id" value="{{ current_user.user_id }}">
-    <div class="row">
-      <div class="col">
-        <label for="username" class="form-label">Username</label>
-        <input type="text" class="form-control" value="{{current_user.username}}" name="username" >
-        <label for="old_password" class="form-label">Current Password</label>
-        <input type="password" class="form-control"  name="old_password" >
-        <label for="new_password" class="form-label">New Password</label>
-        <input type="password" class="form-control"  name="new_password" >
-        <label for="confirm_password" class="form-label">Confirm New Password</label>
-        <input type="password" class="form-control"  name="confirm_password" >
-      </div>
-    </div>
+  </div>
 
-   
-<button type="submit" class="btn btn-primary">Submit</button>
+
+  <button type="submit" class="btn btn-primary">Submit</button>
 </form>
- 
-  </body>
-</html>
+{% endblock %}
