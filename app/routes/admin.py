@@ -3,9 +3,11 @@ from flask import redirect, url_for, flash
 from flask_login import login_required, current_user
 from app.models import Genre, Listing, User, Loan
 from app.services.admin_service import AdminService
+from app.services.listing_service import ListingService
+from app.services.dashboard_service import DashboardService
 from app.extensions import db
 
-
+dashboard_service = DashboardService(db.session, "app/static/metrics.json")
 admin_service = AdminService(db.session)
 
 admin = Blueprint('admin', __name__)
@@ -47,6 +49,7 @@ def delete():
 @admin.route('/create_genre', methods=['POST', 'GET'])
 @login_required
 def create_genre():
+    listing_service = ListingService(db.session, dashboard_service)
     genre_images = [
         'images/adventure.png',
         'images/children.png',
@@ -60,14 +63,13 @@ def create_genre():
         form_data = request.form
         name = form_data.get('name')
         image = form_data.get('image')
-        inactive = False
 
-        result = admin_service.create_genre(name, image, inactive)
+        result = admin_service.create_genre(name, image)
         flash(result.message, "success" if result.success else "danger")
         return redirect(url_for('admin.create_genre'))
         
-    genres_result = admin_service.get_genres()
-    return render_template('add_genre.html', genre_images=genre_images, genres=genres_result.data)
+    genres_result = listing_service.get_all_genres()
+    return render_template('add_genre.html', genre_images=genre_images, genres=genres_result)
 
 @admin.route('/edit_genre', methods=['POST'])
 @login_required

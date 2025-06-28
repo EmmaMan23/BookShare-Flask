@@ -31,7 +31,7 @@ class AdminService:
         self.db_session.commit()
         return Result(True, "Record deleted successfully")
 
-    def create_genre(self, name, image, inactive):
+    def create_genre(self, name, image):
         try:
             name = validate_non_empty_string(name, "Genre name")
         except ValueError as e:
@@ -40,16 +40,11 @@ class AdminService:
         new_genre = Genre(
             name = name,
             image = image,
-            inactive = inactive
         )
 
         self.db_session.add(new_genre)
         self.db_session.commit()
         return Result(True, "Genre created successfully")
-
-    def get_genres(self):
-        genres = self.db_session.query(Genre).all()
-        return Result(True, "Genres returned successfully", genres)
     
     def edit_genre(self, genre_id, name, image):
         

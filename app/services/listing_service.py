@@ -14,7 +14,6 @@ class ListingService:
 
 
     def list_book(self, title, author, description, genre_id, user_id, is_available=True):
-        
         try:
 
             new_listing = Listing(
@@ -42,7 +41,7 @@ class ListingService:
 
 
     def get_all_listings(self, user_id = None, genre=None, availability=None, search=None):
-        query = self.db_session.query(Listing).options(joinedload(Listing.loans))
+        query = self.db_session.query(Listing).order_by(Listing.title).options(joinedload(Listing.loans))
 
         if user_id:
             query = query.filter(Listing.user_id == user_id)
@@ -61,8 +60,6 @@ class ListingService:
 
     def get_all_genres(self):
         return self.db_session.query(Genre).order_by(Genre.name).all()
-
-
 
     def get_listing_by_id(self, listing_id):
         return self.db_session.get(Listing, listing_id)

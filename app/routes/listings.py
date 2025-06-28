@@ -16,7 +16,7 @@ listing_service = ListingService(db.session, dashboard_service)
 @listings.route('/create_listing', methods=['POST', 'GET'])
 @login_required
 def create_listing():
-    genres = Genre.query.filter_by(inactive=False).all()
+    genres = listing_service.get_all_genres()
     if request.method == 'POST':
         form = request.form
         title = form.get('title')
@@ -69,7 +69,7 @@ def view_mine():
 @listings.route('/edit_listing', methods=['POST', 'GET'])
 @login_required
 def edit_listing():
-    genres = Genre.query.filter_by(inactive=False).all()
+    genres = listing_service.get_all_genres()
 
     if request.method == 'POST':
         form_data = request.form

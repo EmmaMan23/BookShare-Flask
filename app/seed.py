@@ -12,61 +12,50 @@ def seeding():
         genres = [
             {
             "name": "Science Fiction",
-            "image": "images/science.png",
-            "inactive": False
+            "image": "images/science.png"
             },
             {
             "name": "Fantasy",
-            "image": "images/fantasy.png",
-            "inactive": False
+            "image": "images/fantasy.png"
             },
             {
             "name": "Romance",
-            "image": "images/romance.png",
-            "inactive": False
+            "image": "images/romance.png"
             },
             {
             "name": "Horror",
-            "image": "images/horror.png",
-            "inactive": False
+            "image": "images/horror.png"
             },
             {
             "name": "Mystery",
-            "image": "images/mystery.png",
-            "inactive": False
+            "image": "images/mystery.png"
             },
             {
             "name": "Thriller",
-            "image": "images/science.png",
-            "inactive": False
+            "image": "images/science.png"
             },
             {
             "name": "History",
-            "image": "images/adventure.png",
-            "inactive": False
+            "image": "images/adventure.png"
             },
             {
             "name": "Non-Fiction",
-            "image": "images/science.png",
-            "inactive": False
+            "image": "images/science.png"
             },
             {
             "name": "Adventure",
-            "image": "images/adventure.png",
-            "inactive": False
+            "image": "images/adventure.png"
             },
             {
             "name": "Children",
-            "image": "images/children.png",
-            "inactive": False
+            "image": "images/children.png"
             }
         ]
 
         for g in genres:
             genre = Genre(
                 name =g["name"],
-                image = g["image"],
-                inactive = g["inactive"]
+                image = g["image"]
             )
             db.session.add(genre)
         db.session.commit()
