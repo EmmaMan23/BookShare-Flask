@@ -21,6 +21,23 @@ class AdminService:
         users = self.db_session.query(User).all()
         return Result(True, "Users retrieved successfully", users)
     
+    def get_user_by_id(self, user_id):
+        return self.db_session.query(User).filter_by(user_id=user_id).first()
+
+    def update_user_role(self, user_id, role):
+        try:
+            user = self.get_user_by_id(user_id)
+            if not user:
+                return False
+
+            user.role = role
+            self.db_session.commit()
+            return True
+        
+        except Exception as e:
+            self.db_session.rollback()
+            return False
+
     
     def delete_record(self, model_class, record_id):
         record = self.db_session.get(model_class, record_id)

@@ -16,7 +16,8 @@ admin = Blueprint('admin', __name__)
 @login_required
 def view_users():
     user_result = admin_service.view_users()
-    return render_template('view_users.html', users=user_result.data)
+    data = dashboard_service.read_metrics(current_user)
+    return render_template('view_users.html', users=user_result.data, metrics=data)
 
 @admin.route('/delete_record', methods=['POST'])
 @login_required
@@ -85,7 +86,27 @@ def edit_genre():
     flash(result.message, "success" if result.success else "danger")
     return redirect(url_for('admin.create_genre'))
 
+@admin.route('/admin_edit_user', methods=['GET', 'POST'])
+@login_required
+def admin_edit_user():
+    user_id = request.args.get('user_id', type=int)
+    if not user_id:
+        flash("User ID is missing.", "danger")
+        return redirect(url_for('admin.view_users'))
 
-    
-    
-    
+    user = admin_service.get_user_by_id(user_id)
+    if not user:
+        flash("User not found.", "danger")
+        return redirect(url_for('admin.view_users'))
+
+    if request.method == 'POST':
+        role = request.form.get('role')
+
+        success = admin_service.update_user_role(user_id, role)
+        if success:
+            flash("User role updated successfully.", "success")
+            return redirect(url_for('admin.view_users'))
+        else:
+            flash("Failed to update user role.", "danger")
+
+    return render_template('view_users.html', user=user)

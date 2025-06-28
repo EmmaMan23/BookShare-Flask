@@ -67,8 +67,8 @@ def seeding():
                 "password": "Shoes123",
                 "role": "admin",
                 "marked_for_deletion": False,
-                "total_loans": 0,
-                "total_listings": 0,
+                "total_loans": 1,
+                "total_listings": 1,
                 "join_date": date(2024, 12, 10)
 
             },
