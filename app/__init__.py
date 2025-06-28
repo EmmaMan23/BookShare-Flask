@@ -46,6 +46,7 @@ def create_app(testing=False):
 
 
     login_manager.login_view = 'auth.login'
+    login_manager.login_message_category = "warning"
     login_manager.init_app(app)
 
     @login_manager.user_loader

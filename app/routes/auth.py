@@ -55,6 +55,7 @@ def login():
     return render_template('login.html', show_register=False, metrics=metrics)
 
 @auth.route('/edit_user', methods=['POST', 'GET'])
+@login_required
 def edit_user():
     
     

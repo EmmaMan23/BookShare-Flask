@@ -45,6 +45,7 @@ def delete():
     return redirect(url_for('listings.view_all'))
 
 @admin.route('/create_genre', methods=['POST', 'GET'])
+@login_required
 def create_genre():
     genre_images = [
         'images/adventure.png',
@@ -69,7 +70,7 @@ def create_genre():
     return render_template('add_genre.html', genre_images=genre_images, genres=genres_result.data)
 
 @admin.route('/edit_genre', methods=['POST'])
-
+@login_required
 def edit_genre():
     form_data = request.form
     genre_id = form_data.get('id')
