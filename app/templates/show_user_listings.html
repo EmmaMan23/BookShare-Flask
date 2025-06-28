@@ -30,6 +30,7 @@
                 </small>
               </p>
             </div>
+            
             <form action="{{ url_for('listings.mark_for_deletion') }}" method="post">
               <input type="hidden" name="listing_id" value="{{ listing.listing_id }}">
               {% if listing.marked_for_deletion %}
@@ -48,6 +49,7 @@
                   {% endif %}
                 </label>
               </div>
+
               <button type="submit" class="btn btn-primary mt-2">Submit</button>
             </form>
             <a href="{{ url_for('listings.edit_listing', listing_id=listing.listing_id)}}" class="btn btn-primary">
@@ -56,12 +58,12 @@
             <div class="card-footer text-end">
               <span class="badge bg-secondary">{{ listing.genre.name | capitalize }}</span>
             </div>
-          </div> 
-        </div> 
-      </div> 
-    </div> 
+          </div>
+        </div>
+      </div>
+    </div>
     {% endfor %}
-  </div> 
+  </div>
   {% else %}
   <div class="text-center mt-4">
     <h4>You haven't listed any books yet!</h4>

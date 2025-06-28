@@ -259,7 +259,7 @@ def seeding():
                 "author": "author14 ",
                 "description": " Keeps you gripped",
                 "genre_id": 5,
-                "is_available": True,
+                "is_available": False,
                 "marked_for_deletion": False,
                 "user_id": 1
             }
@@ -320,10 +320,10 @@ def seeding():
                 "is_returned": True
             },
             {
-                "listing_id": 9 ,
+                "listing_id": 10 ,
                 "user_id": 3,
                 "start_date": date(2025, 5, 30),
-                "return_date": date(2025, 6, 27),
+                "return_date": date(2025, 7, 27),
                 "actual_return_date": None,
                 "is_returned": False
             },

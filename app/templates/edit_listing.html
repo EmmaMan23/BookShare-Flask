@@ -16,12 +16,18 @@
     <textarea class="form-control" name='description' id="floatingTextarea">{{listing.description}}</textarea>
     <label for="floatingTextarea"> Description</label>
   </div>
+  <div class="form-check">
+    <input class="form-check-input" type="checkbox" name="is_available" value="true" id="availCheck">
+    <label class="form-check-label" for="availCheck">Change Availability Status</label>
+
+  </div>
   <div class="mb-3">
 
     <label for="genre" class="form-label">Genre</label>
     <select class="form-select" id="genre" name="genre_id" required>
       {% for genre in genres %}
-      <option value="{{ genre.genre_id }}" {% if genre.genre_id==listing.genre_id %}selected{% endif %}>{{ genre.name | capitalize }}
+      <option value="{{ genre.genre_id }}" {% if genre.genre_id==listing.genre_id %}selected{% endif %}>{{ genre.name |
+        capitalize }}
       </option>
       {% endfor %}
     </select>

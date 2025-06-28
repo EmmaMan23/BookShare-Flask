@@ -6,6 +6,7 @@ from flask import url_for
 from app.services.validators import validate_non_empty_string
 from sqlalchemy.orm import joinedload
 from app.services.dashboard_service import DashboardService
+from flask_login import current_user
 
 class ListingService:
     def __init__(self, db_session, dashboard_service):
@@ -65,23 +66,25 @@ class ListingService:
         return self.db_session.get(Listing, listing_id)
 
     def edit_listing(
-            self,
-            listing_id,
-            user_id,
-            title=None,
-            author=None,
-            description=None,
-            genre_id=None,
-            is_available=None,
-            marked_for_deletion=None):
+        self,
+        listing_id,
+        user_id,
+        title=None,
+        author=None,
+        description=None,
+        genre_id=None,
+        is_available=None,
+        marked_for_deletion=None):
 
-        
         listing = self.get_listing_by_id(listing_id)
         if not listing:
+            print("DEBUG: Listing not found")
             return Result(False, "Listing not found")
 
-        if listing.user_id != user_id:
+        if not (current_user.is_admin or listing.user_id == user_id):
+            print("DEBUG: Permission denied")
             return Result(False, "You can't edit someone else's listing")
+
         try:
             if title is not None:
                 listing.title = validate_non_empty_string(title, "Title")
@@ -93,17 +96,36 @@ class ListingService:
                 listing.genre_id = int(genre_id)
             else:
                 listing.genre_id = None
+
             if is_available is not None:
-                listing.is_available = is_available in ['true', 'on', '1', True]
+                new_availability = is_available in ['true', 'on', '1', True]
+                
+                print(f"DEBUG: Current availability: {listing.is_available}, New availability: {new_availability}")
+                if listing.active_loan:
+                    if new_availability != listing.is_available:
+                        print("DEBUG: Cannot change availability - on loan")
+                        return Result(False, "Cannot change availability while listing is on loan")
+                    else:
+
+                        print("DEBUG: Availability unchanged - on loan")
+
+                if listing.marked_for_deletion:
+                    print("DEBUG: Cannot change availability - marked for deletion")
+                    return Result(False, "Cannot change availability while listing is marked for deletion")
+
+                listing.is_available = new_availability
+
             if marked_for_deletion is not None:
                 listing.marked_for_deletion = marked_for_deletion in ['true', 'on', '1', True]
 
-
             self.db_session.commit()
+            print("DEBUG: Commit successful")
             return Result(True, "Listing updated successfully")
+
         except Exception as e:
-            return Result(False, "An unexpected error occured while updating listing")
-        
+            print(f"DEBUG: Exception occurred: {e}")
+            return Result(False, "An unexpected error occurred while updating listing")
+
     def update_marked_for_deletion(self, listing_id, is_marked):
         listing = self.db_session.get(Listing, listing_id)
         if not listing:

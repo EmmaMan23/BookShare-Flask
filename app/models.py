@@ -55,6 +55,8 @@ class Loan(db.Model):
     user = db.relationship('User', back_populates='loans')
     listing = db.relationship('Listing', back_populates='loans')
 
+    
+
 
 class Genre(db.Model):
     genre_id = db.Column(db.Integer, primary_key=True)

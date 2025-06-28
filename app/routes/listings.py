@@ -76,31 +76,41 @@ def edit_listing():
         listing_id = int(form_data.get('listing_id'))
         listing = listing_service.get_listing_by_id(listing_id)
 
-        if listing.user_id != current_user.user_id:
-            flash("You can't edit someone else's listing")
+        if not (current_user.is_admin or listing.user_id == current_user.user_id):
+            flash("You don't have permission to edit this listing")
             return redirect(url_for('listings.view_mine'))
         
+        # Determine availability toggle:
+        if 'is_available' in form_data:
+            # User ticked box: toggle availability (flip current)
+            new_availability = not listing.is_available
+        else:
+            # No toggle requested; keep as is
+            new_availability = listing.is_available
+
         res = listing_service.edit_listing(
                 listing_id=listing_id,
                 user_id=current_user.user_id,
-                title = form_data.get('title'),
-                author = form_data.get('author'),
-                description = form_data.get('description'),
-                genre_id = form_data.get('genre_id'),
-                is_available = form_data.get('is_available'),
-                marked_for_deletion = form_data.get('marked_for_deletion'))
+                title=form_data.get('title'),
+                author=form_data.get('author'),
+                description=form_data.get('description'),
+                genre_id=form_data.get('genre_id'),
+                is_available=new_availability,
+                marked_for_deletion=form_data.get('marked_for_deletion'))
 
         flash(res.message, "success" if res.success else "danger")
 
         if res.success:
             return redirect(url_for('listings.view_mine'))
         else:
+            genres = listing_service.get_all_genres()
             listing = listing_service.get_listing_by_id(listing_id)
             return render_template('edit_listing.html', genres=genres, listing=listing)
-        
+
+    
     else:
         listing_id = int(request.args.get('listing_id'))
-        listing = listing = listing_service.get_listing_by_id(listing_id)
+        listing = listing_service.get_listing_by_id(listing_id)
 
         if not listing:
             flash("Listing not found.", "danger")
@@ -111,6 +121,7 @@ def edit_listing():
             return redirect(url_for('listings.view_mine'))
         
         return render_template('edit_listing.html', genres=genres, listing=listing)
+
     
 @listings.route('/mark_for_deletion', methods=['POST'])
 @login_required
