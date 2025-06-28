@@ -2,7 +2,7 @@ from app.extensions import db
 from app.utils import Result
 import json
 from app.models import Listing, Loan
-from datetime import date
+from datetime import date, timedelta
 import os
 
 class DashboardService:
@@ -31,7 +31,7 @@ class DashboardService:
                 self.db_session.query(Loan)
                 .filter(
                     Loan.user_id == user.user_id,
-                    Loan.start_date <= today,
+                    Loan.start_date <= today + timedelta(days=1),
                     Loan.return_date >= today
                     )
                 .count()
