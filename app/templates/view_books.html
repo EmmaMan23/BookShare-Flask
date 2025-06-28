@@ -60,8 +60,13 @@
   </h2>
   <div class="row gx-4 gy-4">
     {% for listing in listings %}
-    <div class="col-md-6">
-      <div class="card mb-3 ">
+    <div class="col-md-6 mb-4 d-flex flex-column">
+      <div class="card d-flex flex-column h-100 position-relative p-3" style="max-width: 100%;">
+        {% if listing.marked_for_deletion %}
+        <span class="position-absolute top-0 end-0 m-2 badge bg-danger">
+          Marked for Deletion <i class="fa fa-exclamation-triangle"></i>
+        </span>
+        {% endif %}
         <div class="row g-0">
           <div class="col-md-4">
             <img
@@ -83,8 +88,6 @@
                   {% else %} Unavailable
 
                   {% endif %}
-                  {% if listing.marked_for_deletion %} - Marked for Deletion <i class="fa fa-exclamation-triangle"
-                    style="font-size:24px"></i>{% endif %}
                 </small>
               </p>
               {% if listing.user_id == current_user.user_id %}
@@ -112,11 +115,6 @@
             </div>
 
             {% if current_user.is_admin %}
-            <small class="text-body-secondary">
-              {% if listing.marked_for_deletion %}
-              Deletion requested <i class="fa fa-exclamation-triangle" style="font-size:24px"></i>
-              {% endif %}
-            </small>
             <form method="POST" action="{{ url_for('admin.delete') }}">
               <input type="hidden" name="model" value="listing">
               <input type="hidden" name="id" value="{{ listing.listing_id }}">

@@ -3,35 +3,77 @@
 
 <form method="POST" action="{{url_for('listings.edit_listing')}}">
   <input type="hidden" name="listing_id" value="{{ listing.listing_id }}">
-  <div class="row">
-    <div class="col">
-      <input type="text" class="form-control" value="{{listing.title}}" name="title">
+
+  <!-- Status Row: Loan + Availability + Deletion + Toggle -->
+  <div class="row mb-3 align-items-center border rounded p-3 bg-light">
+    <!-- Loan Status -->
+    <div class="col-auto">
+      <span class="fw-bold">Loan status:</span>
+      {% if listing.active_loan %}
+        <span class="badge bg-danger">On Loan</span>
+      {% else %}
+        <span class="badge bg-success">Not on Loan</span>
+      {% endif %}
     </div>
-    <div class="col">
-      <input type="text" class="form-control" value="{{listing.author}}" name='author'>
+
+    <!-- Availability -->
+    <div class="col-auto">
+      <span class="fw-bold">Availability:</span>
+      {% if listing.is_available %}
+        <span class="badge bg-success">Available</span>
+      {% else %}
+        <span class="badge bg-secondary">Unavailable</span>
+      {% endif %}
+    </div>
+
+    <!-- Deletion Marker -->
+    {% if listing.marked_for_deletion %}
+    <div class="col-auto">
+      <span class="badge bg-danger">Marked for Deletion <i class="fa fa-exclamation-triangle"></i></span>
+    </div>
+    {% endif %}
+
+    <!-- Availability Toggle -->
+    <div class="col-auto">
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" name="is_available" value="true" id="availCheck">
+        <label class="form-check-label fw-bold" for="availCheck">
+          Change Availability
+        </label>
+      </div>
     </div>
   </div>
 
-  <div class="form-floating">
+  <!-- Title & Author Fields -->
+  <div class="row mb-3">
+    <div class="col">
+      <input type="text" class="form-control" value="{{listing.title}}" name="title" placeholder="Title">
+    </div>
+    <div class="col">
+      <input type="text" class="form-control" value="{{listing.author}}" name='author' placeholder="Author">
+    </div>
+  </div>
+
+  <!-- Description -->
+  <div class="form-floating mb-3">
     <textarea class="form-control" name='description' id="floatingTextarea">{{listing.description}}</textarea>
-    <label for="floatingTextarea"> Description</label>
+    <label for="floatingTextarea">Description</label>
   </div>
-  <div class="form-check">
-    <input class="form-check-input" type="checkbox" name="is_available" value="true" id="availCheck">
-    <label class="form-check-label" for="availCheck">Change Availability Status</label>
 
-  </div>
+  <!-- Genre Dropdown -->
   <div class="mb-3">
-
     <label for="genre" class="form-label">Genre</label>
     <select class="form-select" id="genre" name="genre_id" required>
       {% for genre in genres %}
-      <option value="{{ genre.genre_id }}" {% if genre.genre_id==listing.genre_id %}selected{% endif %}>{{ genre.name |
-        capitalize }}
-      </option>
+        <option value="{{ genre.genre_id }}" {% if genre.genre_id==listing.genre_id %}selected{% endif %}>
+          {{ genre.name | capitalize }}
+        </option>
       {% endfor %}
     </select>
   </div>
+
+  <!-- Submit -->
   <button type="submit" class="btn btn-primary">Submit</button>
 </form>
+
 {% endblock %}
