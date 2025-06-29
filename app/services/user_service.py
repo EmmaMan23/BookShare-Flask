@@ -59,8 +59,9 @@ class UserService:
             
     def update_user(self, user: User, new_username: str, old_password: str, new_password: str, confirm_password: str, marked_for_deletion=None ):
         changes_made = False
+        
+        if new_username is not None and new_username != user.username:
 
-        if new_username and new_username != user.username:
             try:
                 new_username = validate_non_empty_string(new_username, "Username")
             except ValueError as e:

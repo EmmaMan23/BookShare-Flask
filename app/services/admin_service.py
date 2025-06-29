@@ -43,6 +43,15 @@ class AdminService:
         record = self.db_session.get(model_class, record_id)
         if not record:
             return Result(False, "Record not found.")
+        if model_class == User:
+
+            if record.role == 'admin':
+                remaining_admins = self.db_session.query(User).filter(
+                    User.role == 'admin',
+                    User.user_id != record.user_id
+                ).count()
+                if remaining_admins == 0:
+                    return Result(False, "Cannot delete the last remaining admin. Please appoint another admin first.")
 
         self.db_session.delete(record)
         self.db_session.commit()

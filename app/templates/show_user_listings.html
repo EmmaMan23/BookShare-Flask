@@ -70,7 +70,7 @@
               <div class="form-check">
                 <input class="form-check-input" type="checkbox" name="marked_for_deletion"
                   id="deleteCheck{{ listing.listing_id }}" value="true">
-                <label class="form-check-label" for="deleteCheck{{ listing.listing_id }}">
+                <label class="form-check-label {% if listing.marked_for_deletion %}text-danger{% else %}text-dark{% endif %}" for="deleteCheck{{ listing.listing_id }}">
                   {% if listing.marked_for_deletion %}
                   Cancel Deletion
                   {% else %}

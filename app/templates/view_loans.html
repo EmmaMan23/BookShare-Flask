@@ -12,6 +12,9 @@
 </div>
 <div class="container mt-4">
   <div class="row">
+    {% if loans|length == 0 %}
+    <h3>No loans to show</h3>
+    {% else %}
     {% for loan in loans %}
     <div class="col-md-6 mb-4">
       <div class="card h-100" style="max-width: 100%;">
@@ -85,6 +88,7 @@
       </div>
     </div>
     {% endfor %}
+    {% endif %}
   </div>
 </div>
 

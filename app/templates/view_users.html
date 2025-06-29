@@ -20,11 +20,21 @@
           Marked for Deletion <i class="fa fa-exclamation-triangle"></i>
         </span>
         {% endif %}
-
         <div class="card-body">
           <h4 class="card-title">Username: {{ user.username | capitalize }}</h4>
           <p class="card-text">Join date: {{ user.join_date.strftime("%d/%m/%Y") }}</p>
-          <h5>Role: {{ user.role | capitalize }} </h5>
+          <h5>Role:
+            {% if user.role == 'admin' %}
+            <span class="badge bg-pale-blue text-dark ms-2 py-1 px-3" style="font-size: 0.95rem;">{{ user.role |
+              capitalize }}</span>
+            {% else %}
+            <span class="badge"
+              style="background-color: #c8b6ff; color: #3b2d5f; font-size: 0.95rem; margin-left: 0.5rem; padding: 0.25rem 0.75rem; border-radius: 0.375rem;">
+              {{ user.role | capitalize }}
+            </span>
+            {% endif %}
+          </h5>
+
           {% if current_user.is_admin %}
           <div class="d-flex gap-2 mt-2">
             <form method="POST" action="{{ url_for('admin.admin_edit_user') }}?user_id={{ user.user_id }}">
@@ -44,8 +54,14 @@
                 Update Role
               </button>
             </form>
-
-
+            <form method="POST" action="{{ url_for('admin.delete') }}"
+              onsubmit="return confirm('Are you sure you want to DELETE this user? This action cannot be undone.');">
+              <input type="hidden" name="model" value="user">
+              <input type="hidden" name="id" value="{{ user.user_id }}">
+              <button type="submit" class="btn btn-danger">
+                Delete User
+              </button>
+            </form>
           </div>
           {% endif %}
         </div>
@@ -69,23 +85,6 @@
                 </div>
               </div>
             </div>
-
-            <!-- <div class="col-6">
-              <div class="card bg-pale-blue text-center small shadow-sm">
-                <div class="card-body p-2">
-                  <div class="text-muted">Active Listings</div>
-                  <div class="fw-bold">{{ user.active_listings }}</div>
-                </div>
-              </div>
-            </div>
-            <div class="col-6">
-              <div class="card bg-pale-pink text-center small shadow-sm">
-                <div class="card-body p-2">
-                  <div class="text-muted">Active Loans</div>
-                  <div class="fw-bold">{{ user.active_loans }}</div>
-                </div>
-              </div>
-            </div> -->
           </div>
         </div>
 

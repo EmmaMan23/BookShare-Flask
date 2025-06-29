@@ -45,7 +45,15 @@ def delete():
     
     result = admin_service.delete_record(model_class, int(record_id))
     flash(result.message, "success" if result.success else "danger")
-    return redirect(url_for('listings.view_all'))
+    if model_class == User:
+        return redirect(url_for('admin.view_users'))
+    elif model_class == Genre:
+        return redirect(url_for('admin.manage_genres'))
+    elif model_class == Loan:
+        return redirect(url_for('listings.view_loans'))
+    else:
+        return redirect(url_for('listings.view_all'))
+
 
 @admin.route('/create_genre', methods=['POST', 'GET'])
 @login_required

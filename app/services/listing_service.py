@@ -16,6 +16,7 @@ class ListingService:
 
     def list_book(self, title, author, description, genre_id, user_id, is_available=True):
         try:
+            title = validate_non_empty_string(title, "Title")
 
             new_listing = Listing(
                 title=title,
@@ -79,11 +80,9 @@ class ListingService:
 
         listing = self.get_listing_by_id(listing_id)
         if not listing:
-            print("DEBUG: Listing not found")
             return Result(False, "Listing not found")
 
         if not (current_user.is_admin or listing.user_id == user_id):
-            print("DEBUG: Permission denied")
             return Result(False, "You can't edit someone else's listing")
 
         try:
@@ -100,18 +99,13 @@ class ListingService:
 
             if is_available is not None:
                 new_availability = is_available in ['true', 'on', '1', True]
-                
-                print(f"DEBUG: Current availability: {listing.is_available}, New availability: {new_availability}")
+
                 if listing.active_loan:
                     if new_availability != listing.is_available:
-                        print("DEBUG: Cannot change availability - on loan")
                         return Result(False, "Cannot change availability while listing is on loan")
-                    else:
-
-                        print("DEBUG: Availability unchanged - on loan")
+                    
 
                 if listing.marked_for_deletion:
-                    print("DEBUG: Cannot change availability - marked for deletion")
                     return Result(False, "Cannot change availability while listing is marked for deletion")
 
                 listing.is_available = new_availability
@@ -120,11 +114,12 @@ class ListingService:
                 listing.marked_for_deletion = marked_for_deletion in ['true', 'on', '1', True]
 
             self.db_session.commit()
-            print("DEBUG: Commit successful")
             return Result(True, "Listing updated successfully")
 
+        except ValueError as ve:
+            return Result(False, str(ve))
+
         except Exception as e:
-            print(f"DEBUG: Exception occurred: {e}")
             return Result(False, "An unexpected error occurred while updating listing")
 
     def update_marked_for_deletion(self, listing_id, is_marked):

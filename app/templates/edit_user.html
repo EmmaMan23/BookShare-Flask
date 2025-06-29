@@ -10,6 +10,7 @@
   <div class="row">
     <div class="col">
       <label for="username" class="form-label">Username</label>
+      <input type="hidden" name="form_type" value="edit">
       <input type="text" class="form-control" value="{{current_user.username}}" name="username">
       <label for="old_password" class="form-label">Current Password</label>
       <input type="password" class="form-control" name="old_password">
