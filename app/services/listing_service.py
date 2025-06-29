@@ -42,7 +42,8 @@ class ListingService:
 
 
     def get_all_listings(self, user_id = None, genre=None, availability=None, search=None):
-        query = self.db_session.query(Listing).order_by(Listing.title).options(joinedload(Listing.loans))
+        query = self.db_session.query(Listing).order_by(Listing.title).options(
+            joinedload(Listing.loans).joinedload(Loan.user))
 
         if user_id:
             query = query.filter(Listing.user_id == user_id)

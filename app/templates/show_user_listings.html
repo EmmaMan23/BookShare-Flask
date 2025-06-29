@@ -35,6 +35,34 @@
                   {% if listing.is_available %} Available {% else %} Unavailable {% endif %}
                 </small>
               </p>
+              <p>
+                {% if listing.active_loan %}
+                Currently borrowed by: {{ listing.active_loan.user.username | capitalize }} (due {{
+                listing.active_loan.return_date }})
+                {% else %}
+                Not currently borrowed
+                {% endif %}
+              </p>
+              <details>
+                <summary>View loan history</summary>
+                <ul>
+                  {% for loan in listing.loans %}
+                  <li>
+                    {{ loan.user.username | capitalize}}
+                    <small class="text-body-secondary">
+                      <br>Loan Period:<br>
+                      Start date: {{ loan.start_date.strftime("%d/%m/%Y") }}<br>
+                      Return date: {{ loan.return_date.strftime("%d/%m/%Y") }}
+                      {% if loan.is_returned %}
+                      <br><em>Returned</em>
+                      {% else %}
+                      <br><em>Not returned yet</em>
+                      {% endif %}
+                    </small>
+                  </li>
+                  {% endfor %}
+                </ul>
+              </details>
             </div>
             <form method="POST" action="{{ url_for('listings.mark_for_deletion') }}">
               <input type="hidden" name="listing_id" value="{{ listing.listing_id }}">
