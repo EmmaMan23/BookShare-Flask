@@ -48,9 +48,11 @@ def delete():
     if model_class == User:
         return redirect(url_for('admin.view_users'))
     elif model_class == Genre:
-        return redirect(url_for('admin.manage_genres'))
+        kind = "genre"
+        return redirect(url_for('admin.create_genre', kind=kind))
     elif model_class == Loan:
-        return redirect(url_for('listings.view_loans'))
+        scope = 'all'
+        return redirect(url_for('listings.view_loans', scope=scope))
     else:
         return redirect(url_for('listings.view_all'))
 
