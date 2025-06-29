@@ -139,30 +139,32 @@ class ListingService:
             return Result(False, f"Error updating deletion status: {str(e)}")
 
     def get_all_loans(self):
+        
         return self.db_session.query(Loan).order_by(Loan.return_date.desc()).all()
 
     def get_loans_current_user(self, user_id):
         return self.db_session.query(Loan).filter_by(user_id=user_id).order_by(Loan.return_date.desc()).all()
 
+    def get_loan_by_id(self, loan_id):
+        return self.db_session.get(Loan, loan_id)
 
-    def update_loan(self, user_id, loan_id, actual_return_date):
+    def update_loan(self, loan_id, actual_return_date):
         loan = self.db_session.get(Loan, loan_id)
         if not loan:
-            return Result(False, "Loan not found")
+            return Result(False, "Loan not found"), None
 
         try:
             loan.is_returned = True
             loan.actual_return_date = actual_return_date
-            
+
             listing = self.db_session.get(Listing, loan.listing_id)
             if listing:
                 listing.is_available = True
 
             self.db_session.commit()
-            return Result(True, "Loan marked as returned")
+            return Result(True, "Loan marked as returned"), loan
         except Exception as e:
-            return Result(False, f"Error updating loan: {str(e)}")
-
+            return Result(False, f"Error updating loan: {str(e)}"), None
 
 
     def reserve_book(self, user_id, listing_id):

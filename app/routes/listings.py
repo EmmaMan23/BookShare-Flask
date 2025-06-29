@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request
 from flask import redirect, url_for, flash
 from flask_login import login_required, current_user
-from app.models import Genre, Listing
+from app.models import Genre, Listing, Loan
 from app.services import listing_service
 from datetime import date, timedelta
 from app.services.listing_service import ListingService
@@ -149,23 +149,23 @@ def mark_for_deletion():
 
     return redirect(url_for('listings.view_mine'))
 
-
-
 @listings.route('/view_loans')
 @login_required
 def view_loans():
-    loans_data = listing_service.get_loans_current_user(current_user.user_id)
-    listings_data = listing_service.get_all_listings()
-    today = date.today()
-    return render_template('view_loans.html', loans=loans_data, listings=listings_data, today=today, scope="self")
+    scope = request.args.get('scope', 'self')
 
-@listings.route('/view_all_loans')
-@login_required
-def view_all_loans():
-    loans_data = listing_service.get_all_loans()
+    if scope == 'all' and current_user.is_admin:
+        loans_data = listing_service.get_all_loans()
+    else:
+        # Force fallback to self for normal users or invalid scope
+        scope = 'self'
+        loans_data = listing_service.get_loans_current_user(current_user.user_id)
+
     listings_data = listing_service.get_all_listings()
     today = date.today()
-    return render_template('view_loans.html', loans=loans_data, listings=listings_data, today=today, scope="all")
+    return render_template('view_loans.html', loans=loans_data, listings=listings_data, today=today, scope=scope)
+
+
 
 @listings.route('/reserve_book', methods=['POST'])
 @login_required
@@ -186,7 +186,7 @@ def reserve_book():
         
         result = listing_service.reserve_book(user_id, listing_id)
         flash(result.message, "success" if result.success else "danger")
-        return redirect(url_for('listings.view_all'))
+        return redirect(url_for('listings.view_loans'))
 
 @listings.route('/update_loan', methods=['POST'])
 @login_required
@@ -197,10 +197,22 @@ def update_loan():
         user_id = current_user.user_id
         today = date.today()
 
-        result = listing_service.update_loan(user_id, loan_id, actual_return_date=today)
-
+        result, loan = listing_service.update_loan(loan_id, actual_return_date=today)
         flash(result.message, "success" if result.success else "danger")
-    return redirect(url_for('listings.view_loans'))
+
+        # Determine where to redirect based on user role and ownership of the loan
+        loan = listing_service.get_loan_by_id(loan_id)
+        if loan:
+            if current_user.is_admin and loan.user_id != current_user.user_id:
+                return redirect(url_for('listings.view_loans', scope='all'))
+        
+        return redirect(url_for('listings.view_loans', scope='self'))
+
+    # fallback
+    return redirect(url_for('listings.view_loans', scope='self'))
+
+
+
 
 
         

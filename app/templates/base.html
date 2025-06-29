@@ -92,6 +92,8 @@
 </head>
 
 <body class="p-3">
+    {% set scope = scope|default('self') %}
+
     <nav class="navbar navbar-expand-lg" data-bs-theme="dark" style="background-color: #114870;">
         <div class="container-fluid">
 
@@ -127,7 +129,7 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {% if request.path == url_for('listings.view_loans') %}active{% endif %}"
+                        <a class="nav-link {% if request.path == url_for('listings.view_loans') and (scope == 'self' or scope is not defined) %}active{% endif %}"
                             href="{{ url_for('listings.view_loans') }}">
                             View my Loans
                         </a>

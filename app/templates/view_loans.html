@@ -50,11 +50,10 @@
                 {% endif %}
               </p>
               {% else %}
-              {% if loan.return_date < today %} <p><strong>Book overdue</strong></p>
-                {% endif %}
+              {% if loan.return_date < today %} <p><strong class="text-danger">Book overdue</strong></p>{% endif %}
+
                 <form method="POST" action="{{ url_for('listings.update_loan') }}">
                   <input type="hidden" name="loan_id" value="{{ loan.loan_id }}">
-
                   <div class="form-check">
                     <input class="form-check-input" type="checkbox" id="checkReturned{{ loan.loan_id }}"
                       name="returned">
@@ -62,7 +61,6 @@
                       Mark as returned
                     </label>
                   </div>
-
                   <button type="submit" class="btn btn-sm btn-success mt-2">Submit</button>
                 </form>
                 {% endif %}
