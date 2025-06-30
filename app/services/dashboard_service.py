@@ -31,14 +31,13 @@ class DashboardService:
                 self.db_session.query(Loan)
                 .filter(
                     Loan.user_id == user.user_id,
-                    Loan.start_date <= today + timedelta(days=1),
-                    Loan.return_date >= today
+                    Loan.is_returned == False
                     )
                 .count()
                 )
             
             data["active_loans"] = (
-                self.db_session.query(Loan)
+                self.db_session.query(Loan).filter(Loan.is_returned == False)
                 .count()
                 )
             

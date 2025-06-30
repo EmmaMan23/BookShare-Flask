@@ -7,7 +7,7 @@
 </div>
 
 <div class="mb-5">
-  <h5>Current Genres</h5>
+  <h3>{% if genres|length > 0 %} Current Genres {% else%} No genres created {% endif %}</h3>
   <a href="#createGenreForm" class="btn btn-outline-primary mb-4">+ Add New Genre</a>
   <div class="d-flex flex-wrap gap-3">
     {% for genre in genres %}
@@ -32,7 +32,7 @@
           </div>
           <div class="d-flex align-items-center">
             <form action="{{url_for('admin.delete')}}" method='POST'
-              onsubmit="return confirm('Are you sure you want to delete this genre?');"
+              onsubmit="return confirm('Are you sure you want to delete this genre? All listings using this genre will have their genre set to None. This will not affect the listings themselves. This action cannot be undone.');"
               style="margin:0; display: inline-flex; align-items: center;">
               <input type="hidden" name="id" value={{genre.genre_id}}>
               <input type="hidden" name="model" value="genre">

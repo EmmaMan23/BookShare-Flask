@@ -58,15 +58,26 @@
   <h2>
     Browse and reserve books
   </h2>
+  {% if not listings %}
+  <h3>No books available</h3>
+  {% endif %}
   <div class="row gx-4 gy-4">
     {% for listing in listings %}
+
     <div class="col-md-6 mb-4 d-flex flex-column">
       <div class="card d-flex flex-column h-100 position-relative p-3" style="max-width: 100%;">
-        {% if listing.marked_for_deletion %}
-        <span class="position-absolute top-0 end-0 m-2 badge bg-danger">
-          Marked for Deletion <i class="fa fa-exclamation-triangle"></i>
-        </span>
-        {% endif %}
+        <div class="position-absolute top-0 end-0 m-2 d-flex flex-column align-items-end gap-1">
+          {% if listing.marked_for_deletion %}
+          <span class="badge bg-danger">
+            Marked for Deletion <i class="fa fa-exclamation-triangle"></i>
+          </span>
+          {% endif %}
+          <span class="badge {{ genre_colors.get(listing.genre.name, 'bg-secondary') }}">
+            {{ listing.genre.name | capitalize }}
+          </span>
+
+        </div>
+
         <div class="row g-0">
           <div class="col-md-4">
             <img
@@ -118,15 +129,15 @@
             <form method="POST" action="{{ url_for('admin.delete') }}">
               <input type="hidden" name="model" value="listing">
               <input type="hidden" name="id" value="{{ listing.listing_id }}">
-              <button type="submit" class="btn btn-danger btn-sm mt-2"
-                onclick="return confirm('Are you sure you want to delete this listing? All loan records for this listing will be deleted too. This action cannot be undone.')">
+              <button type="submit" class="btn btn-danger btn-sm mt-2" {% if listing.active_loan%}
+                onclick="return confirm('This listing has an active loan, are you sure you want to delete? All loan records for this listing will be deleted too. This action cannot be undone.')"
+                {% else %}
+                onclick="return confirm('Are you sure you want to delete this listing? All loan records for this listing will be deleted too. This action cannot be undone.')"
+                {% endif %}>
                 Delete
               </button>
             </form>
             {% endif %}
-            <div class="card-footer text-end">
-              <span class="badge bg-secondary">{{ listing.genre.name | capitalize }}</span>
-            </div>
           </div>
         </div>
       </div>

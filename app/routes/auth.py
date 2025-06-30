@@ -70,6 +70,7 @@ def edit_user():
                 None,
                 None,
                 marked_for_deletion)
+            flash(result.message, 'success' if result.success else 'danger')
             return redirect(url_for('dash.dashboard'))
         
         elif form_type  == 'edit':

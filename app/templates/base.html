@@ -21,15 +21,36 @@
 
         .bg-pale-green {
             background-color: #d9f2d9;
+            color: black;
         }
 
         .bg-pale-blue {
             background-color: #d9e8f2;
         }
+        .bg-light-orange {
+            background-color: lightsalmon;
+        }
+        .bg-navy{
+            background-color: #114870;
+        }
 
         .bg-pale-yellow {
             background-color: #fff9d9;
+            color: black;
         }
+
+        .bg-pale-purple {
+            background-color: plum;
+        }
+
+        .bg-purple {
+            background-color: rebeccapurple !important;
+        }
+
+        .bg-pink {
+            background-color: hotpink !important;
+        }
+
 
         .darker-checkbox {
             border: 2px solid black !important;
@@ -93,6 +114,19 @@
 
 <body class="p-3">
     {% set scope = scope|default('self') %}
+    {% set genre_colors = {
+    'Fantasy': 'bg-purple',
+    'Horror': 'bg-danger',
+    'Romance': 'bg-pink',
+    'Science Fiction': 'bg-info',
+    'Non-Fiction': 'bg-pale-green',
+    'Mystery': 'bg-dark',
+    'Children': 'bg-navy',
+    'Adventure': 'bg-pale-yellow',
+    'Thriller': 'bg-pale-purple',
+    'History': 'bg-light-orange'
+    } %}
+
 
     <nav class="navbar navbar-expand-lg" data-bs-theme="dark" style="background-color: #114870;">
         <div class="container-fluid">

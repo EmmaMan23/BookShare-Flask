@@ -14,6 +14,8 @@
 
     {% if current_user.is_admin %}
     <span class="badge bg-pale-blue text-dark ms-2 py-1 px-3" style="font-size: 0.95rem;">Admin</span>
+    {% else %}
+    <span class="badge bg-light-orange ms-2 py-1 px-3" style="font-size: 0.95rem;">Regular user</span>
     {% endif %}
   </h2>
 
@@ -73,7 +75,11 @@
       </a>
 
       <!-- Deletion Request Card -->
-      <form action="{{ url_for('auth.edit_user') }}" method="POST">
+      <form action="{{ url_for('auth.edit_user') }}" method="POST" {% if not current_user.marked_for_deletion%}
+        onsubmit="return confirm ('Are you sure you want to request account deletion? This will send a request to the admin to remove your account. You can cancel the request later.')"
+        {% else %}
+        onsubmit="return confirm ('Cancel deletion request? This will let the admin know you no longer want your account removed.')"
+        {% endif %}>
         <input type="hidden" name="form_type" value="delete">
         <input type="hidden" name="user_id" value="{{ current_user.user_id }}">
         <div class="card shadow-sm border-0">
@@ -89,7 +95,7 @@
                 {% else %}
                 Request Account Deletion
                 {% endif %}
-                </label>
+              </label>
 
             </div>
             <button type="submit" class="btn btn-light border">Submit</button>
