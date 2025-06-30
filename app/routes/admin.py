@@ -74,6 +74,14 @@ def create_genre():
         form_data = request.form
         name = form_data.get('name')
         image = form_data.get('image')
+        request.form.get("image") 
+
+        print("Submitted image value:", image)  # DEBUG LINE
+
+        if not image:
+            flash("Unsuccessful, please select an image when creating a genre.", "danger")
+            return redirect(url_for('admin.create_genre'))
+
 
         result = admin_service.create_genre(name, image)
         flash(result.message, "success" if result.success else "danger")
@@ -112,11 +120,16 @@ def admin_edit_user():
     if request.method == 'POST':
         role = request.form.get('role')
 
-        success = admin_service.update_user_role(user_id, role)
-        if success:
-            flash("User role updated successfully.", "success")
+        result = admin_service.update_user_role(user_id, role)
+        # Always flash the message from update_user_role
+        flash(result.message, "success" if result.success else "danger")
+
+        if result.success:
             return redirect(url_for('admin.view_users'))
         else:
-            flash("Failed to update user role.", "danger")
+            # Only fetch users for rendering, do NOT flash anything here
+            users_result = admin_service.view_users()
+            users = users_result.data if users_result.success else []
+            return render_template('view_users.html', users=users, user=user)
 
     return render_template('view_users.html', user=user)

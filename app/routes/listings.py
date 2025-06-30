@@ -22,7 +22,9 @@ def create_listing():
         title = form.get('title')
         author = form.get('author')
         description = form.get('description')
-        genre_id = int(form.get('genre_id'))
+        genre_id_raw = form.get('genre_id')
+        genre_id = int(genre_id_raw) if genre_id_raw else None
+
         user_id = current_user.user_id
         is_available = True
     

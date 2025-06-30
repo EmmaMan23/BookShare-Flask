@@ -21,6 +21,7 @@ class AdminService:
         users = self.db_session.query(User).all()
         return Result(True, "Users retrieved successfully", users)
     
+    
     def get_user_by_id(self, user_id):
         return self.db_session.query(User).filter_by(user_id=user_id).first()
 
@@ -28,15 +29,20 @@ class AdminService:
         try:
             user = self.get_user_by_id(user_id)
             if not user:
-                return False
+                return Result(False, "User not found.")
 
+            if user.role == 'admin' and role != 'admin':
+                        admin_count = self.db_session.query(User).filter_by(role='admin').count()
+                        if admin_count <= 1:
+                            # Can't demote last admin
+                            return Result(False, "Failed to update user role. You cannot remove admin rights from the last remaining admin. Please promote another user to admin first", "danger")
             user.role = role
             self.db_session.commit()
-            return True
+            return Result(True, "User role updated successfully.")
         
         except Exception as e:
             self.db_session.rollback()
-            return False
+            return Result(False, f"An error occurred: {str(e)}")
 
     
     def delete_record(self, model_class, record_id):
@@ -86,6 +92,9 @@ class AdminService:
         except ValueError as e:
             return Result(False, str(e))
         
+        if not image:
+            return Result(False, "Please select an image for the genre.")
+    
         genre.name = name
         genre.image = image 
         self.db_session.commit()

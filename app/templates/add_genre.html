@@ -66,7 +66,7 @@
         {% for image in genre_images %}
         <div class="col text-center">
           <label style="cursor: pointer;">
-            <input type="radio" name="image" value="{{ image }}" class="edit-genre-radio" required>
+            <input type="radio" name="image" value="{{ image }}" class="edit-genre-radio">
             <img src="{{ url_for('static', filename=image) }}" class="img-fluid rounded-start"
               style="height: 140px; object-fit: cover;">
           </label>
@@ -138,5 +138,4 @@
   });
 
 </script>
-https://covers.openlibrary.org/b/isbn/9781444720723-L.jpg
 {% endblock %}
