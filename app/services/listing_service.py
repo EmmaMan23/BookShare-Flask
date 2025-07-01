@@ -45,7 +45,7 @@ class ListingService:
             return Result(False, f"Error creating Listing: {str(e)}")
 
 
-    def get_all_listings(self, user_id = None, genre=None, availability=None, search=None, sort_order='desc'):
+    def get_all_listings(self, user_id = None, genre=None, availability=None, search=None, sort_order='desc', marked_for_deletion=None):
         query = self.db_session.query(Listing).options(
         joinedload(Listing.loans).joinedload(Loan.user))
 
@@ -56,12 +56,18 @@ class ListingService:
             query = query.filter(Listing.genre.has(name=genre))
         if availability is not None:
             query = query.filter(Listing.is_available == availability)
+
         if search:
             search_query = f"%{search}%"
             query = query.filter(
                 (Listing.title.ilike(search_query)) |
                 (Listing.author.ilike(search_query))
             )
+        if marked_for_deletion is True:
+            query = query.filter(Listing.marked_for_deletion.is_(True))
+        elif marked_for_deletion is False:
+            query = query.filter(Listing.marked_for_deletion.is_(False))
+            
         if sort_order == 'asc':
             query = query.order_by(Listing.date_listed.asc())
         else:

@@ -47,6 +47,12 @@ def view_all():
     availability_filter = args.get('availability')
     sort_order = args.get('sort', 'desc')
 
+    marked_for_deletion = args.get('marked_for_deletion')
+    if marked_for_deletion and marked_for_deletion.lower() == 'true':
+        marked_for_deletion = True
+    else:
+        marked_for_deletion = None  
+
     if sort_order not in ('asc', 'desc'):
         sort_order = 'desc'
 
@@ -54,7 +60,8 @@ def view_all():
         genre=genre_filter,
         availability=(availability_filter == "available") if availability_filter else None,
         search=search_query,
-        sort_order=sort_order
+        sort_order=sort_order,
+        marked_for_deletion=marked_for_deletion
     )
 
     genres = listing_service.get_all_genres()
@@ -66,7 +73,9 @@ def view_all():
         genre=genre_filter,
         availability=availability_filter,
         genres=genres,
-        sort_order=sort_order
+        sort_order=sort_order,
+        marked_for_deletion=marked_for_deletion,
+        current_user=current_user
     )
 
 @listings.route('/view_my_books')

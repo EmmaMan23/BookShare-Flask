@@ -69,7 +69,7 @@ def seeding():
                 "marked_for_deletion": False,
                 "total_loans": 1,
                 "total_listings": 1,
-                "join_date": date(2024, 12, 10)
+                "join_date": date(2025, 12, 10)
 
             },
             {
@@ -79,7 +79,7 @@ def seeding():
                 "marked_for_deletion": False,
                 "total_loans": 5,
                 "total_listings": 7,
-                "join_date": date(2024, 12, 10)
+                "join_date": date(2026, 12, 10)
             },
             {
                 "username": "john",

@@ -34,6 +34,14 @@
 
         </select>
       </div>
+      {% if current_user.is_admin %}
+      <div class="d-flex flex-column">
+        <label for="marked_for_deletion" class="form-label">Show deletion requests</label>
+        <input type="checkbox" id="marked_for_deletion" name="marked_for_deletion" value="true" {% if
+          marked_for_deletion %}checked{% endif %}>
+      </div>
+      {% endif %}
+
 
       <!-- Buttons -->
       <div class="d-flex gap-2">

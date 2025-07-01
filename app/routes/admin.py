@@ -16,9 +16,32 @@ admin = Blueprint('admin', __name__)
 @admin.route('/view_users')
 @login_required
 def view_users():
-    user_result = admin_service.view_users()
+    args = request.args
+    sort_join_date = args.get('sort_join_date', 'desc')
+    filter_role = args.get('filter_role')  
+    marked_for_deletion = args.get('marked_for_deletion')
+    search = args.get('search')
+
+    if sort_join_date not in ('asc', 'desc'):
+        sort_join_date = 'desc'
+
+    user_result = admin_service.view_users(
+        search=search,
+        sort_join_date=sort_join_date,
+        filter_role=filter_role,
+        marked_for_deletion=marked_for_deletion
+    )
     data = dashboard_service.read_metrics(current_user)
-    return render_template('view_users.html', users=user_result.data, metrics=data)
+    return render_template(
+        'view_users.html',
+        users=user_result.data,
+        metrics=data,
+        search=search,
+        sort_join_date=sort_join_date,
+        role=filter_role,
+        marked_for_deletion=marked_for_deletion
+        )
+
 
 @admin.route('/delete_record', methods=['POST'])
 @login_required
@@ -51,7 +74,7 @@ def delete():
         if loan:
             loan_user_id = loan.user_id
 
- 
+
     result = admin_service.delete_record(model_class, int(record_id))
     flash(result.message, "success" if result.success else "danger")
 
