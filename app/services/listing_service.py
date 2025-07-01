@@ -18,6 +18,7 @@ class ListingService:
     def list_book(self, title, author, description, genre_id, user_id, is_available=True):
         try:
             title = validate_non_empty_string(title, "Title")
+            date_listed = date.today()
 
             new_listing = Listing(
                 title=title,
@@ -26,6 +27,7 @@ class ListingService:
                 genre_id=genre_id,
                 user_id=user_id,
                 is_available=is_available,
+                date_listed=date_listed,
                 )
             
             user = self.db_session.query(User).get(user_id)
@@ -43,9 +45,10 @@ class ListingService:
             return Result(False, f"Error creating Listing: {str(e)}")
 
 
-    def get_all_listings(self, user_id = None, genre=None, availability=None, search=None):
-        query = self.db_session.query(Listing).order_by(Listing.title).options(
-            joinedload(Listing.loans).joinedload(Loan.user))
+    def get_all_listings(self, user_id = None, genre=None, availability=None, search=None, sort_order='desc'):
+        query = self.db_session.query(Listing).options(
+        joinedload(Listing.loans).joinedload(Loan.user))
+
 
         if user_id:
             query = query.filter(Listing.user_id == user_id)
@@ -59,6 +62,10 @@ class ListingService:
                 (Listing.title.ilike(search_query)) |
                 (Listing.author.ilike(search_query))
             )
+        if sort_order == 'asc':
+            query = query.order_by(Listing.date_listed.asc())
+        else:
+            query = query.order_by(Listing.date_listed.desc())
 
         return query.all()
 

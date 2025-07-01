@@ -179,7 +179,8 @@ def seeding():
                 "genre_id": 4,
                 "is_available": True,
                 "marked_for_deletion": False,
-                "user_id": 3
+                "user_id": 3,
+                "date_listed": date(2025, 1, 11),
                 
             },
             {
@@ -189,7 +190,8 @@ def seeding():
                 "genre_id": 10,
                 "is_available": True,
                 "marked_for_deletion": False,
-                "user_id": 8
+                "user_id": 8,
+                "date_listed": date(2025, 2, 11),
             },
             {
                 "title": "Book3 ",
@@ -198,7 +200,8 @@ def seeding():
                 "genre_id": 5,
                 "is_available": False,
                 "marked_for_deletion": False,
-                "user_id": 7
+                "user_id": 7,
+                "date_listed": date(2024, 12, 11),
             },
             {
                 "title": " Book5",
@@ -207,7 +210,8 @@ def seeding():
                 "genre_id": 3,
                 "is_available": False,
                 "marked_for_deletion": True,
-                "user_id": 2
+                "user_id": 2,
+                "date_listed": date(2024, 12, 11),
             },
             {
                 "title": "Book6",
@@ -216,7 +220,8 @@ def seeding():
                 "genre_id": 9,
                 "is_available": False,
                 "marked_for_deletion": False,
-                "user_id": 10
+                "user_id": 10,
+                "date_listed": date(2024, 12, 11),
             },
             {
                 "title": " Book 7",
@@ -225,7 +230,8 @@ def seeding():
                 "genre_id": 4,
                 "is_available": True,
                 "marked_for_deletion": False,
-                "user_id": 8
+                "user_id": 8,
+                "date_listed": date(2024, 12, 11),
             },
             {
                 "title": "Book8 ",
@@ -234,7 +240,8 @@ def seeding():
                 "genre_id": 3,
                 "is_available": False,
                 "marked_for_deletion": False,
-                "user_id": 9
+                "user_id": 9,
+                "date_listed": date(2024, 12, 11),
             },
             {
                 "title": " Book10",
@@ -243,7 +250,8 @@ def seeding():
                 "genre_id": 2,
                 "is_available": True,
                 "marked_for_deletion": False,
-                "user_id": 5
+                "user_id": 5,
+                "date_listed": date(2024, 12, 11),
             },
             {
                 "title": " Book4",
@@ -252,7 +260,8 @@ def seeding():
                 "genre_id": 8,
                 "is_available": False,
                 "marked_for_deletion": False,
-                "user_id": 2
+                "user_id": 2,
+                "date_listed": date(2024, 12, 11),
             },
             {
                 "title": " Book14",
@@ -261,7 +270,8 @@ def seeding():
                 "genre_id": 5,
                 "is_available": False,
                 "marked_for_deletion": False,
-                "user_id": 1
+                "user_id": 1,
+                "date_listed": date(2024, 12, 11),
             }
         ]
 
@@ -274,6 +284,7 @@ def seeding():
                 is_available = l["is_available"],
                 marked_for_deletion = l["marked_for_deletion"],
                 user_id = l["user_id"],
+                date_listed =l["date_listed"],
             )
             db.session.add(listing)
         db.session.commit()
