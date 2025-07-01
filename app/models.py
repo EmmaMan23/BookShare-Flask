@@ -36,6 +36,7 @@ class Listing(db.Model):
     is_available = db.Column(db.Boolean, default=True, nullable=False)
     marked_for_deletion = db.Column(db.Boolean, default=False) #user can mark fo deletion
     user_id = db.Column(db.Integer, db.ForeignKey('user.user_id', ondelete='CASCADE'), nullable=False)
+    date_listed = db.Column(db.Date)
     user = db.relationship('User', back_populates='listings')
     genre = db.relationship('Genre', backref='listings')
     loans = db.relationship('Loan', back_populates='listing', cascade='all, delete-orphan', passive_deletes=True)

@@ -18,9 +18,36 @@ class AdminService:
     def __init__(self, db_session):
         self.db_session = db_session
     
-    def view_users(self):
-        users = self.db_session.query(User).all()
+    def view_users(self, search=None, sort_join_date='desc', filter_role=None, marked_for_deletion=None):
+        query = self.db_session.query(User)
+
+        if search:
+            query = query.filter(User.username.ilike(f'%{search}%'))
+
+        some_user = self.db_session.query(User).first()
+
+
+        # Filter by role
+        if filter_role == 'admin':
+            query = query.filter(User.role=='admin')
+        elif filter_role == 'regular':
+            query = query.filter(User.role=='regular')
+
+
+        # Filter marked for deletion if requested
+        if marked_for_deletion == 'true':
+            query = query.filter(User.marked_for_deletion == True)
+
+        # Sort by join date
+        if sort_join_date == 'asc':
+            query = query.order_by(User.join_date.asc())
+        else:
+            query = query.order_by(User.join_date.desc())
+
+        users = query.all()
         return Result(True, "Users retrieved successfully", users)
+
+
     
     
     def get_user_by_id(self, user_id):

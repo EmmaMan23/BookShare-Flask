@@ -46,6 +46,16 @@
     </form>
   </div>
 </nav>
+{% if search %}
+<p class="d-inline me-2">Search term:</p>
+
+<span class="badge rounded-pill text-bg-light border d-inline-flex align-items-center">
+  {{ search }}
+  <a href="{{ url_for(request.endpoint, scope=request.args.get('scope')) }}" 
+  class="btn-close btn-close-sm ms-2" aria-label="Remove"></a>
+
+</span>
+{% endif %}
 <div class="container mt-4">
   <h2>
     {% if scope == 'self' %}

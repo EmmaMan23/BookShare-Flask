@@ -41,15 +41,27 @@ def create_listing():
 @listings.route('/view_listings', methods=['GET'])
 @login_required
 def view_all():
-    form_data = request.form
-    search_query = form_data.get('search')
-    genre_filter = form_data.get('genre')
-    availability_filter = form_data.get('availability')
+    args = request.args
+    search_query = args.get('search')
+    genre_filter = args.get('genre')
+    availability_filter = args.get('availability')
+    sort_order = args.get('sort', 'desc')
+
+    marked_for_deletion = args.get('marked_for_deletion')
+    if marked_for_deletion and marked_for_deletion.lower() == 'true':
+        marked_for_deletion = True
+    else:
+        marked_for_deletion = None  
+
+    if sort_order not in ('asc', 'desc'):
+        sort_order = 'desc'
 
     listings_data = listing_service.get_all_listings(
         genre=genre_filter,
         availability=(availability_filter == "available") if availability_filter else None,
-        search=search_query
+        search=search_query,
+        sort_order=sort_order,
+        marked_for_deletion=marked_for_deletion
     )
 
     genres = listing_service.get_all_genres()
@@ -60,7 +72,10 @@ def view_all():
         search=search_query,
         genre=genre_filter,
         availability=availability_filter,
-        genres=genres
+        genres=genres,
+        sort_order=sort_order,
+        marked_for_deletion=marked_for_deletion,
+        current_user=current_user
     )
 
 @listings.route('/view_my_books')

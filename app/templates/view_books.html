@@ -26,6 +26,22 @@
           <option value="unavailable" {% if availability=='unavailable' %}selected{% endif %}>Unavailable</option>
         </select>
       </div>
+      <div class="d-flex flex-column">
+        <label for="sort_order" class="form-label">Sort by Date Listed:</label>
+        <select name="sort" id="sort_order" class="form-select">
+          <option value="desc" {% if sort_order=='desc' %}selected{% endif %}>Newest First</option>
+          <option value="asc" {% if sort_order=='asc' %}selected{% endif %}>Oldest First</option>
+
+        </select>
+      </div>
+      {% if current_user.is_admin %}
+      <div class="d-flex flex-column">
+        <label for="marked_for_deletion" class="form-label">Show deletion requests</label>
+        <input type="checkbox" id="marked_for_deletion" name="marked_for_deletion" value="true" {% if
+          marked_for_deletion %}checked{% endif %}>
+      </div>
+      {% endif %}
+
 
       <!-- Buttons -->
       <div class="d-flex gap-2">
@@ -90,6 +106,7 @@
               <h5>{{ listing.author | capitalize }}</h5>
               <p class="card-text">{{ listing.description }}</p>
               <p class="card-text">Listed by: {{ listing.user.username | capitalize }}</p>
+              <p class="card-text">Date listed: {{ listing.date_listed.strftime("%d/%m/%Y")}}</p>
               <p class="card-text">
                 <small class="text-body-secondary">
                   {% if listing.is_available and not listing.marked_for_deletion%} Available
