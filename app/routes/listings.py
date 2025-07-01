@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request
 from flask import redirect, url_for, flash
 from flask_login import login_required, current_user
-from app.models import Genre, Listing
+from app.models import Genre, Listing, Loan
 from app.services import listing_service
 from datetime import date, timedelta
 from app.services.listing_service import ListingService
@@ -16,13 +16,15 @@ listing_service = ListingService(db.session, dashboard_service)
 @listings.route('/create_listing', methods=['POST', 'GET'])
 @login_required
 def create_listing():
-    genres = Genre.query.filter_by(inactive=False).all()
+    genres = listing_service.get_all_genres()
     if request.method == 'POST':
         form = request.form
         title = form.get('title')
         author = form.get('author')
         description = form.get('description')
-        genre_id = int(form.get('genre_id'))
+        genre_id_raw = form.get('genre_id')
+        genre_id = int(genre_id_raw) if genre_id_raw else None
+
         user_id = current_user.user_id
         is_available = True
     
@@ -69,38 +71,48 @@ def view_mine():
 @listings.route('/edit_listing', methods=['POST', 'GET'])
 @login_required
 def edit_listing():
-    genres = Genre.query.filter_by(inactive=False).all()
+    genres = listing_service.get_all_genres()
 
     if request.method == 'POST':
         form_data = request.form
         listing_id = int(form_data.get('listing_id'))
         listing = listing_service.get_listing_by_id(listing_id)
 
-        if listing.user_id != current_user.user_id:
-            flash("You can't edit someone else's listing")
+        if not (current_user.is_admin or listing.user_id == current_user.user_id):
+            flash("You don't have permission to edit this listing")
             return redirect(url_for('listings.view_mine'))
         
+        # Determine availability toggle:
+        if 'is_available' in form_data:
+            # User ticked box: toggle availability (flip current)
+            new_availability = not listing.is_available
+        else:
+            # No toggle requested; keep as is
+            new_availability = listing.is_available
+
         res = listing_service.edit_listing(
                 listing_id=listing_id,
                 user_id=current_user.user_id,
-                title = form_data.get('title'),
-                author = form_data.get('author'),
-                description = form_data.get('description'),
-                genre_id = form_data.get('genre_id'),
-                is_available = form_data.get('is_available'),
-                marked_for_deletion = form_data.get('marked_for_deletion'))
+                title=form_data.get('title'),
+                author=form_data.get('author'),
+                description=form_data.get('description'),
+                genre_id=form_data.get('genre_id'),
+                is_available=new_availability,
+                marked_for_deletion=form_data.get('marked_for_deletion'))
 
         flash(res.message, "success" if res.success else "danger")
 
         if res.success:
             return redirect(url_for('listings.view_mine'))
         else:
+            genres = listing_service.get_all_genres()
             listing = listing_service.get_listing_by_id(listing_id)
             return render_template('edit_listing.html', genres=genres, listing=listing)
-        
+
+    
     else:
         listing_id = int(request.args.get('listing_id'))
-        listing = listing = listing_service.get_listing_by_id(listing_id)
+        listing = listing_service.get_listing_by_id(listing_id)
 
         if not listing:
             flash("Listing not found.", "danger")
@@ -111,43 +123,51 @@ def edit_listing():
             return redirect(url_for('listings.view_mine'))
         
         return render_template('edit_listing.html', genres=genres, listing=listing)
+
     
 @listings.route('/mark_for_deletion', methods=['POST'])
 @login_required
 def mark_for_deletion():
     listing_id = int(request.form.get('listing_id'))
-
-    is_marked = request.form.get('marked_for_deletion') == 'true'
-    
     listing = listing_service.get_listing_by_id(listing_id)
+
     if not listing:
         flash("Listing not found.", "danger")
         return redirect(url_for('listings.view_mine'))
-    if listing.user_id != current_user.user_id: 
-        flash("You are not authorised to mark this listing for deletion.", "danger")
+
+    if listing.user_id != current_user.user_id:
+        flash("You are not authorised to change this listing.", "danger")
         return redirect(url_for('listings.view_mine'))
 
-    result = listing_service.update_marked_for_deletion(listing_id, is_marked)
+    # Only take action if the checkbox was checked
+    if request.form.get('marked_for_deletion') == 'true':
+        # Flip the current deletion status
+        is_marked = not listing.marked_for_deletion
+        result = listing_service.update_marked_for_deletion(listing_id, is_marked)
+        flash(result.message, "success" if result.success else "danger")
 
-    flash(result.message, "success" if result.success else "danger")
+    else:
+        flash("Please check the box to confirm your action.", "warning")
+
     return redirect(url_for('listings.view_mine'))
-
 
 @listings.route('/view_loans')
 @login_required
 def view_loans():
-    loans_data = listing_service.get_loans_current_user(current_user.user_id)
-    listings_data = listing_service.get_all_listings()
-    today = date.today()
-    return render_template('view_loans.html', loans=loans_data, listings=listings_data, today=today, scope="self")
+    scope = request.args.get('scope', 'self')
 
-@listings.route('/view_all_loans')
-@login_required
-def view_all_loans():
-    loans_data = listing_service.get_all_loans()
+    if scope == 'all' and current_user.is_admin:
+        loans_data = listing_service.get_all_loans()
+    else:
+        # Force fallback to self for normal users or invalid scope
+        scope = 'self'
+        loans_data = listing_service.get_loans_current_user(current_user.user_id)
+
     listings_data = listing_service.get_all_listings()
     today = date.today()
-    return render_template('view_loans.html', loans=loans_data, listings=listings_data, today=today, scope="all")
+    return render_template('view_loans.html', loans=loans_data, listings=listings_data, today=today, scope=scope)
+
+
 
 @listings.route('/reserve_book', methods=['POST'])
 @login_required
@@ -168,7 +188,7 @@ def reserve_book():
         
         result = listing_service.reserve_book(user_id, listing_id)
         flash(result.message, "success" if result.success else "danger")
-        return redirect(url_for('listings.view_all'))
+        return redirect(url_for('listings.view_loans'))
 
 @listings.route('/update_loan', methods=['POST'])
 @login_required
@@ -179,10 +199,22 @@ def update_loan():
         user_id = current_user.user_id
         today = date.today()
 
-        result = listing_service.update_loan(user_id, loan_id, actual_return_date=today)
-
+        result, loan = listing_service.update_loan(loan_id, actual_return_date=today)
         flash(result.message, "success" if result.success else "danger")
-    return redirect(url_for('listings.view_loans'))
+
+        # Determine where to redirect based on user role and ownership of the loan
+        loan = listing_service.get_loan_by_id(loan_id)
+        if loan:
+            if current_user.is_admin and loan.user_id != current_user.user_id:
+                return redirect(url_for('listings.view_loans', scope='all'))
+        
+        return redirect(url_for('listings.view_loans', scope='self'))
+
+    # fallback
+    return redirect(url_for('listings.view_loans', scope='self'))
+
+
+
 
 
         

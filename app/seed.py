@@ -12,61 +12,50 @@ def seeding():
         genres = [
             {
             "name": "Science Fiction",
-            "image": "images/science.png",
-            "inactive": False
+            "image": "images/science.png"
             },
             {
             "name": "Fantasy",
-            "image": "images/fantasy.png",
-            "inactive": False
+            "image": "images/fantasy.png"
             },
             {
             "name": "Romance",
-            "image": "images/romance.png",
-            "inactive": False
+            "image": "images/romance.png"
             },
             {
             "name": "Horror",
-            "image": "images/horror.png",
-            "inactive": False
+            "image": "images/horror.png"
             },
             {
             "name": "Mystery",
-            "image": "images/mystery.png",
-            "inactive": False
+            "image": "images/mystery.png"
             },
             {
             "name": "Thriller",
-            "image": "images/science.png",
-            "inactive": False
+            "image": "images/science.png"
             },
             {
             "name": "History",
-            "image": "images/adventure.png",
-            "inactive": False
+            "image": "images/adventure.png"
             },
             {
             "name": "Non-Fiction",
-            "image": "images/science.png",
-            "inactive": False
+            "image": "images/science.png"
             },
             {
             "name": "Adventure",
-            "image": "images/adventure.png",
-            "inactive": False
+            "image": "images/adventure.png"
             },
             {
             "name": "Children",
-            "image": "images/children.png",
-            "inactive": False
+            "image": "images/children.png"
             }
         ]
 
         for g in genres:
             genre = Genre(
                 name =g["name"],
-                image = g["image"],
-                inactive = g["inactive"]
+                image = g["image"]
             )
             db.session.add(genre)
         db.session.commit()
@@ -78,8 +67,8 @@ def seeding():
                 "password": "Shoes123",
                 "role": "admin",
                 "marked_for_deletion": False,
-                "total_loans": 0,
-                "total_listings": 0,
+                "total_loans": 1,
+                "total_listings": 1,
                 "join_date": date(2024, 12, 10)
 
             },
@@ -270,7 +259,7 @@ def seeding():
                 "author": "author14 ",
                 "description": " Keeps you gripped",
                 "genre_id": 5,
-                "is_available": True,
+                "is_available": False,
                 "marked_for_deletion": False,
                 "user_id": 1
             }
@@ -331,10 +320,10 @@ def seeding():
                 "is_returned": True
             },
             {
-                "listing_id": 9 ,
+                "listing_id": 10 ,
                 "user_id": 3,
                 "start_date": date(2025, 5, 30),
-                "return_date": date(2025, 6, 27),
+                "return_date": date(2025, 7, 27),
                 "actual_return_date": None,
                 "is_returned": False
             },

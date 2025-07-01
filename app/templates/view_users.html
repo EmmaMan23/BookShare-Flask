@@ -1,97 +1,97 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet">
-    <title> My Books</title>
-    <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
-    <link
-  rel="stylesheet"
-  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
-/>
-
-  </head>
-  
+{% extends 'base.html' %}
+{% block content %}
 
 
 
-<body class="p-3 m-0 border-0 bd-example m-0 border-0"></body>
-<nav class="navbar" data-bs-theme="dark"style="background-color: #114870"> 
-      <div class="container-fluid">
-        <a class="navbar-brand" href="#">Fixed top</a>
-        <ul class="nav nav-underline">
-  <li class="nav-item">
-    <a class="nav-link active" aria-current="page" href="{{ url_for('dash.dashboard') }}">Dashboard</a>
-  </li>
-  <li class="nav-item">
-    <a class="nav-link active" aria-current="page" href="{{ url_for('listings.view_all') }}">View All Books</a>
-  </li>
-  <li class="nav-item">
-    <a class="nav-link" href="{{ url_for('listings.view_loans') }}">View My loans</a>
-  </li>
-  <li class="nav-item">
-    <a class="nav-link" href="{{ url_for('listings.view_mine') }}">Show My books</a>
-  </li>
-  <li class="nav-item">
-    <a class="nav-link " href="{{ url_for('listings.create_listing') }}">Create Listing</a>
-  </li>
-  {% if current_user.is_admin %}
-  <li class="nav-item">
-    <a class="nav-link" href="{{ url_for('listings.view_all_loans') }}">View All loans</a>
-  </li>
-  <li class="nav-item">
-    <a class="nav-link" href="{{ url_for('admin.create_genre') }}">Create Genre</a>
-  </li>
-  <li class="nav-item">
-    <a class="nav-link" href="{{ url_for('admin.view_users') }}">Users</a>
-  </li>
-  {% endif %}
-</ul>
-</nav>
-{% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-    {% for category, message in messages %}
-      <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-        {{ message }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-      </div>
-    {% endfor %}
-  {% endif %}
-{% endwith %}
+<div class="container mt-4">
+  <h2>
+    Manage Users
+  </h2>
+  <div class="row gx-4 gy-4">
+    <p class="text-muted small fst-italic mb-2">
+      Stats represent all-time user totals, some listings may have been deleted since.
+    </p>
 
-
-{% for user in users %}
-    
-  <div class="card mb-3" style="max-width: 540px;">
-    <div class="row g-0">
-      <div class="col-md-8">
+    {% for user in users %}
+    <div class="col-md-6 mb-4 d-flex flex-column">
+      <div class="card d-flex flex-column h-100 position-relative p-3" style="max-width: 100%;">
+        {% if user.marked_for_deletion %}
+        <span class="position-absolute top-0 end-0 m-2 badge bg-danger">
+          Marked for Deletion <i class="fa fa-exclamation-triangle"></i>
+        </span>
+        {% endif %}
         <div class="card-body">
-          <h4 class="card-title">Username:{{ user.username }}</h4>
-          <h5>Role: {{user.role}} </h5>
-          <p class="card-text">Books listed: {{ user.total_listings }}</p>
-          <p class="card-text">Books Borrowed: {{ user.total_loans }}</p>
+          <h4 class="card-title">Username: {{ user.username | capitalize }}</h4>
           <p class="card-text">Join date: {{ user.join_date.strftime("%d/%m/%Y") }}</p>
-        
-          {% if current_user.is_admin %}
-          <small class="text-body-secondary">
-                  {% if user.marked_for_deletion %} Deletion requested <i class="fa fa-exclamation-triangle" style="font-size:24px"></i> {% endif %}
-            </small>
-          <form method="POST" action="{{ url_for('admin.delete') }}">
-          <input type="hidden" name="model" value="user">
-          <input type="hidden" name="id" value="{{ user.user_id }}">
+          <h5>Role:
+            {% if user.role == 'admin' %}
+            <span class="badge bg-pale-blue text-dark ms-2 py-1 px-3" style="font-size: 0.95rem;">{{ user.role |
+              capitalize }}</span>
+            {% else %}
+            <span class="badge"
+              style="background-color: #c8b6ff; color: #3b2d5f; font-size: 0.95rem; margin-left: 0.5rem; padding: 0.25rem 0.75rem; border-radius: 0.375rem;">
+              {{ user.role | capitalize }}
+            </span>
+            {% endif %}
+          </h5>
 
-          <button type="submit" class="btn btn-danger btn-sm mt-2"
-            onclick="return confirm('Are you sure you want to delete this user?')">
-            Delete
-            </button>
-          </form>
+          {% if current_user.is_admin %}
+          <div class="d-flex gap-2 mt-2">
+            <form method="POST" action="{{ url_for('admin.admin_edit_user') }}?user_id={{ user.user_id }}">
+              <div class="mb-2">
+                <label class="form-check-label me-3">
+                  <input type="radio" name="role" value="regular" {% if user.role=='regular' %}checked{% endif %}>
+                  Regular
+                </label>
+                <label class="form-check-label">
+                  <input type="radio" name="role" value="admin" {% if user.role=='admin' %}checked{% endif %}>
+                  Admin
+                </label>
+              </div>
+
+              <button type="submit" class="btn btn-primary"
+                onclick="return confirm('Are you sure you want to change this user\'s role?');">
+                Update Role
+              </button>
+            </form>
+            <form method="POST" action="{{ url_for('admin.delete') }}"
+              onsubmit="return confirm('Are you sure you want to DELETE this user? All of the users loans and listings will be deleted too. This action cannot be undone.');">
+              <input type="hidden" name="model" value="user">
+              <input type="hidden" name="id" value="{{ user.user_id }}">
+              <button type="submit" class="btn btn-danger">
+                Delete User
+              </button>
+            </form>
+          </div>
           {% endif %}
+        </div>
+
+        <div class="mt-auto d-flex justify-content-end">
+          <div class="row g-2" style="max-width: 300px;">
+            <div class="col-md-6 col-12">
+              <div class="card bg-pale-green text-center small shadow-sm" style="min-height: 70px; min-width: 120px;">
+                <div class="card-body p-2">
+                  <div class="text-muted">Listed</div>
+                  <div class="fw-bold">{{ user.total_listings }}</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-6 col-12">
+              <div class="card bg-pale-yellow text-center small shadow-sm" style="min-height: 70px; min-width: 120px;">
+                <div class="card-body p-2">
+                  <div class="text-muted">Borrowed</div>
+                  <div class="fw-bold">{{ user.total_loans }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
+
+    {% endfor %}
   </div>
-
-  {% endfor %}
-</body>
-</html>
-
+</div>
+{% endblock %}

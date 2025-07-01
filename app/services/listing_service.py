@@ -6,6 +6,7 @@ from flask import url_for
 from app.services.validators import validate_non_empty_string
 from sqlalchemy.orm import joinedload
 from app.services.dashboard_service import DashboardService
+from flask_login import current_user
 
 class ListingService:
     def __init__(self, db_session, dashboard_service):
@@ -14,8 +15,8 @@ class ListingService:
 
 
     def list_book(self, title, author, description, genre_id, user_id, is_available=True):
-        
         try:
+            title = validate_non_empty_string(title, "Title")
 
             new_listing = Listing(
                 title=title,
@@ -42,7 +43,8 @@ class ListingService:
 
 
     def get_all_listings(self, user_id = None, genre=None, availability=None, search=None):
-        query = self.db_session.query(Listing).options(joinedload(Listing.loans))
+        query = self.db_session.query(Listing).order_by(Listing.title).options(
+            joinedload(Listing.loans).joinedload(Loan.user))
 
         if user_id:
             query = query.filter(Listing.user_id == user_id)
@@ -62,29 +64,27 @@ class ListingService:
     def get_all_genres(self):
         return self.db_session.query(Genre).order_by(Genre.name).all()
 
-
-
     def get_listing_by_id(self, listing_id):
         return self.db_session.get(Listing, listing_id)
 
     def edit_listing(
-            self,
-            listing_id,
-            user_id,
-            title=None,
-            author=None,
-            description=None,
-            genre_id=None,
-            is_available=None,
-            marked_for_deletion=None):
+        self,
+        listing_id,
+        user_id,
+        title=None,
+        author=None,
+        description=None,
+        genre_id=None,
+        is_available=None,
+        marked_for_deletion=None):
 
-        
         listing = self.get_listing_by_id(listing_id)
         if not listing:
             return Result(False, "Listing not found")
 
-        if listing.user_id != user_id:
+        if not (current_user.is_admin or listing.user_id == user_id):
             return Result(False, "You can't edit someone else's listing")
+
         try:
             if title is not None:
                 listing.title = validate_non_empty_string(title, "Title")
@@ -96,17 +96,32 @@ class ListingService:
                 listing.genre_id = int(genre_id)
             else:
                 listing.genre_id = None
+
             if is_available is not None:
-                listing.is_available = is_available in ['true', 'on', '1', True]
+                new_availability = is_available in ['true', 'on', '1', True]
+
+                if listing.active_loan:
+                    if new_availability != listing.is_available:
+                        return Result(False, "Cannot change availability while listing is on loan")
+                    
+
+                if listing.marked_for_deletion:
+                    return Result(False, "Cannot change availability while listing is marked for deletion")
+
+                listing.is_available = new_availability
+
             if marked_for_deletion is not None:
                 listing.marked_for_deletion = marked_for_deletion in ['true', 'on', '1', True]
 
-
             self.db_session.commit()
             return Result(True, "Listing updated successfully")
+
+        except ValueError as ve:
+            return Result(False, str(ve))
+
         except Exception as e:
-            return Result(False, "An unexpected error occured while updating listing")
-        
+            return Result(False, "An unexpected error occurred while updating listing")
+
     def update_marked_for_deletion(self, listing_id, is_marked):
         listing = self.db_session.get(Listing, listing_id)
         if not listing:
@@ -124,30 +139,32 @@ class ListingService:
             return Result(False, f"Error updating deletion status: {str(e)}")
 
     def get_all_loans(self):
+        
         return self.db_session.query(Loan).order_by(Loan.return_date.desc()).all()
 
     def get_loans_current_user(self, user_id):
         return self.db_session.query(Loan).filter_by(user_id=user_id).order_by(Loan.return_date.desc()).all()
 
+    def get_loan_by_id(self, loan_id):
+        return self.db_session.get(Loan, loan_id)
 
-    def update_loan(self, user_id, loan_id, actual_return_date):
+    def update_loan(self, loan_id, actual_return_date):
         loan = self.db_session.get(Loan, loan_id)
         if not loan:
-            return Result(False, "Loan not found")
+            return Result(False, "Loan not found"), None
 
         try:
             loan.is_returned = True
             loan.actual_return_date = actual_return_date
-            
+
             listing = self.db_session.get(Listing, loan.listing_id)
             if listing:
                 listing.is_available = True
 
             self.db_session.commit()
-            return Result(True, "Loan marked as returned")
+            return Result(True, "Loan marked as returned"), loan
         except Exception as e:
-            return Result(False, f"Error updating loan: {str(e)}")
-
+            return Result(False, f"Error updating loan: {str(e)}"), None
 
 
     def reserve_book(self, user_id, listing_id):

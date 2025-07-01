@@ -1,115 +1,120 @@
-<!doctype html>
-<html lang="en">
+{% extends 'base.html' %}
+{% block content %}
 
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-  <title> My Books</title>
-  <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
-</head>
+<div class="container mt-4">
+  <h2>Manage your listings</h2>
+</div>
 
-<body class="p-3 m-0 border-0 bd-example m-0 border-0">
-  <nav class="navbar" data-bs-theme="dark" style="background-color: #114870">
-    <div class="container-fluid">
-      <a class="navbar-brand" href="#">Fixed top</a>
-      <ul class="nav nav-underline">
-        <li class="nav-item">
-          <a class="nav-link active" aria-current="page" href="{{ url_for('dash.dashboard') }}">Dashboard</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link active" aria-current="page" href="{{ url_for('listings.view_all') }}">View Books</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="{{ url_for('listings.view_loans') }}">View loans</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="{{ url_for('listings.view_mine') }}">Show my books</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link " href="{{ url_for('listings.create_listing') }}">Create Listing</a>
-        </li>
-        {% if current_user.is_admin %}
-        <li class="nav-item">
-          <a class="nav-link" href="{{ url_for('listings.view_all_loans') }}">View All loans</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="{{ url_for('admin.create_genre') }}">Create Genre</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="{{ url_for('admin.view_users') }}">Users</a>
-        </li>
-        {% endif %}
-      </ul>
+<div class="container mt-4">
+  {% set user_listings = listings | selectattr('user_id', 'equalto', current_user.user_id) | list %}
 
-    </div>
-  </nav>
-  {% with messages = get_flashed_messages() %}
-  {% if messages %}
-  <div class="alert alert-success alert-dismissible fade show" role="alert">
-    {% for message in messages %}
-    {{ message }}
-    {% endfor %}
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-  </div>
-  {% endif %}
-  {% endwith %}
-
-  {% for listing in listings %}
-  {% if listing.user_id == current_user.user_id %}
-  <div class="card mb-3" style="max-width: 540px;">
-    <div class="row g-0">
-      <div class="col-md-4">
-        <img
-          src="{{ url_for('static', filename=listing.genre.image) if listing.genre else url_for('static', filename='images/fallback.png') }}"
-          class="img-fluid rounded-start" style="height: 200px; object-fit: cover;">
-      </div>
-      <div class="col-md-8">
-        <div class="card-body">
-          <h4 class="card-title">{{ listing.title }}</h4>
-          <h5>{{ listing.author }}</h5>
-          <p class="card-text">{{ listing.description }}</p>
-          <p class="card-text">Listed by: {{ listing.user.username }}</p>
-          <p class="card-text">
-            <small class="text-body-secondary">
-              {% if listing.is_available %} Available {% else %} Unavailable {% endif %}
-            </small>
-          </p>
-        </div>
-        <form action="{{ url_for('listings.mark_for_deletion' )}}" method="post">
-          <input type="hidden" name="listing_id" value="{{ listing.listing_id }}">
+  {% if user_listings %}
+  <div class="row align-items-stretch">
+    {% for listing in user_listings %}
+    <div class="col-md-6 mb-4 d-flex flex-column">
+      <div class="card d-flex flex-column h-100 position-relative p-3" style="max-width: 100%;">
+        <div class="position-absolute top-0 end-0 m-2 d-flex flex-column align-items-end gap-1">
           {% if listing.marked_for_deletion %}
-          <p class="text-danger">Deletion requested <i class="fa fa-exclamation-triangle" style="font-size:18px"></i>
-          </p>
+          <span class="badge bg-danger">
+            Marked for Deletion <i class="fa fa-exclamation-triangle"></i>
+          </span>
           {% endif %}
-
-          <div class="form-check">
-
-            <input class="form-check-input" type="checkbox" name="marked_for_deletion"
-              id="deleteCheck{{ listing.listing_id }}" value="true">
-
-
-            <label class="form-check-label" id="deleteCheck{{ listing.listing_id }}">
-              {% if listing.marked_for_deletion %}
-              Cancel Deletion
-              {% else %}
-              Request Deletion
-              {% endif %}
-            </label>
+          {% if listing.genre %}
+          <span class="badge {{ genre_colors.get(listing.genre.name, 'bg-secondary') }}">
+            {{ listing.genre.name | capitalize }}
+          </span>
+          {% else %}
+          <span class="text-muted">No genre – edit listing to add a genre</span>
+          {% endif %}
+        </div>
+        <div class="row g-0 h-100">
+          <div class="col-md-4">
+            <img
+              src="{{ url_for('static', filename=listing.genre.image) if listing.genre else url_for('static', filename='images/fallback.png') }}"
+              class="img-fluid rounded-start" style="height: 200px; object-fit: cover;">
           </div>
-          <button type="submit" class="btn btn-primary mt-2">Submit</button>
-        </form>
-        <a href="{{ url_for('listings.edit_listing', listing_id=listing.listing_id)}}" class="btn btn-primary">Edit book
-          details</a>
-        <div class="card-footer text-end">
-          <span class="badge bg-secondary">{{ listing.genre.name }}</span>
+          <div class="col-md-8 d-flex flex-column h-100">
+            <div class="card-body">
+              <h4 class="card-title">{{ listing.title | capitalize }}</h4>
+              <h5>{{ listing.author | capitalize }}</h5>
+              <p class="card-text">{{ listing.description }}</p>
+              <p class="card-text">Listed by: {{ listing.user.username | capitalize }}</p>
+              <p class="card-text">
+                <small class="text-body-secondary">
+                  {% if listing.is_available %} Available {% else %} Unavailable {% endif %}
+                </small>
+              </p>
+              <p>
+                {% if listing.active_loan %}
+                Currently borrowed by: {{ listing.active_loan.user.username | capitalize }} (due {{
+                listing.active_loan.return_date }})
+                {% else %}
+                Not currently borrowed
+                {% endif %}
+              </p>
+              <details>
+                <summary>View loan history</summary>
+                <ul>
+                  {% for loan in listing.loans %}
+                  <li>
+                    {{ loan.user.username | capitalize}}
+                    <small class="text-body-secondary">
+                      <br>Loan Period:<br>
+                      Start date: {{ loan.start_date.strftime("%d/%m/%Y") }}<br>
+                      Return date: {{ loan.return_date.strftime("%d/%m/%Y") }}
+                      {% if loan.is_returned %}
+                      <br><em>Returned</em>
+                      {% else %}
+                      <br><em>Not returned yet</em>
+                      {% endif %}
+                    </small>
+                  </li>
+                  {% endfor %}
+                </ul>
+              </details>
+            </div>
+            <form method="POST" action="{{ url_for('listings.mark_for_deletion') }}" {% if not
+              listing.marked_for_deletion%}
+              onsubmit="return confirm ('Are you sure you want to request listing deletion? This will send a request to the admin to remove this listing. You can cancel the request later.')"
+              {% else %}
+              onsubmit="return confirm ('Cancel deletion request? This will let the admin know you no longer want this listing removed.')"
+              {% endif %}>
+              <input type="hidden" name="listing_id" value="{{ listing.listing_id }}">
+
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="marked_for_deletion"
+                  id="deleteCheck{{ listing.listing_id }}" value="true">
+                <label
+                  class="form-check-label {% if listing.marked_for_deletion %}text-danger{% else %}text-dark{% endif %}"
+                  for="deleteCheck{{ listing.listing_id }}">
+                  {% if listing.marked_for_deletion %}
+                  Cancel Deletion
+                  {% else %}
+                  Request Deletion
+                  {% endif %}
+                </label>
+              </div>
+
+              <div class="d-flex justify-content-between">
+                <button type="submit" class="btn btn-primary">Submit</button>
+
+                <a href="{{ url_for('listings.edit_listing', listing_id=listing.listing_id) }}"
+                  class="btn btn-primary ms-2" {% if listing.marked_for_deletion %} disabled aria-disabled="true"
+                  style="pointer-events: none; opacity: 0.6;" {% endif %}>
+                  Edit book details
+                </a>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
     </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="text-center mt-4">
+    <h4>You haven't listed any books yet!</h4>
   </div>
   {% endif %}
-  {% endfor %}
-</body>
-
-</html>
+</div>
+{% endblock %}

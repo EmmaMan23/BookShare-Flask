@@ -25,7 +25,7 @@ class UserService:
             return Result(False, str(e))
         
         if password != re_password:
-            return Result(False, "Passwords do not match!")
+            return Result(False, "Unsuccessful registration, Passwords need to match!")
 
         if user_type == "admin":
             if admin_code != "Secretadmin3":
@@ -59,8 +59,9 @@ class UserService:
             
     def update_user(self, user: User, new_username: str, old_password: str, new_password: str, confirm_password: str, marked_for_deletion=None ):
         changes_made = False
+        
+        if new_username is not None and new_username != user.username:
 
-        if new_username and new_username != user.username:
             try:
                 new_username = validate_non_empty_string(new_username, "Username")
             except ValueError as e:
@@ -85,12 +86,14 @@ class UserService:
             user.password_hash = generate_password_hash(new_password)
             changes_made = True
 
-        marked = (marked_for_deletion == 'yes')
         deletion_requested = None
-        if marked != user.marked_for_deletion:
-            user.marked_for_deletion = marked
+
+        if marked_for_deletion in ['true', 'on', '1', True]:
+        
+            user.marked_for_deletion = not user.marked_for_deletion
+            deletion_requested = user.marked_for_deletion
             changes_made = True
-            deletion_requested = marked
+
 
         self.db_session.commit()
         
