@@ -9,6 +9,7 @@ from app.utils import Result
 from app.services.validators import validate_non_empty_string
 import json
 import os
+from sqlalchemy import func
 
 
 class AdminService:
@@ -68,6 +69,12 @@ class AdminService:
             name = validate_non_empty_string(name, "Genre name")
         except ValueError as e:
             return Result(False, str(e))
+        
+        
+
+        existing_genre = self.db_session.query(Genre).filter(func.lower(Genre.name) == name.lower()).first()
+        if existing_genre:
+            return Result(False, "This genre already exists")
 
         new_genre = Genre(
             name = name,

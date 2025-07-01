@@ -84,9 +84,9 @@ def create_genre():
     ]
     if request.method == 'POST':
         form_data = request.form
-        name = form_data.get('name')
+        name = form_data.get('name').strip().capitalize()
         image = form_data.get('image')
-        request.form.get("image") 
+        request.form.get("image")
 
         if not image:
             flash("Unsuccessful, please select an image when creating a genre.", "danger")

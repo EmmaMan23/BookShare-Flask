@@ -28,11 +28,10 @@
     'History': 'bg-light-orange'
     } %}
 
-
     <nav class="navbar navbar-expand-lg" data-bs-theme="dark" style="background-color: #114870;">
         <div class="container-fluid">
 
-            <a class="navbar-brand d-flex align-items-center" href="{{ url_for('listings.view_all') }}">
+            <a class="navbar-brand d-flex align-items-center" href="{{ url_for('dash.dashboard') }}">
                 <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" width="60" height="50"
                     class="me-2">
                 BookShare
