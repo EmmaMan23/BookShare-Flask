@@ -12,7 +12,9 @@ def mock_db_session():
 def listing_service(mock_db_session):
     return ListingService(mock_db_session)
 
-def test_list_book_success(listing_service, mock_db_session):
+def test_list_book_success(mock_db_session):
+    mock_dashboard_service = MagicMock()
+    listing_service = ListingService(mock_db_session, mock_dashboard_service)
     # Arrange: make add() and commit() just succeed
     mock_db_session.add.return_value = None
     mock_db_session.commit.return_value = None
@@ -33,7 +35,9 @@ def test_list_book_success(listing_service, mock_db_session):
     mock_db_session.add.assert_called_once()
     mock_db_session.commit.assert_called_once()
 
-def test_list_book_exception(listing_service, mock_db_session):
+def test_list_book_exception(mock_db_session):
+    mock_dashboard_service = MagicMock()
+    listing_service = ListingService(mock_db_session, mock_dashboard_service)
     mock_db_session.add.side_effect = Exception("DB error")
     result = listing_service.list_book(
         title="Test Book",
@@ -46,24 +50,33 @@ def test_list_book_exception(listing_service, mock_db_session):
     assert result.success is False
     assert "Error creating Listing" in result.message
 
-def test_get_all_listings_calls_query_all(listing_service, mock_db_session):
+def test_get_all_listings_calls_query_all(mock_db_session):
+    mock_dashboard_service = MagicMock()
+    listing_service = ListingService(mock_db_session, mock_dashboard_service)
     listing_service.get_all_listings()
     mock_db_session.query.assert_called_once_with(Listing)
     mock_db_session.query.return_value.all.assert_called_once()
 
-def test_get_listing_by_id_calls_session_get(listing_service, mock_db_session):
+def test_get_listing_by_id_calls_session_get(mock_db_session):
+    mock_dashboard_service = MagicMock()
+    listing_service = ListingService(mock_db_session, mock_dashboard_service)
     listing_service.get_listing_by_id(42)
     mock_db_session.get.assert_called_once_with(Listing, 42)
 
-def test_edit_listing_success(listing_service, mock_db_session):
-    # Setup a dummy listing
+from unittest.mock import patch
+
+@patch('app.services.listing_service.current_user')
+def test_edit_listing_success(mock_current_user, mock_db_session):
+    mock_current_user.is_admin = False  # or True if testing admin
+
+    mock_dashboard_service = MagicMock()
+    listing_service = ListingService(mock_db_session, mock_dashboard_service)
+
     listing = Listing(title="Old", author="Old", description="Old", genre_id=1, user_id=1, is_available=True)
     listing.genre_id = 1
-    # Mock get_listing_by_id to return the dummy listing
     listing_service.get_listing_by_id = MagicMock(return_value=listing)
-    
     mock_db_session.commit.return_value = None
-    
+
     result = listing_service.edit_listing(
         listing_id=1,
         user_id=1,
@@ -72,9 +85,9 @@ def test_edit_listing_success(listing_service, mock_db_session):
         description="New Desc",
         genre_id=2,
         is_available="true",
-        marked_for_deletion="false"
+        marked_for_deletion="false",
     )
-    
+
     assert result.success is True
     assert "Listing updated successfully" in result.message
     assert listing.title == "New Title"
@@ -85,7 +98,10 @@ def test_edit_listing_success(listing_service, mock_db_session):
     assert listing.marked_for_deletion is False
     mock_db_session.commit.assert_called_once()
 
-def test_edit_listing_not_found(listing_service):
+
+def test_edit_listing_not_found():
+    mock_dashboard_service = MagicMock()
+    listing_service = ListingService(mock_db_session, mock_dashboard_service)
     listing_service.get_listing_by_id = MagicMock(return_value=None)
     result = listing_service.edit_listing(
         listing_id=999,
@@ -94,14 +110,18 @@ def test_edit_listing_not_found(listing_service):
     assert result.success is False
     assert result.message == "Listing not found"
 
-def test_edit_listing_wrong_user(listing_service):
+def test_edit_listing_wrong_user():
+    mock_dashboard_service = MagicMock()
+    listing_service = ListingService(mock_db_session, mock_dashboard_service)
     listing = Listing(user_id=2)
     listing_service.get_listing_by_id = MagicMock(return_value=listing)
     result = listing_service.edit_listing(listing_id=1, user_id=1)
     assert result.success is False
     assert "can't edit someone else's listing" in result.message
 
-def test_reserve_book_success(listing_service, mock_db_session):
+def test_reserve_book_success(mock_db_session):
+    mock_dashboard_service = MagicMock()
+    listing_service = ListingService(mock_db_session, mock_dashboard_service)
     mock_db_session.add.return_value = None
     mock_db_session.commit.return_value = None
     
@@ -116,13 +136,17 @@ def test_reserve_book_success(listing_service, mock_db_session):
     mock_db_session.add.assert_called()
     mock_db_session.commit.assert_called()
 
-def test_reserve_book_exception(listing_service, mock_db_session):
+def test_reserve_book_exception(mock_db_session):
+    mock_dashboard_service = MagicMock()
+    listing_service = ListingService(mock_db_session, mock_dashboard_service)
     mock_db_session.add.side_effect = Exception("DB failure")
     result = listing_service.reserve_book(user_id=1, listing_id=1)
     assert result.success is False
     assert "Error reserving book" in result.message
 
-def test_update_loan_success(listing_service, mock_db_session):
+def test_update_loan_success(mock_db_session):
+    mock_dashboard_service = MagicMock()
+    listing_service = ListingService(mock_db_session, mock_dashboard_service)
     loan = Loan(is_returned=False)
     mock_db_session.get.return_value = loan
     mock_db_session.commit.return_value = None
@@ -133,8 +157,13 @@ def test_update_loan_success(listing_service, mock_db_session):
     assert loan.is_returned is True
     mock_db_session.commit.assert_called_once()
 
-def test_update_loan_not_found(listing_service, mock_db_session):
+
+def test_update_loan_not_found(mock_db_session):
+    mock_dashboard_service = MagicMock()
+    listing_service = ListingService(mock_db_session, mock_dashboard_service)
+
     mock_db_session.get.return_value = None
-    result = listing_service.update_loan(user_id=1, loan_id=999)
+    result, loan = listing_service.update_loan(loan_id=999, actual_return_date=None)
     assert result.success is False
     assert "Loan not found" in result.message
+

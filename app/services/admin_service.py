@@ -24,9 +24,6 @@ class AdminService:
         if search:
             query = query.filter(User.username.ilike(f'%{search}%'))
 
-        some_user = self.db_session.query(User).first()
-
-
         # Filter by role
         if filter_role == 'admin':
             query = query.filter(User.role=='admin')

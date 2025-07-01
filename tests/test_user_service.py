@@ -20,7 +20,8 @@ def test_register_user_success(user_service, mock_db_session):
         username="newuser",
         password="secret123",
         re_password="secret123",
-        user_type="member"
+        user_type="member",
+        admin_code=""
     )
 
     assert result.success is True
@@ -35,7 +36,8 @@ def test_register_username_taken(user_service, mock_db_session):
         username="AUserAlready",
         password="pass",
         re_password="pass",
-        user_type="regular"
+        user_type="regular",
+        admin_code=""
     )
 
     assert result.success is False
@@ -47,11 +49,12 @@ def test_register_passwords_not_matching(user_service):
         username="newuser",
         password="pass",
         re_password="notpass",
-        user_type="regular"
+        user_type="regular",
+        admin_code=""
     )
 
     assert result.success is False
-    assert "passwords do not match!" in result.message.lower()
+    assert "passwords need to match!" in result.message.lower()
 
 def test_user_login_success(user_service, mock_db_session):
     fake_user = MagicMock()
@@ -104,7 +107,7 @@ def test_update_username_taken(user_service, mock_db_session, fake_user):
     assert "username already taken" in result.message.lower()
 
 def test_password_change_success(user_service, mock_db_session, fake_user):
-    result = user_service.update_user(fake_user, new_username="", old_password="oldpass", new_password="newpass", confirm_password="newpass", marked_for_deletion=None)
+    result = user_service.update_user(fake_user, new_username=None, old_password="oldpass", new_password="newpass", confirm_password="newpass", marked_for_deletion=None)
 
     assert result.success is True
     assert "details updated successfully" in result.message.lower()
@@ -112,19 +115,19 @@ def test_password_change_success(user_service, mock_db_session, fake_user):
     assert mock_db_session.commit.called
 
 def test_password_change_missing_fields(user_service, fake_user):
-    result = user_service.update_user(fake_user, new_username="", old_password="oldpass", new_password="", confirm_password="", marked_for_deletion=None)
+    result = user_service.update_user(fake_user, new_username=None, old_password="oldpass", new_password="", confirm_password="", marked_for_deletion=None)
 
     assert result.success is False
     assert "all fields required" in result.message.lower()
 
 def test_password_change_incorrect_old_password(user_service, fake_user):
-    result = user_service.update_user(fake_user, new_username="", old_password="wrongpass", new_password="newpass", confirm_password="newpass", marked_for_deletion=None)
+    result = user_service.update_user(fake_user, new_username=None, old_password="wrongpass", new_password="newpass", confirm_password="newpass", marked_for_deletion=None)
 
     assert result.success is False
     assert "current password entered incorrectly" in result.message.lower()
 
 def test_password_change_confirmation_mismatch(user_service, fake_user):
-    result = user_service.update_user(fake_user, new_username="", old_password="oldpass", new_password="newpass", confirm_password="diffpass", marked_for_deletion=None)
+    result = user_service.update_user(fake_user, new_username=None, old_password="oldpass", new_password="newpass", confirm_password="diffpass", marked_for_deletion=None)
 
     assert result.success is False
     assert "do not match" in result.message.lower()
@@ -147,7 +150,7 @@ def test_unmark_for_deletion(user_service, mock_db_session, fake_user):
     assert mock_db_session.commit.called
 
 def test_no_changes_made(user_service, fake_user):
-    result = user_service.update_user(fake_user, new_username="", old_password="", new_password="", confirm_password="", marked_for_deletion=None)
+    result = user_service.update_user(fake_user, new_username=None, old_password="", new_password="", confirm_password="", marked_for_deletion=None)
 
     assert result.success is False
     assert "no changes made" in result.message.lower()
