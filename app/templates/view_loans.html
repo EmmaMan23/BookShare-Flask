@@ -17,6 +17,15 @@
           <option value="overdue" {% if status=='overdue' %}selected{% endif %}>Overdue</option>
         </select>
       </div>
+      <!-- Sort Order -->
+      <div class="d-flex flex-column">
+        <label for="sort" class="form-label mb-0">Sort By Date</label>
+        <select name="sort" id="sort" class="form-select">
+          <option value="desc" {% if sort_order=='desc' %}selected{% endif %}>Newest First</option>
+          <option value="asc" {% if sort_order=='asc' %}selected{% endif %}>Oldest First</option>
+        </select>
+      </div>
+
 
       <!-- Buttons -->
       <div class="d-flex gap-2">
@@ -32,7 +41,8 @@
       <input class="form-control me-2 flex-grow-1" type="search" name="search" placeholder="Search"
         aria-label="Search" />
       <button class="btn btn-outline-success" type="submit">Search</button>
-      <a class="btn btn-outline-secondary ms-2" href="{{ url_for('listings.view_loans', scope=scope )}}">Clear Results</a>
+      <a class="btn btn-outline-secondary ms-2" href="{{ url_for('listings.view_loans', scope=scope )}}">Clear
+        Results</a>
     </form>
   </div>
 </nav>

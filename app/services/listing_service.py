@@ -158,7 +158,7 @@ class ListingService:
         if sort_order == 'asc':
             query = query.order_by(Loan.start_date.asc())
         else:
-            query = query.order_by(Loan.start_date)
+            query = query.order_by(Loan.start_date.desc())
         print('status')
 
         return query.all()

@@ -162,6 +162,9 @@ def view_loans():
     search = args.get('search')
     sort_order = args.get('sort', 'desc')
 
+    print(f"Sort Order: {sort_order}")
+
+
 
     if scope == 'all' and current_user.is_admin:
         loans_data = listing_service.get_all_loans(status=status, search=search, sort_order=sort_order)
