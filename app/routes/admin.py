@@ -9,6 +9,7 @@ from app.extensions import db
 
 dashboard_service = DashboardService(db.session, "app/static/metrics.json")
 admin_service = AdminService(db.session)
+listing_service = ListingService(db.session, dashboard_service)
 
 admin = Blueprint('admin', __name__)
 
@@ -42,19 +43,30 @@ def delete():
     if not model_class:
         flash("Invalid model type.", "danger")
         return redirect(url_for('listings.view_all'))
-    
+
+    # Determine redirect scope if loan
+    loan_user_id = None
+    if model_class == Loan:
+        loan = listing_service.get_loan_by_id(int(record_id))
+        if loan:
+            loan_user_id = loan.user_id
+
+ 
     result = admin_service.delete_record(model_class, int(record_id))
     flash(result.message, "success" if result.success else "danger")
+
+    # Redirect based on model
     if model_class == User:
         return redirect(url_for('admin.view_users'))
     elif model_class == Genre:
         kind = "genre"
         return redirect(url_for('admin.create_genre', kind=kind))
     elif model_class == Loan:
-        scope = 'all'
+        scope = 'self' if loan_user_id == current_user.user_id else 'all'
         return redirect(url_for('listings.view_loans', scope=scope))
     else:
         return redirect(url_for('listings.view_all'))
+
 
 
 @admin.route('/create_genre', methods=['POST', 'GET'])
@@ -75,8 +87,6 @@ def create_genre():
         name = form_data.get('name')
         image = form_data.get('image')
         request.form.get("image") 
-
-        print("Submitted image value:", image)  # DEBUG LINE
 
         if not image:
             flash("Unsuccessful, please select an image when creating a genre.", "danger")
