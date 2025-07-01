@@ -1,6 +1,8 @@
 {% extends 'base.html' %}
 {% block content %}
 
+<script>src="{{ url_for('static', filename='js/login_form.js') }}"</script>
+
 <div class="d-flex flex-column justify-content-start align-items-center min-vh-100 pt-5">
     <div class="mb-5 text-center">
         <strong>Welcome to BookShare!</strong><br>
@@ -125,26 +127,5 @@
     </div>
 </div>
 
-<script>
-    function showLogin() {
-        document.getElementById("loginForm").classList.remove("d-none");
-        document.getElementById("registerForm").classList.add("d-none");
-    }
-
-    function showRegister() {
-        document.getElementById("registerForm").classList.remove("d-none");
-        document.getElementById("loginForm").classList.add("d-none");
-    }
-
-    function togglePasswordVisibility(inputId, btn) {
-        const input = document.getElementById(inputId);
-        const icon = btn.querySelector('i');
-        const isVisible = input.type === 'text';
-
-        input.type = isVisible ? 'password' : 'text';
-        icon.classList.toggle('bi-eye', !isVisible);
-        icon.classList.toggle('bi-eye-slash', isVisible);
-    }
-</script>
 
 {% endblock %}

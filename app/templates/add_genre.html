@@ -1,5 +1,8 @@
 {% extends 'base.html' %}
 {% block content %}
+<!-- js for the dynamic genre form -->
+<script src="{{ url_for('static', filename='js/genre_form.js') }}"></script>
+
 <div class="container mt-4">
   <h2>
     Manage genres
@@ -54,7 +57,8 @@
 <div id="createGenreForm" class="card mb-4 shadow-sm" style="max-width: 600px;">
   <div class="card-body">
     <h5 class="card-title" id="genreFormHeading">Create a New Genre</h5>
-    <form id="genreForm" action="{{ url_for('admin.create_genre') }}" method="POST">
+    <form id="genreForm" action="{{ url_for('admin.create_genre') }}" method="POST"
+      data-edit-url="{{ url_for('admin.edit_genre') }}" data-create-url="{{ url_for('admin.create_genre') }}">
 
       <input type="hidden" id="genre_id" name="id">
       <div class="mb-3">
@@ -82,60 +86,4 @@
   </div>
 </div>
 </div>
-<script>
-  document.querySelectorAll('.edit-btn').forEach(button => {
-    button.addEventListener('click', () => {
-      const genreId = button.dataset.id;
-      const genreName = button.dataset.name;
-      const genreImage = button.dataset.image;
-
-      // Update form fields
-      document.getElementById('genre_id').value = genreId;
-      document.getElementById('name').value = genreName;
-
-      // Update radio selection
-      const radios = document.querySelectorAll('input[name="image"]');
-      radios.forEach(radio => {
-        radio.checked = (radio.value === genreImage);
-      });
-
-      // Change form action and labels
-      const form = document.getElementById('genreForm');
-      form.action = "{{ url_for('admin.edit_genre') }}";
-
-      document.getElementById('genreFormHeading').innerText = "Edit Genre";
-      document.getElementById('genreFormSubmit').innerText = "Update Genre";
-
-      document.getElementById('createGenreForm').classList.add('editing');
-      //document.getElementById('createGenreForm').classList.remove('editing');
-
-      // Scroll to form
-      document.getElementById('createGenreForm').scrollIntoView({ behavior: 'smooth' });
-
-      document.getElementById('cancelEditBtn').style.display = 'inline-block';
-    });
-  });
-
-  // Cancel button
-  const cancelBtn = document.getElementById('cancelEditBtn');
-  const genreForm = document.getElementById('genreForm');
-
-  cancelBtn.addEventListener('click', () => {
-    // Reset form fields
-    genreForm.reset();
-
-    // Clear hidden genre_id input
-    document.getElementById('genre_id').value = '';
-
-    // Reset form action and UI texts
-    genreForm.action = "{{ url_for('admin.create_genre') }}";
-    document.getElementById('genreFormHeading').innerText = "Create a New Genre";
-    document.getElementById('genreFormSubmit').innerText = "Add Genre";
-
-    // Hide cancel button and remove editing class
-    cancelBtn.style.display = 'none';
-    document.getElementById('createGenreForm').classList.remove('editing');
-  });
-
-</script>
 {% endblock %}

@@ -25,7 +25,7 @@ class UserService:
             return Result(False, str(e))
         
         if password != re_password:
-            return Result(False, "Passwords do not match!")
+            return Result(False, "Unsuccessful registration, Passwords need to match!")
 
         if user_type == "admin":
             if admin_code != "Secretadmin3":

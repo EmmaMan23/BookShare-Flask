@@ -1,0 +1,99 @@
+.hover-scale:hover {
+    transform: scale(1.03);
+    transition: transform 0.15s ease-in-out;
+}
+
+.bg-pale-pink {
+    background-color: #ffe6eb;
+}
+
+.bg-pale-green {
+    background-color: #d9f2d9;
+    color: black;
+}
+
+.bg-pale-blue {
+    background-color: #d9e8f2;
+}
+
+.bg-light-orange {
+    background-color: lightsalmon;
+}
+
+.bg-navy {
+    background-color: #114870;
+}
+
+.bg-pale-yellow {
+    background-color: #fff9d9;
+    color: black;
+}
+
+.bg-pale-purple {
+    background-color: plum;
+}
+
+.bg-purple {
+    background-color: rebeccapurple;
+}
+
+.bg-pink {
+    background-color: hotpink;
+}
+
+
+.darker-checkbox {
+    border: 2px solid black;
+    width: 1.2em;
+    height: 1.2em;
+}
+
+.genre-radio,
+.edit-genre-radio {
+    display: none;
+    /* keep hiding the native radio */
+}
+
+.genre-tile {
+    border: 4px solid transparent;
+    border-radius: 8px;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    user-select: none;
+}
+
+.genre-tile .card-body {
+    padding: 0.5rem 0.75rem;
+}
+
+.genre-tile:hover {
+    border-color: #80bdff;
+    box-shadow: 0 0 8px rgba(0, 123, 255, 0.3);
+}
+
+/* Use :has() if supported to style label when its radio is checked */
+.genre-tile:has(input[type="radio"]:checked) {
+    border-color: #007bff;
+    box-shadow: 0 0 10px rgba(0, 123, 255, 0.5);
+}
+
+.edit-genre-radio:checked+img {
+    border: 4px solid #007bff;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 123, 255, 0.5);
+}
+
+/* Highlight genre form when editing */
+#createGenreForm.editing {
+    border: 3px solid #ffc107;
+    box-shadow: 0 0 15px rgba(255, 193, 7, 0.6);
+    transition: all 0.3s ease-in-out;
+}
+
+#radiotext {
+    display: none;
+}
+
+/* Show #radiotext when admin radio is checked */
+#gridRadios1:checked~#radiotext {
+    display: block;
+}
