@@ -1,12 +1,13 @@
 from app.models import Listing, Loan, Genre, User
 from app.utils import Result
 from app.extensions import db
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 from flask import url_for
 from app.services.validators import validate_non_empty_string
 from sqlalchemy.orm import joinedload
 from app.services.dashboard_service import DashboardService
 from flask_login import current_user
+from sqlalchemy import and_
 
 class ListingService:
     def __init__(self, db_session, dashboard_service):
@@ -138,12 +139,54 @@ class ListingService:
             self.db_session.rollback() 
             return Result(False, f"Error updating deletion status: {str(e)}")
 
-    def get_all_loans(self):
-        
-        return self.db_session.query(Loan).order_by(Loan.return_date.desc()).all()
+    def get_all_loans(self, status=None, sort_order='desc', search=None):
+        query = self.db_session.query(Loan).join(Loan.user).join(Loan.listing)
 
-    def get_loans_current_user(self, user_id):
-        return self.db_session.query(Loan).filter_by(user_id=user_id).order_by(Loan.return_date.desc()).all()
+        if status == 'active':
+            query = query.filter(and_(Loan.actual_return_date == None, Loan.return_date > datetime.now()))
+        elif status == 'past':
+            query = query.filter(Loan.actual_return_date != None)
+        elif status == 'overdue':
+            query = query.filter(and_(Loan.actual_return_date == None, Loan.return_date < datetime.now()))
+
+        if search:
+            search_term = f"%{search.lower()}%"
+            query = query.filter(
+                (Listing.title.ilike(search_term)) |
+                (User.username.ilike(search_term)))
+
+        if sort_order == 'asc':
+            query = query.order_by(Loan.start_date.asc())
+        else:
+            query = query.order_by(Loan.start_date)
+        print('status')
+
+        return query.all()
+
+    def get_loans_current_user(self, user_id, status=None, search=None, sort_order='desc'):
+        query = self.db_session.query(Loan).filter_by(user_id=user_id).join(Loan.listing).join(Loan.user)
+
+        if status == 'active':
+            query = query.filter(and_(Loan.actual_return_date == None, Loan.return_date > datetime.now()))
+        elif status == 'past':
+            query = query.filter(Loan.actual_return_date != None)
+        elif status == 'overdue':
+            query = query.filter(and_(Loan.actual_return_date == None, Loan.return_date < datetime.now()))
+
+        if search:
+            search_term = f"%{search.lower()}%"
+            query = query.filter(
+                (Listing.title.ilike(search_term)) |
+                (User.username.ilike(search_term))
+            )
+
+        if sort_order == 'asc':
+            query = query.order_by(Loan.start_date.asc())
+        else:
+            query = query.order_by(Loan.start_date.desc())
+
+        return query.all()
+
 
     def get_loan_by_id(self, loan_id):
         return self.db_session.get(Loan, loan_id)

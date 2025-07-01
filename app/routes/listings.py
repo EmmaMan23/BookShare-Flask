@@ -41,9 +41,10 @@ def create_listing():
 @listings.route('/view_listings', methods=['GET'])
 @login_required
 def view_all():
-    search_query = request.args.get('search')
-    genre_filter = request.args.get('genre')
-    availability_filter = request.args.get('availability')
+    form_data = request.form
+    search_query = form_data.get('search')
+    genre_filter = form_data.get('genre')
+    availability_filter = form_data.get('availability')
 
     listings_data = listing_service.get_all_listings(
         genre=genre_filter,
@@ -154,18 +155,32 @@ def mark_for_deletion():
 @listings.route('/view_loans')
 @login_required
 def view_loans():
-    scope = request.args.get('scope', 'self')
+    args = request.args
+    default_scope = 'all' if current_user.is_admin else 'self'
+    scope = args.get('scope', default_scope)
+    status = args.get('status')
+    search = args.get('search')
+    sort_order = args.get('sort', 'desc')
+
 
     if scope == 'all' and current_user.is_admin:
-        loans_data = listing_service.get_all_loans()
+        loans_data = listing_service.get_all_loans(status=status, search=search, sort_order=sort_order)
     else:
-        # Force fallback to self for normal users or invalid scope
-        scope = 'self'
-        loans_data = listing_service.get_loans_current_user(current_user.user_id)
-
+        loans_data = listing_service.get_loans_current_user(current_user.user_id, status=status, search=search, sort_order=sort_order)
+    print(f"Scope: {scope}, Is admin: {current_user.is_admin}")
     listings_data = listing_service.get_all_listings()
     today = date.today()
-    return render_template('view_loans.html', loans=loans_data, listings=listings_data, today=today, scope=scope)
+    return render_template(
+        'view_loans.html',
+        loans=loans_data,
+        listings=listings_data,
+        today=today,
+        scope=scope,
+        status=status,
+        search=search,
+        sort_order=sort_order
+    )
+        
 
 
 

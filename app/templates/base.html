@@ -64,7 +64,7 @@
                     </li>
                     <li class="nav-item">
                         <a class="nav-link {% if request.path == url_for('listings.view_loans') and (scope == 'self' or scope is not defined) %}active{% endif %}"
-                            href="{{ url_for('listings.view_loans') }}">
+                            href="{{ url_for('listings.view_loans', scope='self') }}">
                             View my Loans
                         </a>
                     </li>

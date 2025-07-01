@@ -3,45 +3,36 @@
 <nav class="navbar navbar-expand-lg bg-body-tertiary">
   <div class="container-fluid">
     <form method="get" class="d-flex flex-wrap align-items-end gap-3 mb-4">
+      <input type="hidden" name="scope" value="{{ scope }}">
 
       <span class="fw-semibold me-1">Filter&nbsp;by:</span>
 
-      <!-- Genre filter -->
+      <!-- Loan status filter -->
       <div class="d-flex flex-column">
-        <label for="genre" class="form-label">Genre</label>
-        <select class="form-select" id="genre" name="genre">
+        <label for="status" class="form-label mb-0">Loan Status</label>
+        <select name="status" id="status" class="form-select">
           <option value="">All</option>
-          {% for g in genres %}
-          <option value="{{ g.name }}" {% if genre==g.name %}selected{% endif %}>{{ g.name | capitalize }}</option>
-          {% endfor %}
-        </select>
-      </div>
-
-      <!-- Availability filter -->
-      <div class="d-flex flex-column">
-        <label for="availability" class="form-label mb-0">Availability</label>
-        <select name="availability" id="availability" class="form-select">
-          <option value="">All</option>
-          <option value="available" {% if availability=='available' %}selected{% endif %}>Available</option>
-          <option value="unavailable" {% if availability=='unavailable' %}selected{% endif %}>Unavailable</option>
+          <option value="active" {% if status=='active' %}selected{% endif %}>Active</option>
+          <option value="past" {% if status=='past' %}selected{% endif %}>Past</option>
+          <option value="overdue" {% if status=='overdue' %}selected{% endif %}>Overdue</option>
         </select>
       </div>
 
       <!-- Buttons -->
       <div class="d-flex gap-2">
         <button type="submit" class="btn btn-primary">Apply</button>
-        <a href="{{ url_for(request.endpoint) }}" class="btn btn-outline-secondary">Clear</a>
+        <a href="{{ url_for(request.endpoint, scope=scope) }}" class="btn btn-outline-secondary">Clear</a>
       </div>
     </form>
 
 
 
-    <form class="d-flex ms-auto" role="search" method="GET" action="{{url_for('listings.view_all')}}">
-
+    <form class="d-flex ms-auto" role="search" method="GET" action="{{url_for('listings.view_loans')}}">
+      <input type="hidden" name="scope" value="{{ scope }}">
       <input class="form-control me-2 flex-grow-1" type="search" name="search" placeholder="Search"
         aria-label="Search" />
       <button class="btn btn-outline-success" type="submit">Search</button>
-      <a class="btn btn-outline-secondary ms-2" href="{{ url_for('listings.view_all') }}">Clear Results</a>
+      <a class="btn btn-outline-secondary ms-2" href="{{ url_for('listings.view_loans', scope=scope )}}">Clear Results</a>
     </form>
   </div>
 </nav>
@@ -102,6 +93,7 @@
               {% if loan.return_date < today %} <p><strong class="text-danger">Book overdue</strong></p>{% endif %}
 
                 <form method="POST" action="{{ url_for('listings.update_loan') }}">
+                  <input type="hidden" name="scope" value="{{ scope }}">
                   <input type="hidden" name="loan_id" value="{{ loan.loan_id }}">
                   <div class="form-check">
                     <input class="form-check-input" type="checkbox" id="checkReturned{{ loan.loan_id }}"
@@ -110,19 +102,23 @@
                       Mark as returned
                     </label>
                   </div>
-                  <button type="submit" class="btn btn-sm btn-success mt-2" 
-                  {% if current_user.is_admin and loan.user_id != current_user.user_id%} 
-                  onclick="return confirm('Are you sure you want to mark this book as returned for {{ loan.user.username | capitalize }}?')" 
-                  {% endif%}>Submit</button>
+                  <button type="submit" class="btn btn-sm btn-success mt-2" {% if current_user.is_admin and loan.user_id
+                    !=current_user.user_id%}
+                    onclick="return confirm('Are you sure you want to mark this book as returned for {{ loan.user.username | capitalize }}?')"
+                    {% endif%}>Submit</button>
                 </form>
                 {% endif %}
 
                 {% if current_user.is_admin %}
                 <form method="POST" action="{{ url_for('admin.delete') }}">
+                  <input type="hidden" name="scope" value="{{ scope }}">
                   <input type="hidden" name="model" value="loan">
                   <input type="hidden" name="id" value="{{ loan.loan_id }}">
-                  <button type="submit" class="btn btn-danger btn-sm mt-2" {% if not loan.is_returned %} onclick="return confirm('This is an active loan, are you sure you want to delete it? This action cannot be undone') " {%
-                    else %} onclick="return confirm('Are you sure you want to delete this loan? This action cannot be undone') " {% endif %}>
+                  <button type="submit" class="btn btn-danger btn-sm mt-2" {% if not loan.is_returned %}
+                    onclick="return confirm('This is an active loan, are you sure you want to delete it? This action cannot be undone') "
+                    {% else %}
+                    onclick="return confirm('Are you sure you want to delete this loan? This action cannot be undone') "
+                    {% endif %}>
                     Delete
                   </button>
                 </form>

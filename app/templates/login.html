@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<script>src="{{ url_for('static', filename='js/login_form.js') }}"</script>
+
 
 <div class="d-flex flex-column justify-content-start align-items-center min-vh-100 pt-5">
     <div class="mb-5 text-center">
@@ -126,6 +126,6 @@
 
     </div>
 </div>
-
+<script src="{{ url_for('static', filename='js/login_form.js') }}"></script>
 
 {% endblock %}
