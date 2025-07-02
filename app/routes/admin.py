@@ -128,7 +128,7 @@ def create_genre():
 def edit_genre():
     form_data = request.form
     genre_id = form_data.get('id')
-    name = form_data.get('name')
+    name = form_data.get('name', '').strip().capitalize()
     image = form_data.get('image')
 
     result = admin_service.edit_genre(genre_id, name, image)
@@ -154,13 +154,11 @@ def admin_edit_user():
         role = request.form.get('role')
 
         result = admin_service.update_user_role(user_id, role)
-        # Always flash the message from update_user_role
         flash(result.message, "success" if result.success else "danger")
 
         if result.success:
             return redirect(url_for('admin.view_users'))
         else:
-            # Only fetch users for rendering, do NOT flash anything here
             users_result = admin_service.view_users()
             users = users_result.data if users_result.success else []
             return render_template('view_users.html', users=users, user=user)

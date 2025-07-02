@@ -1,11 +1,13 @@
 import pytest
 from app.models import User, Genre
 from app.extensions import db as _db
+from unittest.mock import patch
+from datetime import date
 
 @pytest.fixture
 def genre_to_delete(app):
     with app.app_context():
-        genre = Genre(name="To Be Deleted", image="images/horror.png", inactive=False)
+        genre = Genre(name="To Be Deleted", image="images/horror.png")
         _db.session.add(genre)
         _db.session.commit()
         yield genre
@@ -13,8 +15,8 @@ def genre_to_delete(app):
 @pytest.fixture
 def regular_user(app):
     with app.app_context():
-        user = User(username="regular", role="regular")
-        user.set_password("password")  # Assuming your User model has this method
+        user = User(username="regular", role="regular", join_date=date.today(), total_loans=0, total_listings=0)
+        user.set_password("password")
         _db.session.add(user)
         _db.session.commit()
         yield user
@@ -22,7 +24,7 @@ def regular_user(app):
 @pytest.fixture
 def admin_user(app):
     with app.app_context():
-        admin = User(username="admin", role="admin")
+        admin = User(username="admin", role="admin", join_date=date.today(), total_loans=0, total_listings=0)
         admin.set_password("password")
         _db.session.add(admin)
         _db.session.commit()
@@ -32,23 +34,39 @@ def login_client(client, user):
     with client.session_transaction() as sess:
         sess['_user_id'] = str(user.user_id)
 
-def test_view_users_page(client, app):
+
+def test_view_users_page(client, app, admin_user):
     with app.app_context():
-        user1 = User(username="user1", role="regular")
-        user2 = User(username="user2", role="regular")
+        user1 = User(username="user1", role="regular", join_date=date.today(), total_loans=0, total_listings=0)
+        user2 = User(username="user2", role="regular", join_date=date.today(), total_loans=0, total_listings=0)
+
         user1.set_password("pass1")
         user2.set_password("pass2")
         _db.session.add_all([user1, user2])
         _db.session.commit()
 
-    response = client.get('/view_users')
+    with app.app_context():
+        users = User.query.all()
+        print("Users in DB:", [u.username for u in users])
+
+
+    login_client(client, admin_user)
+
+    response = client.get('/view_users', follow_redirects=True)
+
+    print("Status code:", response.status_code)
+    print("Response URL:", response.request.path)
+    print("Response data snippet:", response.data[:500])
 
     assert response.status_code == 200
-    assert b"user1" in response.data
-    assert b"user2" in response.data
+    assert b"user1" in response.data.lower()
+    assert b"user2" in response.data.lower()
 
 
-def test_create_genre_success(client, app):
+
+def test_create_genre_success(client, app, admin_user):
+    login_client(client, admin_user)
+
     with app.app_context():
         genre_count = Genre.query.count()
 
@@ -64,7 +82,9 @@ def test_create_genre_success(client, app):
         assert Genre.query.count() == genre_count + 1
 
 
-def test_create_genre_invalid_name(client):
+def test_create_genre_invalid_name(client, admin_user):
+    login_client(client, admin_user)
+
     response = client.post('/create_genre', data={
         'name': '   ',
         'image': 'images/fantasy.png'
@@ -74,9 +94,11 @@ def test_create_genre_invalid_name(client):
     assert b"Genre name cannot be empty" in response.data
 
 
-def test_edit_genre_success(client, app):
+def test_edit_genre_success(client, app, admin_user):
+    login_client(client, admin_user)
+
     with app.app_context():
-        genre = Genre(name="SciFi", image="images/science.png", inactive=False)
+        genre = Genre(name="SciFi", image="images/science.png")
         _db.session.add(genre)
         _db.session.commit()
         genre_id = genre.genre_id
@@ -86,13 +108,14 @@ def test_edit_genre_success(client, app):
         'name': 'Updated Genre',
         'image': 'images/fantasy.png'
     }, follow_redirects=True)
+    print(response.data.decode())
 
     assert response.status_code == 200
     assert b"Genre updated successfully" in response.data
 
     with app.app_context():
         updated = _db.session.get(Genre, genre_id)
-        assert updated.name == "Updated Genre"
+        assert updated.name == "Updated genre"
         assert updated.image == "images/fantasy.png"
 
 
@@ -108,7 +131,6 @@ def test_delete_genre_record_non_admin(client, regular_user, genre_to_delete):
     assert b"Unauthorised: Admins only" in response.data
 
     with client.application.app_context():
-        # Should still exist, deletion blocked
         assert _db.session.get(Genre, genre_to_delete.genre_id) is not None
 
 

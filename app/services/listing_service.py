@@ -30,7 +30,7 @@ class ListingService:
                 date_listed=date_listed,
                 )
             
-            user = self.db_session.query(User).get(user_id)
+            user = self.db_session.get(User, user_id)
             if user.total_listings is None:
                 user.total_listings = 1
             else:
@@ -243,7 +243,7 @@ class ListingService:
             if listing:
                 listing.is_available = False
             
-            user = self.db_session.query(User).get(user_id)
+            user = self.db_session.get(User, user_id)
             if user.total_loans is None:
                 user.total_loans = 1
             else:

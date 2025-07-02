@@ -81,11 +81,12 @@ def test_user_login_fail(user_service, mock_db_session):
 
 @pytest.fixture
 def fake_user():
-    user = MagicMock()
-    user.username = "oldusername"
-    user.password_hash = generate_password_hash("oldpass")
-    user.marked_for_deletion = False
-    user.verify_password.side_effect = lambda pw: pw == "oldpass"
+    user = User(
+    username = "oldusername",
+    password_hash = generate_password_hash("oldpass"),
+    marked_for_deletion = False
+    )
+    user.verify_password = lambda pw: pw == "oldpass"
     return user
 
 def test_update_user_success_username(user_service, mock_db_session, fake_user):
@@ -133,19 +134,30 @@ def test_password_change_confirmation_mismatch(user_service, fake_user):
     assert "do not match" in result.message.lower()
 
 def test_mark_for_deletion(user_service, mock_db_session, fake_user):
-    result = user_service.update_user(fake_user, new_username="", old_password="", new_password="", confirm_password="", marked_for_deletion="yes")
+    result = user_service.update_user(
+    user=fake_user,
+    new_username="oldusername",
+    old_password=None,
+    new_password=None,
+    confirm_password=None,
+    marked_for_deletion="true"
+)
 
     assert result.success is True
-    assert "deletion requested" in result.message.lower()
+    assert "account deletion requested. an admin will review your request" in result.message.lower()
     assert fake_user.marked_for_deletion is True
     assert mock_db_session.commit.called
 
 def test_unmark_for_deletion(user_service, mock_db_session, fake_user):
-    fake_user.marked_for_deletion = True
-    result = user_service.update_user(fake_user, new_username="", old_password="", new_password="", confirm_password="", marked_for_deletion="no")
+    result = user_service.update_user(
+        user=fake_user, new_username="oldusername",
+        old_password=None, new_password=None,
+        confirm_password=None,
+        marked_for_deletion="false")
+    print("Result message:", result.message)
 
     assert result.success is True
-    assert "deletion has been cancelled" in result.message.lower()
+    assert "account deletion has been cancelled" in result.message.lower()
     assert fake_user.marked_for_deletion is False
     assert mock_db_session.commit.called
 

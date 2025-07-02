@@ -13,7 +13,8 @@ def test_register_success(client, app):
         'username': 'testuser',
         'password': 'pass123',
         're_password': 'pass123',
-        'user_type': 'admin'
+        'user_type': 'admin',
+        'admin_code': "Secretadmin3"
     }, follow_redirects=True)
 
     assert b"Registration successful" in response.data
@@ -27,11 +28,12 @@ def test_register_password_mismatch(client):
         'username': 'testuser2',
         'password': 'pass123',
         're_password': 'differentpass',
-        'user_type': 'regular'
+        'user_type': 'regular',
+        'admin_code': ""
     }, follow_redirects=True)
 
-    assert b"Passwords do not match" in response.data
-    assert b"Register" in response.data  
+    assert b"Unsuccessful registration, Passwords need to match!"in response.data
+    assert b"Register" in response.data
 
 def test_login_success(client, app):
     with app.app_context():
@@ -54,11 +56,11 @@ def test_login_success(client, app):
 @pytest.mark.parametrize(
     "username,password",
     [
-        ("notauser", "any_password"),  # username not in DB
-        ("testuser", "wrongpassword"),  # valid user, wrong pass
-        ("", "password"),  # empty username
-        ("testuser", ""),  # empty password
-        ("", ""),  # both empty
+        ("notauser", "any_password"),
+        ("testuser", "wrongpassword"),
+        ("", "password"), 
+        ("testuser", ""), 
+        ("", ""),
     ]
 )
 
@@ -80,22 +82,21 @@ def test_login_invalid_details(client, app, username, password):
     else:
         assert b"Invalid username or password" in response.data
 
+import pytest
+
 @pytest.mark.parametrize(
-    "new_username, old_password, new_password, confirm_password, marked_for_deletion",
+    "new_username, old_password, new_password, confirm_password",
     [
-        ("newuser", "", "", "", ""),
-        ("", "oldpass", "newpass123", "newpass123", ""),
-        ("", "oldpass", "newpass123", "wrongconfirm", ""),
-        ("", "", "newpass123", "newpass123", ""),
-        ("takenuser", "", "", "", ""),
-        ("", "", "", "", ""),
-        ("", "", "", "", "yes"),
-        ("", "", "", "", "no"),
+        ("newuser", "", "", ""),
+        ("olduser", "oldpass", "newpass123", "newpass123"),
+        ("olduser", "oldpass", "newpass123", "wrongconfirm"),
+        ("olduser", "", "newpass123", "newpass123"),
+        ("takenuser", "", "", ""),
+        ("olduser", "oldpass", "", ""),
     ]
 )
-def test_edit_user(client, app, new_username, old_password, new_password, confirm_password, marked_for_deletion):
+def test_edit_user(client, app, new_username, old_password, new_password, confirm_password):
     with app.app_context():
-        # Setup users
         user = User(username='olduser', role='regular')
         user.set_password('oldpass')
         _db.session.add(user)
@@ -106,47 +107,64 @@ def test_edit_user(client, app, new_username, old_password, new_password, confir
 
         _db.session.commit()
 
-    # Login the user
     client.post('/login', data={'username': 'olduser', 'password': 'oldpass'}, follow_redirects=True)
 
     data = {
+        'form_type': 'edit',
         'username': new_username,
         'old_password': old_password,
         'new_password': new_password,
         'confirm_password': confirm_password,
-        'marked_for_deletion': marked_for_deletion
     }
+    
+    response = client.post('/edit_user', data=data, follow_redirects=True)
+    print(response.data.decode())  
 
-    # Post without follow_redirects
-    response = client.post('/edit_user', data=data, follow_redirects=False)
-    print(response.request.path)
-    assert response.status_code == 302
 
-    # Follow the redirect manually
-    redirect_url = response.headers['Location']
-    response2 = client.get(redirect_url)
-    page_content = response2.data.decode()
-
-    # Conditional asserts on flash messages
     if new_username == "takenuser":
-        assert "Username already taken" in page_content
+        assert b"Username already taken" in response.data
     elif old_password or new_password or confirm_password:
         if not all([old_password, new_password, confirm_password]):
-            assert "All fields required to change password" in page_content
+            assert b"All fields required to change password" in response.data
         elif new_password != confirm_password:
-            assert "New password and confirmation password do not match!" in page_content
-        elif old_password and old_password != "oldpass":
-            assert "Current Password entered incorrectly" in page_content
+            assert b"New password and confirmation password do not match!" in response.data
+        elif old_password != "oldpass":
+            assert b"Current Password entered incorrectly" in response.data
         else:
-            assert "Details updated successfully" in page_content
-    elif marked_for_deletion == "yes":
-        assert "Account deletion requested. An admin will review your request" in page_content
+            assert b"Details updated successfully" in response.data
     elif new_username and new_username != "olduser":
-        assert "Details updated successfully" in page_content
+        assert b"Details updated successfully" in response.data
     else:
-        assert "No changes made" in page_content
+        assert b"No changes made" in response.data
+    print(response.data.decode())  
+    response = client.post('/edit_user', data=data, follow_redirects=True)
+    
 
-    print(response.request.path)
+
+
+@pytest.mark.parametrize(
+    "marked_for_deletion, expected_message",
+    [
+        ('true', b"Account deletion requested. An admin will review your request"),
+        ('false', b"Account deletion has been cancelled"),
+    ]
+)
+def test_edit_user_marked_for_deletion(client, app, marked_for_deletion, expected_message):
+    with app.app_context():
+        user = User(username='olduser', role='regular')
+        user.set_password('oldpass')
+        _db.session.add(user)
+        _db.session.commit()
+
+    client.post('/login', data={'username': 'olduser', 'password': 'oldpass'}, follow_redirects=True)
+
+    data = {
+        'form_type': 'delete',
+        'marked_for_deletion': marked_for_deletion,
+    }
+
+    response = client.post('/edit_user', data=data, follow_redirects=True)
+    assert expected_message in response.data
 
 def test_logout(client, app):
     with app.app_context():

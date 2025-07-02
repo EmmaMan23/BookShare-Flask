@@ -1,6 +1,5 @@
 from flask import Blueprint, render_template, request
 from flask import redirect, url_for, flash
-from flask_login import login_required, current_user
 from app.models import Genre, Listing, User
 from app.services import listing_service
 from datetime import date, timedelta
@@ -113,6 +112,12 @@ class AdminService:
         
         if not genre_id:
             return Result(False, "No genre ID provided.")
+        
+        try:
+            genre_id = int(genre_id)
+        except (ValueError, TypeError):
+            return Result(False, "Invalid genre ID.")
+
         
         genre = self.db_session.get(Genre, genre_id)
         if not genre:

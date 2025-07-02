@@ -89,10 +89,15 @@ class UserService:
         deletion_requested = None
 
         if marked_for_deletion in ['true', 'on', '1', True]:
-        
-            user.marked_for_deletion = not user.marked_for_deletion
-            deletion_requested = user.marked_for_deletion
+            user.marked_for_deletion = True
+            deletion_requested = True
             changes_made = True
+        elif marked_for_deletion in ['false', 'off', '0', False]:
+            user.marked_for_deletion = False
+            deletion_requested = False
+            changes_made = True
+
+
 
 
         self.db_session.commit()

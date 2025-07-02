@@ -52,7 +52,6 @@ class DashboardService:
                     )
                 .count()
             )
-            print (data)
             return data
     
     def update_overall_listings(self):
