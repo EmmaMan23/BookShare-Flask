@@ -144,7 +144,7 @@ def admin_edit_user():
     if not user_id:
         flash("User ID is missing.", "danger")
         return redirect(url_for('admin.view_users'))
-
+    
     user = admin_service.get_user_by_id(user_id)
     if not user:
         flash("User not found.", "danger")
@@ -162,5 +162,5 @@ def admin_edit_user():
             users_result = admin_service.view_users()
             users = users_result.data if users_result.success else []
             return render_template('view_users.html', users=users, user=user)
-
+    
     return render_template('view_users.html', user=user)

@@ -78,7 +78,7 @@ class ListingService:
         return self.db_session.query(Genre).order_by(Genre.name).all()
 
     def get_listing_by_id(self, listing_id):
-        return self.db_session.get(Listing, listing_id)
+        return Listing.get_by_id(self.db_session, listing_id)
 
     def edit_listing(
         self,
@@ -136,7 +136,7 @@ class ListingService:
             return Result(False, "An unexpected error occurred while updating listing")
 
     def update_marked_for_deletion(self, listing_id, is_marked):
-        listing = self.db_session.get(Listing, listing_id)
+        listing = self.get_listing_by_id(listing_id)
         if not listing:
             return Result(False, "Listing not found.")
         
@@ -201,10 +201,10 @@ class ListingService:
 
 
     def get_loan_by_id(self, loan_id):
-        return self.db_session.get(Loan, loan_id)
+        return Loan.get_by_id(self.db_session, loan_id)
 
     def update_loan(self, loan_id, actual_return_date):
-        loan = self.db_session.get(Loan, loan_id)
+        loan = self.get_loan_by_id(loan_id)
         if not loan:
             return Result(False, "Loan not found"), None
 
@@ -237,7 +237,7 @@ class ListingService:
                 is_returned= False
             )
 
-            listing = self.db_session.get(Listing, listing_id)
+            listing = self.get_listing_by_id(listing_id)
             if listing:
                 listing.is_available = False
                 listing.save(self.db_session)

@@ -25,6 +25,15 @@ class baseModel(db.Model):
             db_session.rollback()
             logging.error(f"Failed to delete {self}: {e}")
             return False
+        
+    @classmethod
+    def get_by_id(cls, db_session, record_id):
+        try:
+            record = db_session.query(cls).get(record_id)
+            return record
+        except Exception as e:
+            logging.error(f"Failed to get record {cls.__name__} with id={record_id}: {e}")
+            return None
 
 
 

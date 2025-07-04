@@ -9,6 +9,7 @@ from app.services.validators import validate_non_empty_string
 import json
 import os
 from sqlalchemy import func
+import logging
 
 
 class AdminService:
@@ -47,7 +48,7 @@ class AdminService:
     
     
     def get_user_by_id(self, user_id):
-        return self.db_session.query(User).filter_by(user_id=user_id).first()
+        return User.get_by_id(self.db_session, user_id)
 
     def update_user_role(self, user_id, role):
         try:
@@ -66,6 +67,7 @@ class AdminService:
         
         except Exception as e:
             self.db_session.rollback()
+            logging.error(f"An unexpected error occurred while updating user role for user ID {user_id}: {str(e)}")
             return Result(False, f"An error occurred: {str(e)}")
 
     

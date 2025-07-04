@@ -79,12 +79,6 @@ def test_get_all_listings_calls_query_all(mock_db_session):
     ListingService(mock_db_session, mock_dashboard_service)
 
 
-def test_get_listing_by_id_calls_session_get(mock_db_session):
-    mock_dashboard_service = MagicMock()
-    listing_service = ListingService(mock_db_session, mock_dashboard_service)
-    listing_service.get_listing_by_id(42)
-    mock_db_session.get.assert_called_once_with(Listing, 42)
-
 from unittest.mock import patch
 
 @patch('app.services.listing_service.current_user')
@@ -158,13 +152,13 @@ def test_reserve_book_success(mock_db_session):
 
     mock_db_session.get.side_effect = lambda model, id: {
         User: mock_user,
-        Listing: mock_listing
     }.get(model)
     
     mock_dashboard_service = MagicMock()
     listing_service = ListingService(mock_db_session, mock_dashboard_service)
 
-    with patch.object(mock_listing, 'save', return_value=True) as mock_listing_save, \
+    with patch.object(Listing, 'get_by_id', return_value=mock_listing), \
+        patch.object(mock_listing, 'save', return_value=True) as mock_listing_save, \
         patch.object(mock_user, 'save', return_value=True) as mock_user_save, \
         patch('app.models.Loan.save', return_value=True) as mock_loan_save:
 
@@ -195,13 +189,13 @@ def test_reserve_book_exception(mock_db_session):
     mock_listing = MagicMock()
     mock_listing.save.side_effect = Exception("DB failure")
     mock_db_session.get.side_effect = lambda model, id: {
-        Listing: mock_listing,
         User: mock_user,
     }.get(model)
 
-    result = listing_service.reserve_book(user_id=1, listing_id=1)
-    assert result.success is False
-    assert "Error reserving book" in result.message
+    with patch.object(Listing, 'get_by_id', return_value=mock_listing):
+        result = listing_service.reserve_book(user_id=1, listing_id=1)
+        assert result.success is False
+        assert "Error reserving book" in result.message
 
 def test_update_loan_success(mock_db_session):
 
@@ -216,14 +210,14 @@ def test_update_loan_success(mock_db_session):
     mock_dashboard_service = MagicMock()
 
     mock_db_session.get.side_effect = lambda model, id: {
-    Loan: mock_loan,
     Listing: mock_listing,
     }.get(model)
 
 
     listing_service = ListingService(mock_db_session, mock_dashboard_service)
     with patch.object(mock_listing, 'save', return_value=True) as mock_listing_save, \
-        patch.object(mock_loan, 'save', return_value=True) as mock_loan_save:
+        patch.object(mock_loan, 'save', return_value=True) as mock_loan_save, \
+        patch.object(Loan, 'get_by_id', return_value=mock_loan):
 
         result, _ = listing_service.update_loan(loan_id=1, actual_return_date=date.today())
         assert result.success is True
@@ -240,8 +234,9 @@ def test_update_loan_not_found(mock_db_session):
     mock_dashboard_service = MagicMock()
     listing_service = ListingService(mock_db_session, mock_dashboard_service)
 
-    mock_db_session.get.return_value = None
-    result, loan = listing_service.update_loan(loan_id=999, actual_return_date=None)
-    assert result.success is False
-    assert "Loan not found" in result.message
+    with patch('app.models.Loan.get_by_id', return_value=None):
+    
+        result, loan = listing_service.update_loan(loan_id=999, actual_return_date=None)
+        assert result.success is False
+        assert "Loan not found" in result.message
 
