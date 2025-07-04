@@ -91,12 +91,20 @@ def edit_listing():
 
     if request.method == 'POST':
         form_data = request.form
-        listing_id = int(form_data.get('listing_id'))
-        listing = listing_service.get_listing_by_id(listing_id)
+        listing_id_str = form_data.get('listing_id')
 
-        if not listing:
+        if not listing_id_str or not listing_id_str.isdigit():
+            flash("Invalid or missing listing ID.", "danger")
+            return redirect(url_for('listings.view_mine'))
+
+        listing_id = int(listing_id_str)
+        result = listing_service.get_listing_by_id(listing_id)
+
+        if not result.success:
             flash("Listing not found.", "danger")
             return redirect(url_for('listings.view_mine'))
+
+        listing = result.data
 
         # Determine availability toggle
         if 'is_available' in form_data:
@@ -105,37 +113,44 @@ def edit_listing():
             new_availability = listing.is_available
 
         res = listing_service.edit_listing(
-                listing_id=listing_id,
-                user_id=current_user.user_id,
-                title=form_data.get('title'),
-                author=form_data.get('author'),
-                description=form_data.get('description'),
-                genre_id=form_data.get('genre_id'),
-                is_available=new_availability,
-                marked_for_deletion=form_data.get('marked_for_deletion')
-                )
+            listing_id=listing_id,
+            user_id=current_user.user_id,
+            title=form_data.get('title'),
+            author=form_data.get('author'),
+            description=form_data.get('description'),
+            genre_id=form_data.get('genre_id'),
+            is_available=new_availability,
+            marked_for_deletion=form_data.get('marked_for_deletion')
+        )
 
         flash(res.message, "success" if res.success else "danger")
 
         if res.success:
             return redirect(url_for('listings.view_mine'))
         else:
-            listing = listing_service.get_listing_by_id(listing_id)
+            # On failure, re-fetch listing for rendering
+            listing_result = listing_service.get_listing_by_id(listing_id)
+            listing = listing_result.data if listing_result.success else None
             return render_template('edit_listing.html', genres=genres, listing=listing)
 
-    
     else:
-        listing_id = int(request.args.get('listing_id', type=int))
-        listing = listing_service.get_listing_by_id(listing_id)
+        # GET method
+        listing_id = request.args.get('listing_id', type=int)
+        if not listing_id:
+            flash("Invalid or missing listing ID.", "danger")
+            return redirect(url_for('listings.view_mine'))
 
-        if not listing:
+        listing_result = listing_service.get_listing_by_id(listing_id)
+        if not listing_result.success:
             flash("Listing not found.", "danger")
             return redirect(url_for('listings.view_mine'))
+
+        listing = listing_result.data
 
         if listing.user_id != current_user.user_id:
             flash("You can't edit someone else's listing", "danger")
             return redirect(url_for('listings.view_mine'))
-        
+
         return render_template('edit_listing.html', genres=genres, listing=listing)
 
     
@@ -143,11 +158,13 @@ def edit_listing():
 @login_required
 def mark_for_deletion():
     listing_id = int(request.form.get('listing_id'))
-    listing = listing_service.get_listing_by_id(listing_id)
 
-    if not listing:
+    result = listing_service.get_listing_by_id(listing_id)
+    if not result.success:
         flash("Listing not found.", "danger")
         return redirect(url_for('listings.view_mine'))
+
+    listing = result.data  # unwrap the Listing object
 
     if listing.user_id != current_user.user_id:
         flash("You are not authorised to change this listing.", "danger")
@@ -157,13 +174,13 @@ def mark_for_deletion():
     if request.form.get('marked_for_deletion') == 'true':
         # Flip the current deletion status
         is_marked = not listing.marked_for_deletion
-        result = listing_service.update_marked_for_deletion(listing_id, is_marked)
-        flash(result.message, "success" if result.success else "danger")
-
+        update_result = listing_service.update_marked_for_deletion(listing_id, is_marked)
+        flash(update_result.message, "success" if update_result.success else "danger")
     else:
         flash("Please check the box to confirm your action.", "warning")
 
     return redirect(url_for('listings.view_mine'))
+
 
 @listings.route('/view_loans')
 @login_required
@@ -179,7 +196,7 @@ def view_loans():
     if scope == 'all' and current_user.is_admin:
         result = listing_service.get_all_loans(status=status, search=search, sort_order=sort_order)
     else:
-        result = listing_service.get_loans_current_user(current_user.user_id, status=status, search=search, sort_order=sort_order)
+        result = listing_service.get_all_loans(current_user.user_id, status=status, search=search, sort_order=sort_order)
     print(f"Scope: {scope}, Is admin: {current_user.is_admin}")
     listings_data = listing_service.get_all_listings()
     today = date.today()
@@ -202,10 +219,12 @@ def reserve_book():
         listing_id = int(form_data.get('listing_id'))
         user_id = current_user.user_id
 
-        listing = listing_service.get_listing_by_id(listing_id)
-        if not listing:
+        listing_result = listing_service.get_listing_by_id(listing_id)
+        if not listing_result.success:
             flash("Listing not found.", "danger")
             return redirect(url_for('listings.view_all'))
+
+        listing = listing_result.data
 
         if listing.user_id == current_user.user_id:
             flash("You cannot reserve your own book.", "warning")
@@ -213,7 +232,11 @@ def reserve_book():
         
         result = listing_service.reserve_book(user_id, listing_id)
         flash(result.message, "success" if result.success else "danger")
-        return redirect(url_for('listings.view_loans'))
+
+   
+        return redirect(url_for('listings.view_loans', scope='self'))
+
+
 
 @listings.route('/update_loan', methods=['POST'])
 @login_required
@@ -227,16 +250,17 @@ def update_loan():
         result, loan = listing_service.update_loan(loan_id, actual_return_date=today)
         flash(result.message, "success" if result.success else "danger")
 
-        # Determine where to redirect based on user role and ownership of the loan
-        loan = listing_service.get_loan_by_id(loan_id)
-        if loan:
-            if current_user.is_admin and loan.user_id != current_user.user_id:
+        loan_result = listing_service.get_loan_by_id(loan_id)
+        if loan_result.success:
+            loan_obj = loan_result.data
+            if current_user.is_admin and loan_obj.user_id != current_user.user_id:
                 return redirect(url_for('listings.view_loans', scope='all'))
         
         return redirect(url_for('listings.view_loans', scope='self'))
 
     # fallback
     return redirect(url_for('listings.view_loans', scope='self'))
+
 
 
 

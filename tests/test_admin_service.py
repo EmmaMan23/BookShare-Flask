@@ -54,13 +54,14 @@ def test_delete_record_not_found(admin_service, mock_db_session):
     mock_db_session.commit.assert_not_called()
 
 def test_edit_genre_success(admin_service, mock_db_session):
-    with patch('app.services.admin_service.validate_non_empty_string', side_effect=lambda name, field: name) as mock_validate_string:
-        mock_genre = SimpleNamespace(id=1, name="Old Name", image="old_image.png")
-        mock_genre.save = MagicMock(return_value=True)
-        mock_db_session.get.return_value = mock_genre
+    mock_genre = SimpleNamespace(id=1, name="Old Name", image="old_image.png")
+    mock_genre.save = MagicMock(return_value=True)
 
-        new_name = "Updated Name"
-        new_image = "new_image.png"
+    new_name = "Updated Name"
+    new_image = "new_image.png"
+
+    with patch('app.services.admin_service.validate_non_empty_string', side_effect=lambda name, field: name) as mock_validate_string, \
+        patch('app.models.Genre.get_by_id', return_value=mock_genre) as mock_get_by_id:
 
         result = admin_service.edit_genre(mock_genre.id, new_name, new_image)
 
@@ -69,8 +70,9 @@ def test_edit_genre_success(admin_service, mock_db_session):
         mock_validate_string.assert_called_with(new_name, "Genre name")
         assert mock_genre.name == new_name
         assert mock_genre.image == new_image
-        mock_db_session.get.assert_called_with(Genre, mock_genre.id)
+        mock_get_by_id.assert_called_once_with(mock_db_session, mock_genre.id)
         mock_genre.save.assert_called_once_with(mock_db_session)
+
 
 def test_edit_genre_no_id(admin_service, mock_db_session):
     result = admin_service.edit_genre(None, "Some Name", "Some Image")
@@ -81,14 +83,13 @@ def test_edit_genre_no_id(admin_service, mock_db_session):
     mock_db_session.commit.assert_not_called()
 
 def test_edit_genre_not_found(admin_service, mock_db_session):
-    mock_db_session.get.return_value = None
+    with patch('app.models.Genre.get_by_id', return_value=None) as mock_get_by_id:
+        result = admin_service.edit_genre(999, "Some Name", "some_image.png")
 
-    result = admin_service.edit_genre(999, "New Name", "New Image")
-
-    assert result.success is False
-    assert "Genre not found." in result.message
-    mock_db_session.get.assert_called_with(Genre, 999)
-    mock_db_session.commit.assert_not_called()
+        assert result.success is False
+        assert "Genre not found." in result.message
+        mock_get_by_id.assert_called_once_with(mock_db_session, 999)
+        mock_db_session.commit.assert_not_called()
 
 def test_edit_genre_invalid_name(admin_service, mock_db_session):
     with patch('app.services.admin_service.validate_non_empty_string', side_effect=ValueError("Genre name cannot be empty.")) as mock_validate_string:

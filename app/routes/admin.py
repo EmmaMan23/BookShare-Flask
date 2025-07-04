@@ -55,7 +55,7 @@ def delete():
     model = form_data.get('model')
     record_id = form_data.get('id')
 
-    model_map ={
+    model_map = {
         'user': User,
         'listing': Listing,
         'genre': Genre,
@@ -70,10 +70,13 @@ def delete():
     # Determine redirect scope if loan
     loan_user_id = None
     if model_class == Loan:
-        loan = listing_service.get_loan_by_id(int(record_id))
-        if loan:
-            loan_user_id = loan.user_id
-
+        loan_result = listing_service.get_loan_by_id(int(record_id))
+        if loan_result.success:
+            loan_obj = loan_result.data
+            loan_user_id = loan_obj.user_id
+        else:
+            flash("Loan not found.", "danger")
+            return redirect(url_for('listings.view_loans', scope='all'))
 
     result = admin_service.delete_record(model_class, int(record_id))
     flash(result.message, "success" if result.success else "danger")

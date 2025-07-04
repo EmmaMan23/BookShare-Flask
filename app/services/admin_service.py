@@ -40,7 +40,7 @@ class AdminService:
                 return Result(False, "User not found.")
 
             if user.role == 'admin' and role != 'admin':
-                        admin_count = self.db_session.query(User).filter_by(role='admin').count()
+                        admin_count = User.count_admins(self.db_session)
                         if admin_count <= 1:
                             # Can't demote last admin
                             return Result(False, "Failed to update user role. You cannot remove admin rights from the last remaining admin. Please promote another user to admin first", "danger")
@@ -61,11 +61,8 @@ class AdminService:
         if model_class == User:
 
             if record.role == 'admin':
-                remaining_admins = self.db_session.query(User).filter(
-                    User.role == 'admin',
-                    User.user_id != record.user_id
-                ).count()
-                if remaining_admins == 0:
+                admin_count = User.count_admins(self.db_session)
+                if admin_count <= 1:
                     return Result(False, "Cannot delete the last remaining admin. Please appoint another admin first.")
 
         record.delete(self.db_session)
@@ -77,7 +74,7 @@ class AdminService:
         except ValueError as e:
             return Result(False, str(e))
         
-        existing_genre = self.db_session.query(Genre).filter(func.lower(Genre.name) == name.lower()).first()
+        existing_genre = Genre.exists_by_name(self.db_session, name)
         if existing_genre:
             return Result(False, "This genre already exists")
 
@@ -100,7 +97,7 @@ class AdminService:
             return Result(False, "Invalid genre ID.")
 
         
-        genre = self.db_session.get(Genre, genre_id)
+        genre = Genre.get_by_id(self.db_session, genre_id)
         if not genre:
             return Result(False, "Genre not found.")
         

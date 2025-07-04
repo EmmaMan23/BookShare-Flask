@@ -3,7 +3,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 import logging
 from datetime import datetime
-from sqlalchemy import and_
+from sqlalchemy import and_, func
 
 class baseModel(db.Model):
     __abstract__ = True
@@ -31,7 +31,7 @@ class baseModel(db.Model):
     @classmethod
     def get_by_id(cls, db_session, record_id):
         try:
-            record = db_session.query(cls).get(record_id)
+            record = db_session.get(cls, record_id)
             return record
         except Exception as e:
             logging.error(f"Failed to get record {cls.__name__} with id={record_id}: {e}")
@@ -40,7 +40,7 @@ class baseModel(db.Model):
     @classmethod
     def get_all(cls, db_session):
         try:
-            records = db_session.query(cls)
+            records = db_session.query(cls).all()
             return records
         except Exception as e:
             logging.error(f"Failed to get records {cls.__name__}: {e}")
@@ -72,6 +72,10 @@ class User(baseModel, UserMixin):
         return str(self.user_id)
     
     @classmethod
+    def count_admins(cls, db_session):
+        return db_session.query(cls).filter_by(role='admin').count()
+    
+    @classmethod
     def filter_search_query(cls, db_session, search=None, filter_role=None, marked_for_deletion=None, sort_join_date='desc'):
         query = db_session.query(cls)
 
@@ -90,6 +94,14 @@ class User(baseModel, UserMixin):
             query = query.order_by(cls.join_date.desc())
         
         return query.all()
+    
+    def increment_totals(self, db_session):
+        if self.total_listings is None:
+            self.total_listings = 1
+        else:
+            self.total_listings += 1
+        return self.save(db_session)
+
     
 
 
@@ -130,8 +142,9 @@ class Listing(baseModel):
             query = query.filter(Listing.is_available == filter_availability)
 
 
-        if marked_for_deletion == 'true':
+        if marked_for_deletion is True:
             query = query.filter(cls.marked_for_deletion.is_(True))
+
         
         if sort_order == 'asc':
             query = query.order_by(cls.date_listed.asc())
@@ -152,8 +165,11 @@ class Loan(baseModel):
     listing = db.relationship('Listing', back_populates='loans')
 
     @classmethod
-    def filter_search_loans(cls, db_session, filter_status=None, search=None, sort_order='desc'):
+    def filter_search_loans(cls, db_session, user_id=None, filter_status=None, search=None, sort_order='desc'):
         query = db_session.query(cls).join(cls.listing).join(cls.user)
+
+        if user_id is not None:
+            query = query.filter(cls.user_id == user_id)
 
         if search:
             query = query.filter(
@@ -170,6 +186,7 @@ class Loan(baseModel):
                 ))
             elif filter_status == 'past':
                 query = query.filter(cls.actual_return_date.isnot(None))
+
             elif filter_status == 'overdue':
                 query = query.filter(and_(
                     cls.actual_return_date.is_(None),
@@ -188,3 +205,7 @@ class Genre(baseModel):
     genre_id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(20), unique=True, nullable=False)
     image = db.Column(db.String(255), nullable=True)
+
+    @classmethod
+    def exists_by_name(cls, db_session, name):
+        return db_session.query(cls).filter(func.lower(cls.name) == name.lower()).first()
