@@ -35,9 +35,8 @@ class ListingService:
                 user.total_listings = 1
             else:
                 user.total_listings += 1
-            self.db_session.add(new_listing)
             
-            self.db_session.commit()
+            new_listing.save(self.db_session)
             self.dashboard_service.update_overall_listings()
 
             return Result(True, "Listing created successfully", new_listing)
@@ -127,7 +126,7 @@ class ListingService:
             if marked_for_deletion is not None:
                 listing.marked_for_deletion = marked_for_deletion in ['true', 'on', '1', True]
 
-            self.db_session.commit()
+            listing.save(self.db_session)
             return Result(True, "Listing updated successfully")
 
         except ValueError as ve:
@@ -144,7 +143,7 @@ class ListingService:
         try:
             listing.marked_for_deletion = is_marked
             listing.is_available = False
-            self.db_session.commit()
+            listing.save(self.db_session)
             
             status_message = "marked for deletion" if is_marked else "unmarked for deletion"
             return Result(True, f"Listing successfully {status_message}.")
@@ -216,8 +215,9 @@ class ListingService:
             listing = self.db_session.get(Listing, loan.listing_id)
             if listing:
                 listing.is_available = True
+                listing.save(self.db_session)
 
-            self.db_session.commit()
+            loan.save(self.db_session)
             return Result(True, "Loan marked as returned"), loan
         except Exception as e:
             return Result(False, f"Error updating loan: {str(e)}"), None
@@ -236,20 +236,21 @@ class ListingService:
                 return_date=return_date,
                 is_returned= False
             )
-            
-            self.db_session.add(loan)
 
             listing = self.db_session.get(Listing, listing_id)
             if listing:
                 listing.is_available = False
+                listing.save(self.db_session)
             
             user = self.db_session.get(User, user_id)
             if user.total_loans is None:
                 user.total_loans = 1
             else:
                 user.total_loans += 1
+            user.save(self.db_session)
 
-            self.db_session.commit()
+
+            loan.save(self.db_session)
             self.dashboard_service.update_overall_loans()
             return Result(True, "Book reserved successfully", loan)
         except Exception as e:

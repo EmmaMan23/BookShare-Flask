@@ -61,7 +61,7 @@ class AdminService:
                             # Can't demote last admin
                             return Result(False, "Failed to update user role. You cannot remove admin rights from the last remaining admin. Please promote another user to admin first", "danger")
             user.role = role
-            self.db_session.commit()
+            user.save(self.db_session)
             return Result(True, "User role updated successfully.")
         
         except Exception as e:
@@ -83,8 +83,7 @@ class AdminService:
                 if remaining_admins == 0:
                     return Result(False, "Cannot delete the last remaining admin. Please appoint another admin first.")
 
-        self.db_session.delete(record)
-        self.db_session.commit()
+        record.delete(self.db_session)
         return Result(True, "Record deleted successfully")
 
     def create_genre(self, name, image):
@@ -104,8 +103,7 @@ class AdminService:
             image = image,
         )
 
-        self.db_session.add(new_genre)
-        self.db_session.commit()
+        new_genre.save(self.db_session)
         return Result(True, "Genre created successfully")
     
     def edit_genre(self, genre_id, name, image):
@@ -133,7 +131,7 @@ class AdminService:
     
         genre.name = name
         genre.image = image 
-        self.db_session.commit()
+        genre.save(self.db_session)
         return Result(True, "Genre updated successfully")
     
     

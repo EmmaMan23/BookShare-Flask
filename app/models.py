@@ -1,8 +1,34 @@
 from app.extensions import db
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
+import logging
 
-class User(db.Model, UserMixin):
+class baseModel(db.Model):
+    __abstract__ = True
+
+    def save(self, db_session):
+        try:
+            db_session.add(self)
+            db_session.commit()
+            return True
+        except Exception as e:
+            db_session.rollback()
+            logging.error(f"Failed to save {self}: {e}")
+            return False
+        
+    def delete(self, db_session):
+        try:
+            db_session.delete(self)
+            db_session.commit()
+            return True
+        except Exception as e:
+            db_session.rollback()
+            logging.error(f"Failed to delete {self}: {e}")
+            return False
+
+
+
+class User(baseModel, UserMixin):
     user_id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(255), unique=True, nullable=False)
     password_hash = db.Column(db.String(255), nullable=False) 
@@ -27,7 +53,7 @@ class User(db.Model, UserMixin):
     def get_id(self):
         return str(self.user_id)
 
-class Listing(db.Model):
+class Listing(baseModel):
     listing_id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(255), nullable=False)
     author = db.Column(db.String(255))
@@ -45,21 +71,21 @@ class Listing(db.Model):
     def active_loan(self):
         return next((loan for loan in self.loans if not loan.is_returned), None)
 
-class Loan(db.Model):
+class Loan(baseModel):
     loan_id = db.Column(db.Integer, primary_key=True)
     listing_id = db.Column(db.Integer, db.ForeignKey('listing.listing_id', ondelete='CASCADE'), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.user_id', ondelete='CASCADE'), nullable=False)
     start_date = db.Column(db.Date)
     return_date = db.Column(db.Date)
     actual_return_date = db.Column(db.Date, nullable=True)
-    is_returned = db.Column(db.Boolean, default=True)
+    is_returned = db.Column(db.Boolean, default=False)
     user = db.relationship('User', back_populates='loans')
     listing = db.relationship('Listing', back_populates='loans')
 
     
 
 
-class Genre(db.Model):
+class Genre(baseModel):
     genre_id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(20), unique=True, nullable=False)
     image = db.Column(db.String(255), nullable=True)

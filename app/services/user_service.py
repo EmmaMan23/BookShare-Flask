@@ -38,9 +38,7 @@ class UserService:
         new_user = User(username=username, role=user_type, join_date=join_date, total_loans=total_loans, total_listings=total_listings)
         new_user.set_password(password)
 
-
-        self.db_session.add(new_user)
-        self.db_session.commit()
+        new_user.save(self.db_session)
 
         return Result(True, "Registration successful")
 
@@ -97,10 +95,7 @@ class UserService:
             deletion_requested = False
             changes_made = True
 
-
-
-
-        self.db_session.commit()
+        user.save(self.db_session)
         
         if not changes_made:
             return Result(False, "No changes made")

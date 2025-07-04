@@ -13,6 +13,7 @@ from sqlalchemy import event
 from sqlalchemy.engine import Engine
 from app.services.dashboard_service import DashboardService
 from app.services.listing_service import ListingService
+import logging
 
 @event.listens_for(Engine, "connect")
 def set_sqlite_pragma(dbapi_connection, connection_record):
@@ -24,9 +25,11 @@ def set_sqlite_pragma(dbapi_connection, connection_record):
 
 load_dotenv()
 
-
+logging.basicConfig(filename='app.log', level=logging.ERROR, format='%(asctime)s %(levelname)s: %(message)s')
 def create_app(testing=False):
     app = Flask(__name__, static_folder='static')
+    
+
 
     app.secret_key = os.environ.get('SECRET_KEY', 'testing_secret_key')
 
