@@ -14,39 +14,22 @@ import logging
 
 class AdminService:
 
-
     def __init__(self, db_session):
         self.db_session = db_session
     
     def view_users(self, search=None, sort_join_date='desc', filter_role=None, marked_for_deletion=None):
-        query = self.db_session.query(User)
 
-        if search:
-            query = query.filter(User.username.ilike(f'%{search}%'))
+        users = User.filter_search_query(
+            db_session=self.db_session,
+            search=search,
+            filter_role=filter_role,
+            marked_for_deletion=marked_for_deletion,
+            sort_join_date=sort_join_date
+        )
 
-        # Filter by role
-        if filter_role == 'admin':
-            query = query.filter(User.role=='admin')
-        elif filter_role == 'regular':
-            query = query.filter(User.role=='regular')
-
-
-        # Filter marked for deletion if requested
-        if marked_for_deletion == 'true':
-            query = query.filter(User.marked_for_deletion == True)
-
-        # Sort by join date
-        if sort_join_date == 'asc':
-            query = query.order_by(User.join_date.asc())
-        else:
-            query = query.order_by(User.join_date.desc())
-
-        users = query.all()
         return Result(True, "Users retrieved successfully", users)
 
 
-    
-    
     def get_user_by_id(self, user_id):
         return User.get_by_id(self.db_session, user_id)
 
@@ -94,8 +77,6 @@ class AdminService:
         except ValueError as e:
             return Result(False, str(e))
         
-        
-
         existing_genre = self.db_session.query(Genre).filter(func.lower(Genre.name) == name.lower()).first()
         if existing_genre:
             return Result(False, "This genre already exists")

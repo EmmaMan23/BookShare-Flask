@@ -56,7 +56,7 @@ def view_all():
     if sort_order not in ('asc', 'desc'):
         sort_order = 'desc'
 
-    listings_data = listing_service.get_all_listings(
+    result = listing_service.get_all_listings(
         genre=genre_filter,
         availability=(availability_filter == "available") if availability_filter else None,
         search=search_query,
@@ -68,7 +68,7 @@ def view_all():
 
     return render_template(
         'view_books.html',
-        listings=listings_data,
+        listings=result.data,
         search=search_query,
         genre=genre_filter,
         availability=availability_filter,
@@ -81,8 +81,8 @@ def view_all():
 @listings.route('/view_my_books')
 @login_required
 def view_mine():
-    listings_data = listing_service.get_all_listings(user_id=current_user.user_id)
-    return render_template('show_user_listings.html', listings=listings_data, existing_user=current_user)
+    result = listing_service.get_all_listings(user_id=current_user.user_id)
+    return render_template('show_user_listings.html', listings=result.data, existing_user=current_user)
 
 @listings.route('/edit_listing', methods=['POST', 'GET'])
 @login_required
@@ -175,20 +175,17 @@ def view_loans():
     search = args.get('search')
     sort_order = args.get('sort', 'desc')
 
-    print(f"Sort Order: {sort_order}")
-
-
 
     if scope == 'all' and current_user.is_admin:
-        loans_data = listing_service.get_all_loans(status=status, search=search, sort_order=sort_order)
+        result = listing_service.get_all_loans(status=status, search=search, sort_order=sort_order)
     else:
-        loans_data = listing_service.get_loans_current_user(current_user.user_id, status=status, search=search, sort_order=sort_order)
+        result = listing_service.get_loans_current_user(current_user.user_id, status=status, search=search, sort_order=sort_order)
     print(f"Scope: {scope}, Is admin: {current_user.is_admin}")
     listings_data = listing_service.get_all_listings()
     today = date.today()
     return render_template(
         'view_loans.html',
-        loans=loans_data,
+        loans=result.data,
         listings=listings_data,
         today=today,
         scope=scope,
@@ -197,9 +194,6 @@ def view_loans():
         sort_order=sort_order
     )
         
-
-
-
 @listings.route('/reserve_book', methods=['POST'])
 @login_required
 def reserve_book():

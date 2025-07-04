@@ -30,7 +30,7 @@ class ListingService:
                 date_listed=date_listed,
                 )
             
-            user = self.db_session.get(User, user_id)
+            user = User.get_by_id(self.db_session, user_id)
             if user.total_listings is None:
                 user.total_listings = 1
             else:
@@ -45,34 +45,17 @@ class ListingService:
 
 
     def get_all_listings(self, user_id = None, genre=None, availability=None, search=None, sort_order='desc', marked_for_deletion=None):
-        query = self.db_session.query(Listing).options(
-        joinedload(Listing.loans).joinedload(Loan.user))
+        query = Listing.filter_search_listings(
+            db_session=self.db_session,
+            user_id=user_id,
+            search=search,
+            filter_genre=genre,
+            filter_availability=availability,
+            sort_order=sort_order,
+            marked_for_deletion=marked_for_deletion
+        )
 
-
-        if user_id:
-            query = query.filter(Listing.user_id == user_id)
-        if genre:
-            query = query.filter(Listing.genre.has(name=genre))
-        if availability is not None:
-            query = query.filter(Listing.is_available == availability)
-
-        if search:
-            search_query = f"%{search}%"
-            query = query.filter(
-                (Listing.title.ilike(search_query)) |
-                (Listing.author.ilike(search_query))
-            )
-        if marked_for_deletion is True:
-            query = query.filter(Listing.marked_for_deletion.is_(True))
-        elif marked_for_deletion is False:
-            query = query.filter(Listing.marked_for_deletion.is_(False))
-            
-        if sort_order == 'asc':
-            query = query.order_by(Listing.date_listed.asc())
-        else:
-            query = query.order_by(Listing.date_listed.desc())
-
-        return query.all()
+        return Result(True, "Listings returned successfully.", query)
 
     def get_all_genres(self):
         return self.db_session.query(Genre).order_by(Genre.name).all()
@@ -152,28 +135,15 @@ class ListingService:
             return Result(False, f"Error updating deletion status: {str(e)}")
 
     def get_all_loans(self, status=None, sort_order='desc', search=None):
-        query = self.db_session.query(Loan).join(Loan.user).join(Loan.listing)
+        query = Loan.filter_search_loans(
+            db_session=self.db_session,
+            filter_status=status,
+            search=search,
+            sort_order=sort_order
+        )
 
-        if status == 'active':
-            query = query.filter(and_(Loan.actual_return_date == None, Loan.return_date > datetime.now()))
-        elif status == 'past':
-            query = query.filter(Loan.actual_return_date != None)
-        elif status == 'overdue':
-            query = query.filter(and_(Loan.actual_return_date == None, Loan.return_date < datetime.now()))
+        return Result(True, "Loans retrieved successfully", query)
 
-        if search:
-            search_term = f"%{search.lower()}%"
-            query = query.filter(
-                (Listing.title.ilike(search_term)) |
-                (User.username.ilike(search_term)))
-
-        if sort_order == 'asc':
-            query = query.order_by(Loan.start_date.asc())
-        else:
-            query = query.order_by(Loan.start_date.desc())
-        print('status')
-
-        return query.all()
 
     def get_loans_current_user(self, user_id, status=None, search=None, sort_order='desc'):
         query = self.db_session.query(Loan).filter_by(user_id=user_id).join(Loan.listing).join(Loan.user)
@@ -196,8 +166,8 @@ class ListingService:
             query = query.order_by(Loan.start_date.asc())
         else:
             query = query.order_by(Loan.start_date.desc())
-
-        return query.all()
+        results = query.all()
+        return Result(True, "User's loans retrieved successfully.", results)
 
 
     def get_loan_by_id(self, loan_id):

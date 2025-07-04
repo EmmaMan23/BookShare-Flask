@@ -2,6 +2,8 @@ from app.extensions import db
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 import logging
+from datetime import datetime
+from sqlalchemy import and_
 
 class baseModel(db.Model):
     __abstract__ = True
@@ -34,8 +36,15 @@ class baseModel(db.Model):
         except Exception as e:
             logging.error(f"Failed to get record {cls.__name__} with id={record_id}: {e}")
             return None
-
-
+        
+    @classmethod
+    def get_all(cls, db_session):
+        try:
+            records = db_session.query(cls)
+            return records
+        except Exception as e:
+            logging.error(f"Failed to get records {cls.__name__}: {e}")
+            return None
 
 class User(baseModel, UserMixin):
     user_id = db.Column(db.Integer, primary_key=True)
@@ -61,6 +70,28 @@ class User(baseModel, UserMixin):
     
     def get_id(self):
         return str(self.user_id)
+    
+    @classmethod
+    def filter_search_query(cls, db_session, search=None, filter_role=None, marked_for_deletion=None, sort_join_date='desc'):
+        query = db_session.query(cls)
+
+        if search:
+            query = query.filter(cls.username.ilike(f'%{search}%'))
+
+        if filter_role in ('admin', 'regular'):
+            query = query.filter(cls.role == filter_role)
+
+        if marked_for_deletion == 'true':
+            query = query.filter(cls.marked_for_deletion.is_(True))
+        
+        if sort_join_date == 'asc':
+            query = query.order_by(cls.join_date.asc())
+        else:
+            query = query.order_by(cls.join_date.desc())
+        
+        return query.all()
+    
+
 
 class Listing(baseModel):
     listing_id = db.Column(db.Integer, primary_key=True)
@@ -79,6 +110,35 @@ class Listing(baseModel):
     @property
     def active_loan(self):
         return next((loan for loan in self.loans if not loan.is_returned), None)
+    
+    @classmethod
+    def filter_search_listings(cls, db_session, user_id=None, search=None, filter_genre=None, filter_availability=None, sort_order='desc', marked_for_deletion=None):
+        query = db_session.query(cls)
+
+        if user_id:
+            query = query.filter(cls.user_id == user_id)
+        if search:
+            query = query.filter(
+                (cls.title.ilike(f'%{search}%')) |
+                (cls.author.ilike(f'%{search}%'))
+                )
+            
+        if filter_genre:
+            query = query.filter(Listing.genre.has(name=filter_genre))
+
+        if filter_availability is not None:
+            query = query.filter(Listing.is_available == filter_availability)
+
+
+        if marked_for_deletion == 'true':
+            query = query.filter(cls.marked_for_deletion.is_(True))
+        
+        if sort_order == 'asc':
+            query = query.order_by(cls.date_listed.asc())
+        else:
+            query = query.order_by(cls.date_listed.desc())
+        
+        return query.all()
 
 class Loan(baseModel):
     loan_id = db.Column(db.Integer, primary_key=True)
@@ -91,7 +151,37 @@ class Loan(baseModel):
     user = db.relationship('User', back_populates='loans')
     listing = db.relationship('Listing', back_populates='loans')
 
-    
+    @classmethod
+    def filter_search_loans(cls, db_session, filter_status=None, search=None, sort_order='desc'):
+        query = db_session.query(cls).join(cls.listing).join(cls.user)
+
+        if search:
+            query = query.filter(
+                (Listing.title.ilike(f'%{search}%')) |
+                (User.username.ilike(f'%{search}%'))
+            )
+
+        if filter_status:
+            now = datetime.now()
+            if filter_status == 'active':
+                query = query.filter(and_(
+                    cls.actual_return_date.is_(None),
+                    cls.return_date > now
+                ))
+            elif filter_status == 'past':
+                query = query.filter(cls.actual_return_date.isnot(None))
+            elif filter_status == 'overdue':
+                query = query.filter(and_(
+                    cls.actual_return_date.is_(None),
+                    cls.return_date < now
+                ))
+
+        if sort_order == 'asc':
+            query = query.order_by(cls.start_date.asc())
+        else:
+            query = query.order_by(cls.start_date.desc())
+
+        return query.all()
 
 
 class Genre(baseModel):

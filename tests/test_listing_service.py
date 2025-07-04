@@ -15,12 +15,12 @@ def listing_service(mock_db_session):
 
 
 def test_list_book_success(mock_db_session):
-    with patch('app.services.listing_service.validate_non_empty_string', side_effect=lambda val, field: val), \
-        patch('app.models.Listing.save', return_value=True) as mock_save:
+    mock_user = MagicMock()
+    mock_user.total_listings = 0
 
-        mock_user =MagicMock()
-        mock_user.total_listings = 0
-        mock_db_session.get.return_value = mock_user
+    with patch('app.services.listing_service.validate_non_empty_string', side_effect=lambda val, field: val), \
+        patch('app.models.Listing.save', return_value=True) as mock_save, \
+        patch.object(User, 'get_by_id', return_value=mock_user):
 
         mock_dashboard_service = MagicMock()
         listing_service = ListingService(mock_db_session, mock_dashboard_service)
@@ -41,8 +41,7 @@ def test_list_book_success(mock_db_session):
         assert "Listing created successfully" in result.message
         mock_save.assert_called_once()
         mock_dashboard_service.update_overall_listings.assert_called_once()
-        mock_db_session.get.assert_called_with(User, 123)
-        
+
 
 def test_list_book_exception(mock_db_session):
 
