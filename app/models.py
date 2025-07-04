@@ -71,6 +71,12 @@ class User(baseModel, UserMixin):
     def get_id(self):
         return str(self.user_id)
     
+
+    @classmethod
+    def existing_user(cls, db_session, username):
+        return db_session.query(cls).filter(func.lower(cls.username) == username.lower()).first()
+
+    
     @classmethod
     def count_admins(cls, db_session):
         return db_session.query(cls).filter_by(role='admin').count()

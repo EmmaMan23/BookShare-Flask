@@ -31,7 +31,7 @@ class UserService:
             if admin_code != "Secretadmin3":
                 return Result(False, "Invalid admin registration code!")
             
-        existing_user = self.db_session.query(User).filter_by(username=username).first()
+        existing_user = User.existing_user(self.db_session, username)
         if existing_user:
             return Result(False, "Username already taken")
             
@@ -49,7 +49,7 @@ class UserService:
         except ValueError as e:
             return Result(False, str(e))
 
-        existing_user = self.db_session.query(User).filter_by(username=username).first()
+        existing_user = User.existing_user(self.db_session, username)
         if existing_user and existing_user.verify_password(password):
             return Result(True, "Successful login", existing_user)
         else:
@@ -66,7 +66,7 @@ class UserService:
                 return Result(False, str(e))
 
 
-            existing_user = self.db_session.query(User).filter_by(username=new_username).first()
+            existing_user = User.existing_user(self.db_session, new_username)
             if existing_user:
                 return Result(False, "Username already taken")
             
