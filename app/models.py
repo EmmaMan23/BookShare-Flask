@@ -158,6 +158,17 @@ class Listing(baseModel):
             query = query.order_by(cls.date_listed.desc())
         
         return query.all()
+    @classmethod
+    def count_by_user(cls, db_session, user_id):
+        return db_session.query(cls).filter(cls.user_id == user_id).count()
+
+    @classmethod
+    def count_all(cls, db_session):
+        return db_session.query(cls).count()
+
+    @classmethod
+    def count_available(cls, db_session):
+        return db_session.query(cls).filter(cls.is_available.is_(True)).count()
 
 class Loan(baseModel):
     loan_id = db.Column(db.Integer, primary_key=True)
@@ -205,6 +216,14 @@ class Loan(baseModel):
             query = query.order_by(cls.start_date.desc())
 
         return query.all()
+    
+    @classmethod
+    def count_active_by_user(cls, db_session, user_id):
+        return db_session.query(cls).filter(cls.user_id == user_id, cls.is_returned.is_(False)).count()
+
+    @classmethod
+    def count_active(cls, db_session):
+        return db_session.query(cls).filter(cls.is_returned.is_(False)).count()
 
 
 class Genre(baseModel):
