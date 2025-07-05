@@ -1,9 +1,6 @@
-from app.extensions import db
 from app.utils import Result
 import json
 from app.models import Listing, Loan
-from datetime import date, timedelta
-import os
 
 class DashboardService:
 

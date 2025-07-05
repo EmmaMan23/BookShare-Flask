@@ -32,7 +32,7 @@ def create_listing():
 
         if result.success:
             flash(result.message, "success")
-            return redirect(url_for('listings.view_all'))
+            return redirect(url_for('listings.view_mine'))
         else:
             flash(result.message, "danger")
 
@@ -51,7 +51,7 @@ def view_all():
     if marked_for_deletion and marked_for_deletion.lower() == 'true':
         marked_for_deletion = True
     else:
-        marked_for_deletion = None  
+        marked_for_deletion = None
 
     if sort_order not in ('asc', 'desc'):
         sort_order = 'desc'
@@ -128,13 +128,13 @@ def edit_listing():
         if res.success:
             return redirect(url_for('listings.view_mine'))
         else:
-            # On failure, re-fetch listing for rendering
+
             listing_result = listing_service.get_listing_by_id(listing_id)
             listing = listing_result.data if listing_result.success else None
             return render_template('edit_listing.html', genres=genres, listing=listing)
 
     else:
-        # GET method
+
         listing_id = request.args.get('listing_id', type=int)
         if not listing_id:
             flash("Invalid or missing listing ID.", "danger")
@@ -164,7 +164,7 @@ def mark_for_deletion():
         flash("Listing not found.", "danger")
         return redirect(url_for('listings.view_mine'))
 
-    listing = result.data  # unwrap the Listing object
+    listing = result.data 
 
     if listing.user_id != current_user.user_id:
         flash("You are not authorised to change this listing.", "danger")
@@ -233,7 +233,6 @@ def reserve_book():
         result = listing_service.reserve_book(user_id, listing_id)
         flash(result.message, "success" if result.success else "danger")
 
-   
         return redirect(url_for('listings.view_loans', scope='self'))
 
 

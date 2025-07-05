@@ -1,7 +1,6 @@
-from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.security import generate_password_hash
 from app.models import User
 from app.utils import Result
-from app.extensions import db
 from flask_login import logout_user
 from app.services.validators import validate_non_empty_string
 from datetime import date

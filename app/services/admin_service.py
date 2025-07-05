@@ -1,14 +1,6 @@
-from flask import Blueprint, render_template, request
-from flask import redirect, url_for, flash
-from app.models import Genre, Listing, User
-from app.services import listing_service
-from datetime import date, timedelta
-from app.extensions import db
+from app.models import Genre, User
 from app.utils import Result
 from app.services.validators import validate_non_empty_string
-import json
-import os
-from sqlalchemy import func
 import logging
 
 

@@ -1,12 +1,9 @@
 from app.models import Listing, Loan, Genre, User
 from app.utils import Result
-from datetime import date, timedelta, datetime
-from flask import url_for
+from datetime import date, timedelta
 from app.services.validators import validate_non_empty_string
-from sqlalchemy.orm import joinedload
-from app.services.dashboard_service import DashboardService
 from flask_login import current_user
-from sqlalchemy import and_
+
 
 class ListingService:
     def __init__(self, db_session, dashboard_service):
@@ -82,12 +79,12 @@ class ListingService:
         is_available=None,
         marked_for_deletion=None):
 
-        result = self.get_listing_by_id(listing_id)  # This returns a Result object
+        result = self.get_listing_by_id(listing_id)  
 
         if not result.success:
             return Result(False, "Listing not found")
 
-        listing = result.data  # Extract the actual Listing object
+        listing = result.data 
 
         if not (current_user.is_admin or listing.user_id == user_id):
             return Result(False, "You can't edit someone else's listing")
@@ -132,9 +129,9 @@ class ListingService:
     def update_marked_for_deletion(self, listing_id, is_marked):
         result = self.get_listing_by_id(listing_id)
         if not result.success:
-            return result  # Return the error result early
+            return result  
 
-        listing = result.data  # unwrap the actual listing object
+        listing = result.data  
 
         try:
             listing.marked_for_deletion = is_marked
@@ -165,9 +162,9 @@ class ListingService:
     def update_loan(self, loan_id, actual_return_date):
         loan_result = self.get_loan_by_id(loan_id)
         if not loan_result.success:
-            return loan_result, None  # Always return a tuple
+            return loan_result, None 
 
-        loan = loan_result.data  # assuming your Result object stores the loan in `data`
+        loan = loan_result.data 
 
         try:
             loan.is_returned = True
