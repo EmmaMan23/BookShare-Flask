@@ -1,5 +1,4 @@
 from app import create_app
-from app.routes import auth
 from app.seed import seeding
 from flask import redirect, url_for
 
@@ -12,7 +11,6 @@ if __name__ == '__main__':
 
     @app.route('/')
     def index():
-        return redirect(url_for('auth.login'))  
-
+        return redirect(url_for('auth.login'))
 
     app.run(debug=True)

@@ -13,12 +13,13 @@ listing_service = ListingService(db.session, dashboard_service)
 
 admin = Blueprint('admin', __name__)
 
+
 @admin.route('/view_users')
 @login_required
 def view_users():
     args = request.args
     sort_join_date = args.get('sort_join_date', 'desc')
-    filter_role = args.get('filter_role')  
+    filter_role = args.get('filter_role')
     marked_for_deletion = args.get('marked_for_deletion')
     search = args.get('search')
 
@@ -40,7 +41,7 @@ def view_users():
         sort_join_date=sort_join_date,
         role=filter_role,
         marked_for_deletion=marked_for_deletion
-        )
+    )
 
 
 @admin.route('/delete_record', methods=['POST'])
@@ -49,7 +50,7 @@ def delete():
     if not current_user.is_admin:
         flash("Unauthorised: Admins only", "danger")
         return redirect(url_for('dash.dashboard'))
-    
+
     form_data = request.form
 
     model = form_data.get('model')
@@ -94,7 +95,6 @@ def delete():
         return redirect(url_for('listings.view_all'))
 
 
-
 @admin.route('/create_genre', methods=['POST', 'GET'])
 @login_required
 def create_genre():
@@ -118,13 +118,13 @@ def create_genre():
             flash("Unsuccessful, please select an image when creating a genre.", "danger")
             return redirect(url_for('admin.create_genre'))
 
-
         result = admin_service.create_genre(name, image)
         flash(result.message, "success" if result.success else "danger")
         return redirect(url_for('admin.create_genre'))
-        
+
     genres_result = listing_service.get_all_genres()
     return render_template('add_genre.html', genre_images=genre_images, genres=genres_result)
+
 
 @admin.route('/edit_genre', methods=['POST'])
 @login_required
@@ -136,9 +136,9 @@ def edit_genre():
 
     result = admin_service.edit_genre(genre_id, name, image)
 
-    
     flash(result.message, "success" if result.success else "danger")
     return redirect(url_for('admin.create_genre'))
+
 
 @admin.route('/admin_edit_user', methods=['GET', 'POST'])
 @login_required
@@ -147,7 +147,7 @@ def admin_edit_user():
     if not user_id:
         flash("User ID is missing.", "danger")
         return redirect(url_for('admin.view_users'))
-    
+
     user = admin_service.get_user_by_id(user_id)
     if not user:
         flash("User not found.", "danger")
@@ -165,5 +165,5 @@ def admin_edit_user():
             users_result = admin_service.view_users()
             users = users_result.data if users_result.success else []
             return render_template('view_users.html', users=users, user=user)
-    
+
     return render_template('view_users.html', user=user)

@@ -15,6 +15,7 @@ from app.services.dashboard_service import DashboardService
 from app.services.listing_service import ListingService
 import logging
 
+
 @event.listens_for(Engine, "connect")
 def set_sqlite_pragma(dbapi_connection, connection_record):
     cursor = dbapi_connection.cursor()
@@ -22,14 +23,14 @@ def set_sqlite_pragma(dbapi_connection, connection_record):
     cursor.close()
 
 
-
 load_dotenv()
 
-logging.basicConfig(filename='app.log', level=logging.ERROR, format='%(asctime)s %(levelname)s: %(message)s')
+logging.basicConfig(filename='app.log', level=logging.ERROR,
+                    format='%(asctime)s %(levelname)s: %(message)s')
+
+
 def create_app(testing=False):
     app = Flask(__name__, static_folder='static')
-    
-
 
     app.secret_key = os.environ.get('SECRET_KEY', 'testing_secret_key')
 
@@ -45,8 +46,6 @@ def create_app(testing=False):
     with app.app_context():
         db.drop_all()
         db.create_all()
-
-
 
     login_manager.login_view = 'auth.login'
     login_manager.login_message_category = "warning"

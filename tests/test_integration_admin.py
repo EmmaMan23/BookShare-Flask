@@ -1,8 +1,8 @@
 import pytest
 from app.models import User, Genre
 from app.extensions import db as _db
-from unittest.mock import patch
 from datetime import date
+
 
 @pytest.fixture
 def genre_to_delete(app):
@@ -12,23 +12,28 @@ def genre_to_delete(app):
         _db.session.commit()
         yield genre
 
+
 @pytest.fixture
 def regular_user(app):
     with app.app_context():
-        user = User(username="regular", role="regular", join_date=date.today(), total_loans=0, total_listings=0)
+        user = User(username="regular", role="regular",
+                    join_date=date.today(), total_loans=0, total_listings=0)
         user.set_password("password")
         _db.session.add(user)
         _db.session.commit()
         yield user
 
+
 @pytest.fixture
 def admin_user(app):
     with app.app_context():
-        admin = User(username="admin", role="admin", join_date=date.today(), total_loans=0, total_listings=0)
+        admin = User(username="admin", role="admin",
+                    join_date=date.today(), total_loans=0, total_listings=0)
         admin.set_password("password")
         _db.session.add(admin)
         _db.session.commit()
         yield admin
+
 
 def login_client(client, user):
     with client.session_transaction() as sess:
@@ -37,8 +42,10 @@ def login_client(client, user):
 
 def test_view_users_page(client, app, admin_user):
     with app.app_context():
-        user1 = User(username="user1", role="regular", join_date=date.today(), total_loans=0, total_listings=0)
-        user2 = User(username="user2", role="regular", join_date=date.today(), total_loans=0, total_listings=0)
+        user1 = User(username="user1", role="regular",
+                     join_date=date.today(), total_loans=0, total_listings=0)
+        user2 = User(username="user2", role="regular",
+                     join_date=date.today(), total_loans=0, total_listings=0)
 
         user1.set_password("pass1")
         user2.set_password("pass2")
@@ -48,7 +55,6 @@ def test_view_users_page(client, app, admin_user):
     with app.app_context():
         users = User.query.all()
         print("Users in DB:", [u.username for u in users])
-
 
     login_client(client, admin_user)
 
@@ -61,7 +67,6 @@ def test_view_users_page(client, app, admin_user):
     assert response.status_code == 200
     assert b"user1" in response.data.lower()
     assert b"user2" in response.data.lower()
-
 
 
 def test_create_genre_success(client, app, admin_user):

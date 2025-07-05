@@ -6,60 +6,60 @@ from datetime import date
 
 app = create_app()
 
+
 def seeding():
     with app.app_context():
 
         genres = [
             {
-            "name": "Science Fiction",
-            "image": "images/science.png"
+                "name": "Science Fiction",
+                "image": "images/science.png"
             },
             {
-            "name": "Fantasy",
-            "image": "images/fantasy.png"
+                "name": "Fantasy",
+                "image": "images/fantasy.png"
             },
             {
-            "name": "Romance",
-            "image": "images/romance.png"
+                "name": "Romance",
+                "image": "images/romance.png"
             },
             {
-            "name": "Horror",
-            "image": "images/horror.png"
+                "name": "Horror",
+                "image": "images/horror.png"
             },
             {
-            "name": "Mystery",
-            "image": "images/mystery.png"
+                "name": "Mystery",
+                "image": "images/mystery.png"
             },
             {
-            "name": "Thriller",
-            "image": "images/science.png"
+                "name": "Thriller",
+                "image": "images/horror.png"
             },
             {
-            "name": "History",
-            "image": "images/adventure.png"
+                "name": "History",
+                "image": "images/adventure.png"
             },
             {
-            "name": "Non-Fiction",
-            "image": "images/science.png"
+                "name": "Non-Fiction",
+                "image": "images/science.png"
             },
             {
-            "name": "Adventure",
-            "image": "images/adventure.png"
+                "name": "Adventure",
+                "image": "images/adventure.png"
             },
             {
-            "name": "Children",
-            "image": "images/children.png"
+                "name": "Children",
+                "image": "images/children.png"
             }
         ]
 
         for g in genres:
             genre = Genre(
-                name =g["name"],
-                image = g["image"]
+                name=g["name"],
+                image=g["image"]
             )
             db.session.add(genre)
         db.session.commit()
-
 
         users = [
             {
@@ -131,7 +131,7 @@ def seeding():
                 "password": "Piesforever",
                 "role": "regular",
                 "marked_for_deletion": True,
-                "total_loans":5 ,
+                "total_loans": 5,
                 "total_listings": 1,
                 "join_date": date(2024, 12, 1)
             },
@@ -149,7 +149,7 @@ def seeding():
                 "password": "Ilovefootball",
                 "role": "regular",
                 "marked_for_deletion": False,
-                "total_loans": 5 ,
+                "total_loans": 5,
                 "total_listings": 1,
                 "join_date": date(2025, 4, 5)
             }
@@ -158,13 +158,13 @@ def seeding():
         for i in users:
             hashed_password = generate_password_hash(i["password"])
             user = User(
-                username = i["username"],
-                password_hash = hashed_password,
-                role = i["role"],
-                marked_for_deletion = i["marked_for_deletion"],
-                total_loans = i["total_loans"],
-                total_listings = i["total_listings"],
-                join_date = i["join_date"],
+                username=i["username"],
+                password_hash=hashed_password,
+                role=i["role"],
+                marked_for_deletion=i["marked_for_deletion"],
+                total_loans=i["total_loans"],
+                total_listings=i["total_listings"],
+                join_date=i["join_date"],
             )
 
             db.session.add(user)
@@ -181,7 +181,7 @@ def seeding():
                 "marked_for_deletion": False,
                 "user_id": 3,
                 "date_listed": date(2025, 1, 11),
-                
+
             },
             {
                 "title": "Alice in Wonderland ",
@@ -277,14 +277,14 @@ def seeding():
 
         for l in listings:
             listing = Listing(
-                title = l["title"],
-                author = l["author"],
-                description = l["description"],
-                genre_id = l["genre_id"],
-                is_available = l["is_available"],
-                marked_for_deletion = l["marked_for_deletion"],
-                user_id = l["user_id"],
-                date_listed =l["date_listed"],
+                title=l["title"],
+                author=l["author"],
+                description=l["description"],
+                genre_id=l["genre_id"],
+                is_available=l["is_available"],
+                marked_for_deletion=l["marked_for_deletion"],
+                user_id=l["user_id"],
+                date_listed=l["date_listed"],
             )
             db.session.add(listing)
         db.session.commit()
@@ -331,7 +331,7 @@ def seeding():
                 "is_returned": True
             },
             {
-                "listing_id": 10 ,
+                "listing_id": 10,
                 "user_id": 3,
                 "start_date": date(2025, 5, 30),
                 "return_date": date(2025, 6, 27),
@@ -355,7 +355,7 @@ def seeding():
                 "is_returned": True
             },
             {
-                "listing_id": 7 ,
+                "listing_id": 7,
                 "user_id": 10,
                 "start_date": date(2025, 6, 10),
                 "return_date": date(2025, 7, 2),
@@ -374,12 +374,12 @@ def seeding():
 
         for i in loans:
             loan = Loan(
-                listing_id = i["listing_id"],
-                user_id = i["user_id"],
-                start_date = i["start_date"],
-                return_date = i["return_date"],
-                actual_return_date = i["actual_return_date"],
-                is_returned = i["is_returned"]
+                listing_id=i["listing_id"],
+                user_id=i["user_id"],
+                start_date=i["start_date"],
+                return_date=i["return_date"],
+                actual_return_date=i["actual_return_date"],
+                is_returned=i["is_returned"]
             )
             db.session.add(loan)
         db.session.commit()

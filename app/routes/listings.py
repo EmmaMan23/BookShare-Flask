@@ -9,9 +9,10 @@ from app.services import listing_service, dashboard_service
 from app.extensions import db
 
 
-listings = Blueprint ('listings', __name__)
+listings = Blueprint('listings', __name__)
 
 listing_service = ListingService(db.session, dashboard_service)
+
 
 @listings.route('/create_listing', methods=['POST', 'GET'])
 @login_required
@@ -27,8 +28,9 @@ def create_listing():
 
         user_id = current_user.user_id
         is_available = True
-    
-        result = listing_service.list_book(title, author, description, genre_id, user_id, is_available)
+
+        result = listing_service.list_book(
+            title, author, description, genre_id, user_id, is_available)
 
         if result.success:
             flash(result.message, "success")
@@ -37,6 +39,7 @@ def create_listing():
             flash(result.message, "danger")
 
     return render_template('create_listing.html', genres=genres)
+
 
 @listings.route('/view_listings', methods=['GET'])
 @login_required
@@ -58,7 +61,8 @@ def view_all():
 
     result = listing_service.get_all_listings(
         genre=genre_filter,
-        availability=(availability_filter == "available") if availability_filter else None,
+        availability=(availability_filter ==
+                      "available") if availability_filter else None,
         search=search_query,
         sort_order=sort_order,
         marked_for_deletion=marked_for_deletion
@@ -78,11 +82,13 @@ def view_all():
         current_user=current_user
     )
 
+
 @listings.route('/view_my_books')
 @login_required
 def view_mine():
     result = listing_service.get_all_listings(user_id=current_user.user_id)
     return render_template('show_user_listings.html', listings=result.data, existing_user=current_user)
+
 
 @listings.route('/edit_listing', methods=['POST', 'GET'])
 @login_required
@@ -153,7 +159,7 @@ def edit_listing():
 
         return render_template('edit_listing.html', genres=genres, listing=listing)
 
-    
+
 @listings.route('/mark_for_deletion', methods=['POST'])
 @login_required
 def mark_for_deletion():
@@ -164,7 +170,7 @@ def mark_for_deletion():
         flash("Listing not found.", "danger")
         return redirect(url_for('listings.view_mine'))
 
-    listing = result.data 
+    listing = result.data
 
     if listing.user_id != current_user.user_id:
         flash("You are not authorised to change this listing.", "danger")
@@ -174,8 +180,10 @@ def mark_for_deletion():
     if request.form.get('marked_for_deletion') == 'true':
         # Flip the current deletion status
         is_marked = not listing.marked_for_deletion
-        update_result = listing_service.update_marked_for_deletion(listing_id, is_marked)
-        flash(update_result.message, "success" if update_result.success else "danger")
+        update_result = listing_service.update_marked_for_deletion(
+            listing_id, is_marked)
+        flash(update_result.message,
+              "success" if update_result.success else "danger")
     else:
         flash("Please check the box to confirm your action.", "warning")
 
@@ -192,11 +200,12 @@ def view_loans():
     search = args.get('search')
     sort_order = args.get('sort', 'desc')
 
-
     if scope == 'all' and current_user.is_admin:
-        result = listing_service.get_all_loans(status=status, search=search, sort_order=sort_order)
+        result = listing_service.get_all_loans(
+            status=status, search=search, sort_order=sort_order)
     else:
-        result = listing_service.get_all_loans(current_user.user_id, status=status, search=search, sort_order=sort_order)
+        result = listing_service.get_all_loans(
+            current_user.user_id, status=status, search=search, sort_order=sort_order)
     print(f"Scope: {scope}, Is admin: {current_user.is_admin}")
     listings_data = listing_service.get_all_listings()
     today = date.today()
@@ -210,7 +219,8 @@ def view_loans():
         search=search,
         sort_order=sort_order
     )
-        
+
+
 @listings.route('/reserve_book', methods=['POST'])
 @login_required
 def reserve_book():
@@ -229,12 +239,11 @@ def reserve_book():
         if listing.user_id == current_user.user_id:
             flash("You cannot reserve your own book.", "warning")
             return redirect(url_for('listings.view_all'))
-        
+
         result = listing_service.reserve_book(user_id, listing_id)
         flash(result.message, "success" if result.success else "danger")
 
         return redirect(url_for('listings.view_loans', scope='self'))
-
 
 
 @listings.route('/update_loan', methods=['POST'])
@@ -246,7 +255,8 @@ def update_loan():
         user_id = current_user.user_id
         today = date.today()
 
-        result, loan = listing_service.update_loan(loan_id, actual_return_date=today)
+        result, loan = listing_service.update_loan(
+            loan_id, actual_return_date=today)
         flash(result.message, "success" if result.success else "danger")
 
         loan_result = listing_service.get_loan_by_id(loan_id)
@@ -254,15 +264,8 @@ def update_loan():
             loan_obj = loan_result.data
             if current_user.is_admin and loan_obj.user_id != current_user.user_id:
                 return redirect(url_for('listings.view_loans', scope='all'))
-        
+
         return redirect(url_for('listings.view_loans', scope='self'))
 
     # fallback
     return redirect(url_for('listings.view_loans', scope='self'))
-
-
-
-
-
-
-        

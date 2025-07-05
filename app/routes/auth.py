@@ -23,16 +23,19 @@ def register():
         user_type = form_data.get('user_type', '')
         admin_code = form_data.get('admin_code', '')
 
-        result = user_service.register_user(username, password, re_password, user_type, admin_code)
+        result = user_service.register_user(
+            username, password, re_password, user_type, admin_code)
 
         if result.success:
             flash(result.message, "success")
             return redirect(url_for('auth.login'))
         else:
             flash(result.message, "danger")
-            return render_template('login.html', show_register=True, metrics=metrics) #keep showing register form if registration failed
-        
+            # keep showing register form if registration failed
+            return render_template('login.html', show_register=True, metrics=metrics)
+
     return render_template('login.html', show_register=False, metrics=metrics)
+
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
@@ -54,6 +57,7 @@ def login():
             return render_template('login.html', show_register=False)
     return render_template('login.html', show_register=False, metrics=metrics)
 
+
 @auth.route('/edit_user', methods=['POST', 'GET'])
 @login_required
 def edit_user():
@@ -72,8 +76,8 @@ def edit_user():
                 marked_for_deletion)
             flash(result.message, 'success' if result.success else 'danger')
             return redirect(url_for('dash.dashboard'))
-        
-        elif form_type  == 'edit':
+
+        elif form_type == 'edit':
             form_data = request.form
             new_username = form_data.get('username', '').strip()
             old_password = form_data.get('old_password', '').strip()
@@ -88,12 +92,11 @@ def edit_user():
                 new_password,
                 confirm_password,
                 marked_for_deletion
-                )
-            
-            
+            )
+
             flash(result.message, 'success' if result.success else 'danger')
             return redirect(url_for('dash.dashboard' if result.success else 'auth.edit_user'))
-    
+
     return render_template('edit_user.html')
 
 
