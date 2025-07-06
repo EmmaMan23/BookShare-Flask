@@ -9,9 +9,10 @@ class DashboardService:
         self.db_session = db_session
         self.metrics_file = metrics_file_path
 
-    def read_metrics(self, user=None):
+    def read_metrics(self, user=None, scope='all'):
         with open(self.metrics_file, "r") as f:
             data = json.load(f)
+            scope=scope
 
         if user:
             data["user_total_listings"] = user.total_listings or 0

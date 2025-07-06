@@ -26,7 +26,6 @@ def test_register_user_success(user_service):
                 user_type="member",
                 admin_code=""
             )
-            print("Result:", result.success, result.message)
             assert result.success is True
             assert "successful" in result.message.lower()
             assert mock_save.called
@@ -162,6 +161,7 @@ def test_mark_for_deletion(user_service, mock_db_session, fake_user):
         marked_for_deletion="true"
     )
 
+
     assert result.success is True
     assert "account deletion requested. an admin will review your request" in result.message.lower()
     assert fake_user.marked_for_deletion is True
@@ -169,17 +169,22 @@ def test_mark_for_deletion(user_service, mock_db_session, fake_user):
 
 
 def test_unmark_for_deletion(user_service, mock_db_session, fake_user):
+    fake_user.marked_for_deletion = True
+
     result = user_service.update_user(
-        user=fake_user, new_username="oldusername",
-        old_password=None, new_password=None,
+        user=fake_user,
+        new_username=None,
+        old_password=None,
+        new_password=None,
         confirm_password=None,
-        marked_for_deletion="false")
-    print("Result message:", result.message)
+        marked_for_deletion="true"
+    )
 
     assert result.success is True
     assert "account deletion has been cancelled" in result.message.lower()
     assert fake_user.marked_for_deletion is False
     assert mock_db_session.commit.called
+
 
 
 def test_no_changes_made(user_service, fake_user):

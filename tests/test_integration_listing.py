@@ -45,6 +45,8 @@ def test_genre(app):
         yield genre
 
 
+
+
 @pytest.fixture
 def logged_in_client(client, test_user):
     with client.session_transaction() as sess:
@@ -77,6 +79,7 @@ def test_edit_listing_route_success(logged_in_client, test_user, test_genre):
             description="Old Desc",
             genre_id=test_genre.genre_id,
             user_id=test_user.user_id,
+            date_listed=date.today(),
             is_available=True
         )
         _db.session.add(listing)

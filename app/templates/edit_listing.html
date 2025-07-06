@@ -10,9 +10,9 @@
     <div class="col-auto">
       <span class="fw-bold">Loan status:</span>
       {% if listing.active_loan %}
-        <span class="badge bg-danger">On Loan</span>
+      <span class="badge bg-danger">On Loan</span>
       {% else %}
-        <span class="badge bg-success">Not on Loan</span>
+      <span class="badge bg-success">Not on Loan</span>
       {% endif %}
     </div>
 
@@ -20,9 +20,9 @@
     <div class="col-auto">
       <span class="fw-bold">Availability:</span>
       {% if listing.is_available %}
-        <span class="badge bg-success">Available</span>
+      <span class="badge bg-success">Available</span>
       {% else %}
-        <span class="badge bg-secondary">Unavailable</span>
+      <span class="badge bg-secondary">Unavailable</span>
       {% endif %}
     </div>
 
@@ -59,22 +59,39 @@
     <textarea class="form-control" name='description' id="floatingTextarea">{{listing.description}}</textarea>
     <label for="floatingTextarea">Description</label>
   </div>
-
-  <!-- Genre Dropdown -->
-  <div class="mb-3">
-    <label for="genre" class="form-label">Genre</label>
-    <select class="form-select" id="genre" name="genre_id">
-      <option value="" {% if not listing.genre %}selected{% endif %}>-- No genre --</option>
+  <div class="mb-4">
+    <h5>Select a Genre</h5>
+    <div class="d-flex flex-wrap gap-3">
       {% for genre in genres %}
-        <option value="{{ genre.genre_id }}" {% if genre.genre_id==listing.genre_id %}selected{% endif %}>
-          {{ genre.name | capitalize }}
-        </option>
+      <label class="genre-tile card text-center p-0" style="width: 180px; cursor: pointer; position: relative;">
+        <input type="radio" name="genre_id" value="{{ genre.genre_id }}" class="genre-radio" {% if
+          genre.genre_id==listing.genre_id %}checked{% endif %}>
+
+        {% if genre.image %}
+        <img src="{{ url_for('static', filename=genre.image) }}" alt="{{ genre.name }}" class="card-img-top"
+          style="height: 150px; object-fit: cover;">
+        {% else %}
+        <img src="{{ url_for('static', filename='images/default.png') }}" alt="{{ genre.name }}" class="card-img-top"
+          style="height: 150px; object-fit: cover;">
+        {% endif %}
+
+        <div class="card-body p-2">
+          <h6 class="mb-0">{{ genre.name | capitalize }}</h6>
+        </div>
+      </label>
       {% endfor %}
-    </select>
+    </div>
   </div>
 
+
+
   <!-- Submit -->
-  <button type="submit" class="btn btn-primary">Submit</button>
+  <div class="container mt-0">
+    <div class="d-flex justify-content-end">
+      <button type="submit" class="btn btn-primary">Submit</button>
+    </div>
+  </div>
+
 </form>
 
 {% endblock %}

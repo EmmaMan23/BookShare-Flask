@@ -1,9 +1,8 @@
 from flask import Blueprint, render_template, request
 from flask import redirect, url_for, flash
 from flask_login import login_required, current_user
-from app.models import Genre, Listing, Loan
 from app.services import listing_service
-from datetime import date, timedelta
+from datetime import date
 from app.services.listing_service import ListingService
 from app.services import listing_service, dashboard_service
 from app.extensions import db
@@ -34,7 +33,7 @@ def create_listing():
 
         if result.success:
             flash(result.message, "success")
-            return redirect(url_for('listings.view_mine'))
+            return redirect(url_for('listings.view_all', scope='self'))
         else:
             flash(result.message, "danger")
 
@@ -45,49 +44,54 @@ def create_listing():
 @login_required
 def view_all():
     args = request.args
+    scope = args.get('scope', 'all')  # default to 'all' if not set
     search_query = args.get('search')
     genre_filter = args.get('genre')
     availability_filter = args.get('availability')
     sort_order = args.get('sort', 'desc')
-
     marked_for_deletion = args.get('marked_for_deletion')
+
     if marked_for_deletion and marked_for_deletion.lower() == 'true':
         marked_for_deletion = True
     else:
         marked_for_deletion = None
 
-    if sort_order not in ('asc', 'desc'):
-        sort_order = 'desc'
+    user_id = current_user.user_id if scope == 'self' else None
 
     result = listing_service.get_all_listings(
+        user_id=user_id,
         genre=genre_filter,
-        availability=(availability_filter ==
-                      "available") if availability_filter else None,
+        availability=(availability_filter == "available") if availability_filter else None,
         search=search_query,
         sort_order=sort_order,
         marked_for_deletion=marked_for_deletion
     )
 
     genres = listing_service.get_all_genres()
+    today = date.today()
 
     return render_template(
         'view_books.html',
         listings=result.data,
+        scope=scope,
         search=search_query,
         genre=genre_filter,
         availability=availability_filter,
         genres=genres,
         sort_order=sort_order,
         marked_for_deletion=marked_for_deletion,
-        current_user=current_user
+        current_user=current_user,
+        today=today
     )
 
 
-@listings.route('/view_my_books')
-@login_required
-def view_mine():
-    result = listing_service.get_all_listings(user_id=current_user.user_id)
-    return render_template('show_user_listings.html', listings=result.data, existing_user=current_user)
+# @listings.route('/view_my_books')
+# @login_required
+# def view_mine():
+#     result = listing_service.get_all_listings(user_id=current_user.user_id)
+#     today = date.today()
+#     genres = listing_service.get_all_genres()
+#     return render_template('show_user_listings.html', listings=result.data, existing_user=current_user, today=today, genres=genres)
 
 
 @listings.route('/edit_listing', methods=['POST', 'GET'])
@@ -101,14 +105,14 @@ def edit_listing():
 
         if not listing_id_str or not listing_id_str.isdigit():
             flash("Invalid or missing listing ID.", "danger")
-            return redirect(url_for('listings.view_mine'))
+            return redirect(url_for('listings.view_all', scope='self'))
 
         listing_id = int(listing_id_str)
         result = listing_service.get_listing_by_id(listing_id)
 
         if not result.success:
             flash("Listing not found.", "danger")
-            return redirect(url_for('listings.view_mine'))
+            return redirect(url_for('listings.view_all', scope='self'))
 
         listing = result.data
 
@@ -132,7 +136,7 @@ def edit_listing():
         flash(res.message, "success" if res.success else "danger")
 
         if res.success:
-            return redirect(url_for('listings.view_mine'))
+            return redirect(url_for('listings.view_all', scope='self'))
         else:
 
             listing_result = listing_service.get_listing_by_id(listing_id)
@@ -144,18 +148,18 @@ def edit_listing():
         listing_id = request.args.get('listing_id', type=int)
         if not listing_id:
             flash("Invalid or missing listing ID.", "danger")
-            return redirect(url_for('listings.view_mine'))
+            return redirect(url_for('listings.view_all', scope='self'))
 
         listing_result = listing_service.get_listing_by_id(listing_id)
         if not listing_result.success:
             flash("Listing not found.", "danger")
-            return redirect(url_for('listings.view_mine'))
+            return redirect(url_for('listings.view_all', scope='self'))
 
         listing = listing_result.data
 
         if listing.user_id != current_user.user_id:
             flash("You can't edit someone else's listing", "danger")
-            return redirect(url_for('listings.view_mine'))
+            return redirect(url_for('listings.view_all', scope='self'))
 
         return render_template('edit_listing.html', genres=genres, listing=listing)
 
@@ -168,13 +172,13 @@ def mark_for_deletion():
     result = listing_service.get_listing_by_id(listing_id)
     if not result.success:
         flash("Listing not found.", "danger")
-        return redirect(url_for('listings.view_mine'))
+        return redirect(url_for('listings.view_all'))
 
     listing = result.data
 
     if listing.user_id != current_user.user_id:
         flash("You are not authorised to change this listing.", "danger")
-        return redirect(url_for('listings.view_mine'))
+        return redirect(url_for('listings.view_all', scope='all'))
 
     # Only take action if the checkbox was checked
     if request.form.get('marked_for_deletion') == 'true':
@@ -187,7 +191,7 @@ def mark_for_deletion():
     else:
         flash("Please check the box to confirm your action.", "warning")
 
-    return redirect(url_for('listings.view_mine'))
+    return redirect(url_for('listings.view_all', scope='self'))
 
 
 @listings.route('/view_loans')
@@ -232,13 +236,13 @@ def reserve_book():
         listing_result = listing_service.get_listing_by_id(listing_id)
         if not listing_result.success:
             flash("Listing not found.", "danger")
-            return redirect(url_for('listings.view_all'))
+            return redirect(url_for('listings.view_all', scope='all'))
 
         listing = listing_result.data
 
         if listing.user_id == current_user.user_id:
             flash("You cannot reserve your own book.", "warning")
-            return redirect(url_for('listings.view_all'))
+            return redirect(url_for('listings.view_all', scope='all'))
 
         result = listing_service.reserve_book(user_id, listing_id)
         flash(result.message, "success" if result.success else "danger")

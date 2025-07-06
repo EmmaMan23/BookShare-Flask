@@ -114,7 +114,7 @@ def test_edit_user(client, app, new_username, old_password, new_password, confir
     }
 
     response = client.post('/edit_user', data=data, follow_redirects=True)
-    print(response.data.decode())
+    # print(response.data.decode())
 
     if new_username == "takenuser":
         assert b"Username already taken" in response.data
@@ -131,20 +131,24 @@ def test_edit_user(client, app, new_username, old_password, new_password, confir
         assert b"Details updated successfully" in response.data
     else:
         assert b"No changes made" in response.data
-    print(response.data.decode())
+    # print(response.data.decode())
     response = client.post('/edit_user', data=data, follow_redirects=True)
 
 
+import pytest
+
 @pytest.mark.parametrize(
-    "marked_for_deletion, expected_message",
+    "initial_marked_for_deletion, form_marked_for_deletion_value, expected_message",
     [
-        ('true', b"Account deletion requested. An admin will review your request"),
-        ('false', b"Account deletion has been cancelled"),
+        (False, 'true', b"Account deletion requested. An admin will review your request"),
+        (True, 'true', b"Account deletion has been cancelled"),
+        (False, None, b"No changes made"),
+        (True, None, b"No changes made"),
     ]
 )
-def test_edit_user_marked_for_deletion(client, app, marked_for_deletion, expected_message):
+def test_edit_user_marked_for_deletion(client, app, initial_marked_for_deletion, form_marked_for_deletion_value, expected_message):
     with app.app_context():
-        user = User(username='olduser', role='regular')
+        user = User(username='olduser', role='regular', marked_for_deletion=initial_marked_for_deletion)
         user.set_password('oldpass')
         _db.session.add(user)
         _db.session.commit()
@@ -154,12 +158,16 @@ def test_edit_user_marked_for_deletion(client, app, marked_for_deletion, expecte
 
     data = {
         'form_type': 'delete',
-        'marked_for_deletion': marked_for_deletion,
     }
+    if form_marked_for_deletion_value is not None:
+        data['marked_for_deletion'] = form_marked_for_deletion_value
 
     response = client.post('/edit_user', data=data, follow_redirects=True)
-    assert expected_message in response.data
 
+    assert expected_message in response.data, \
+        f"Assertion failed for initial_marked_for_deletion={initial_marked_for_deletion}, " \
+        f"form_marked_for_deletion_value={form_marked_for_deletion_value}. " \
+        f"Expected '{expected_message.decode()}' but got '{response.data.decode()}'"
 
 def test_logout(client, app):
     with app.app_context():

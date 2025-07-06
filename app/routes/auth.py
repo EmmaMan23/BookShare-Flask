@@ -66,17 +66,17 @@ def edit_user():
         form_type = form_data.get('form_type')
 
         if form_type == 'delete':
-            marked_for_deletion = form_data.get('marked_for_deletion', None)
+            marked_for_deletion = form_data.get('marked_for_deletion')
             result = user_service.update_user(
                 current_user,
-                None,  # no username update
-                None,  # no password updates
+                None,
+                None,
                 None,
                 None,
                 marked_for_deletion)
             flash(result.message, 'success' if result.success else 'danger')
             return redirect(url_for('dash.dashboard'))
-
+            
         elif form_type == 'edit':
             form_data = request.form
             new_username = form_data.get('username', '').strip()

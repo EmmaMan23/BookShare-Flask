@@ -40,7 +40,7 @@ class UserService:
 
         new_user.save(self.db_session)
 
-        return Result(True, "Registration successful")
+        return Result(True, "Registration successful, please login")
 
     def user_login(self, username, password):
         try:
@@ -85,14 +85,14 @@ class UserService:
             changes_made = True
 
         deletion_requested = None
-
+        print(user.marked_for_deletion)
         if marked_for_deletion in ['true', 'on', '1', True]:
-            user.marked_for_deletion = True
-            deletion_requested = True
-            changes_made = True
-        elif marked_for_deletion in ['false', 'off', '0', False]:
-            user.marked_for_deletion = False
-            deletion_requested = False
+            if user.marked_for_deletion != True:
+                user.marked_for_deletion = True
+                deletion_requested = True
+            else: 
+                user.marked_for_deletion = False
+                deletion_requested = False
             changes_made = True
 
         user.save(self.db_session)
