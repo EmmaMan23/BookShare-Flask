@@ -128,10 +128,8 @@ def test_reserve_book_route_success(logged_in_client, other_user, test_genre):
     assert response.status_code == 200
 
     if b"book reserved successfully" not in response.data.lower():
-        print("Response HTML on failure:")
-        print(response.data.decode())
 
-    assert b"book reserved successfully" in response.data.lower()
+        assert b"book reserved successfully" in response.data.lower()
 
     with logged_in_client.application.app_context():
         reserved_listing = _db.session.get(Listing, listing_id)

@@ -85,15 +85,6 @@ def view_all():
     )
 
 
-# @listings.route('/view_my_books')
-# @login_required
-# def view_mine():
-#     result = listing_service.get_all_listings(user_id=current_user.user_id)
-#     today = date.today()
-#     genres = listing_service.get_all_genres()
-#     return render_template('show_user_listings.html', listings=result.data, existing_user=current_user, today=today, genres=genres)
-
-
 @listings.route('/edit_listing', methods=['POST', 'GET'])
 @login_required
 def edit_listing():
@@ -210,7 +201,6 @@ def view_loans():
     else:
         result = listing_service.get_all_loans(
             current_user.user_id, status=status, search=search, sort_order=sort_order)
-    print(f"Scope: {scope}, Is admin: {current_user.is_admin}")
     listings_data = listing_service.get_all_listings()
     today = date.today()
     return render_template(
@@ -248,6 +238,9 @@ def reserve_book():
         flash(result.message, "success" if result.success else "danger")
 
         return redirect(url_for('listings.view_loans', scope='self'))
+    
+    flash("Please tick the box to confirm you want to reserve this book.", "warning")
+    return redirect(url_for('listings.view_all', scope='all'))
 
 
 @listings.route('/update_loan', methods=['POST'])
@@ -271,5 +264,5 @@ def update_loan():
 
         return redirect(url_for('listings.view_loans', scope='self'))
 
-    # fallback
+    flash("Please tick the box to confirm you want to retrun this loan.", "warning")
     return redirect(url_for('listings.view_loans', scope='self'))

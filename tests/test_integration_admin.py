@@ -54,15 +54,12 @@ def test_view_users_page(client, app, admin_user):
 
     with app.app_context():
         users = User.query.all()
-        print("Users in DB:", [u.username for u in users])
+
 
     login_client(client, admin_user)
 
     response = client.get('/view_users', follow_redirects=True)
 
-    print("Status code:", response.status_code)
-    print("Response URL:", response.request.path)
-    print("Response data snippet:", response.data[:500])
 
     assert response.status_code == 200
     assert b"user1" in response.data.lower()
@@ -113,7 +110,6 @@ def test_edit_genre_success(client, app, admin_user):
         'name': 'Updated Genre',
         'image': 'images/fantasy.png'
     }, follow_redirects=True)
-    print(response.data.decode())
 
     assert response.status_code == 200
     assert b"Genre updated successfully" in response.data
@@ -133,7 +129,7 @@ def test_delete_genre_record_non_admin(client, regular_user, genre_to_delete):
     }, follow_redirects=True)
 
     assert response.status_code == 200
-    assert b"Unauthorised: Admins only" in response.data
+    assert b"Admin access required." in response.data
 
     with client.application.app_context():
         assert _db.session.get(Genre, genre_to_delete.genre_id) is not None

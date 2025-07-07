@@ -114,7 +114,7 @@ def test_edit_user(client, app, new_username, old_password, new_password, confir
     }
 
     response = client.post('/edit_user', data=data, follow_redirects=True)
-    # print(response.data.decode())
+
 
     if new_username == "takenuser":
         assert b"Username already taken" in response.data
@@ -131,7 +131,7 @@ def test_edit_user(client, app, new_username, old_password, new_password, confir
         assert b"Details updated successfully" in response.data
     else:
         assert b"No changes made" in response.data
-    # print(response.data.decode())
+
     response = client.post('/edit_user', data=data, follow_redirects=True)
 
 

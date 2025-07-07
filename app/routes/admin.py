@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, request
 from flask import redirect, url_for, flash
 from flask_login import login_required, current_user
+from app.utils import admin_required
 from app.models import Genre, Listing, User, Loan
 from app.services.admin_service import AdminService
 from app.services.listing_service import ListingService
@@ -16,6 +17,7 @@ admin = Blueprint('admin', __name__)
 
 @admin.route('/view_users')
 @login_required
+@admin_required
 def view_users():
     args = request.args
     sort_join_date = args.get('sort_join_date', 'desc')
@@ -46,6 +48,7 @@ def view_users():
 
 @admin.route('/delete_record', methods=['POST'])
 @login_required
+@admin_required
 def delete():
     if not current_user.is_admin:
         flash("Unauthorised: Admins only", "danger")
@@ -97,6 +100,7 @@ def delete():
 
 @admin.route('/create_genre', methods=['POST', 'GET'])
 @login_required
+@admin_required
 def create_genre():
     listing_service = ListingService(db.session, dashboard_service)
     genre_images = [
@@ -128,6 +132,7 @@ def create_genre():
 
 @admin.route('/edit_genre', methods=['POST'])
 @login_required
+@admin_required
 def edit_genre():
     form_data = request.form
     genre_id = form_data.get('id')
@@ -142,6 +147,7 @@ def edit_genre():
 
 @admin.route('/admin_edit_user', methods=['GET', 'POST'])
 @login_required
+@admin_required
 def admin_edit_user():
     user_id = request.args.get('user_id', type=int)
     if not user_id:
