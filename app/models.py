@@ -2,7 +2,7 @@ from app.extensions import db
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 import logging
-from datetime import datetime
+from datetime import datetime, date
 from sqlalchemy import and_, func
 
 
@@ -57,7 +57,7 @@ class User(baseModel, UserMixin):
     marked_for_deletion = db.Column(db.Boolean, default=False)
     total_loans = db.Column(db.Integer)
     total_listings = db.Column(db.Integer)
-    join_date = db.Column(db.Date)
+    join_date = db.Column(db.Date, default=date.today())
     listings = db.relationship(
         'Listing', back_populates='user', cascade='all, delete-orphan', passive_deletes=True)
     loans = db.relationship('Loan', back_populates='user',
@@ -197,7 +197,8 @@ class Loan(baseModel):
         if search:
             query = query.filter(
                 (Listing.title.ilike(f'%{search}%')) |
-                (User.username.ilike(f'%{search}%'))
+                (User.username.ilike(f'%{search}%')) |
+                (Listing.author.ilike(f'%{search}%'))
             )
 
         if filter_status:

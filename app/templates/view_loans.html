@@ -86,9 +86,9 @@
           </div>
           <div class="col-md-8">
             <div class="card-body">
-              <h4 class="card-title">{{ loan.listing.title | capitalize }}</h4>
-              <h5>{{ loan.listing.author | capitalize }}</h5>
-              <p class="card-text">{{ loan.listing.description }}</p>
+              <h4 class="card-title">Title: {{ loan.listing.title | capitalize }}</h4>
+              <h5>Author: {{ loan.listing.author | title }}</h5>
+              <p class="card-text">Book Description: {{ loan.listing.description }}</p>
               <p class="card-text">Listed by: {{ loan.listing.user.username | capitalize }}</p>
               <p class="card-text">Borrowed by: {{ loan.user.username | capitalize }}</p>
               <p class="card-text">

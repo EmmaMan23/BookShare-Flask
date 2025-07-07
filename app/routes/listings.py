@@ -265,4 +265,4 @@ def update_loan():
         return redirect(url_for('listings.view_loans', scope='self'))
 
     flash("Please tick the box to confirm you want to retrun this loan.", "warning")
-    return redirect(url_for('listings.view_loans', scope='self'))
+    return redirect(url_for('listings.view_loans', scope='all'))

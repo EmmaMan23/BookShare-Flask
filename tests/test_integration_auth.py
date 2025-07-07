@@ -1,6 +1,7 @@
 import pytest
 from app.extensions import db as _db
 from app.models import User
+from datetime import date
 
 
 def test_register_success(client, app):

@@ -1,11 +1,14 @@
 from functools import wraps
 from flask import redirect, url_for, flash
 from flask_login import current_user
+
+
 class Result:
     def __init__(self, success, message=None, data=None):
         self.success = success
         self.message = message
         self.data = data
+
 
 def admin_required(f):
     @wraps(f)
