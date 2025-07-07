@@ -13,6 +13,8 @@ from sqlalchemy import event
 from sqlalchemy.engine import Engine
 from app.services.dashboard_service import DashboardService
 from app.services.listing_service import ListingService
+import logging
+
 
 @event.listens_for(Engine, "connect")
 def set_sqlite_pragma(dbapi_connection, connection_record):
@@ -21,8 +23,10 @@ def set_sqlite_pragma(dbapi_connection, connection_record):
     cursor.close()
 
 
-
 load_dotenv()
+
+logging.basicConfig(filename='app.log', level=logging.ERROR,
+                    format='%(asctime)s %(levelname)s: %(message)s')
 
 
 def create_app(testing=False):
@@ -42,8 +46,6 @@ def create_app(testing=False):
     with app.app_context():
         db.drop_all()
         db.create_all()
-
-
 
     login_manager.login_view = 'auth.login'
     login_manager.login_message_category = "warning"

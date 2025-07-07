@@ -18,6 +18,7 @@
     <span class="badge bg-light-orange ms-2 py-1 px-3" style="font-size: 0.95rem;">Regular user</span>
     {% endif %}
   </h2>
+  <p>Date joined: {{current_user.join_date.strftime("%d/%m/%Y")}}</p>
 
 
 
@@ -161,7 +162,7 @@
         </div>
 
         <div class="col-md-6">
-          <a href="{{ url_for('listings.view_all') }}" class="text-decoration-none">
+          <a href="{{ url_for('listings.view_all', scope='all') }}" class="text-decoration-none">
             <div class="card h-100 shadow-sm rounded-3 bg-light border-secondary hover-scale">
               <div class="card-body ">
                 <h5 class="card-title text-dark">View All Books</h5>
@@ -172,7 +173,7 @@
         </div>
 
         <div class="col-md-6">
-          <a href="{{ url_for('listings.view_mine') }}" class="text-decoration-none">
+          <a href="{{ url_for('listings.view_all', scope='self') }}" class="text-decoration-none">
             <div class="card h-100 shadow-sm rounded-3 bg-light border-secondary hover-scale">
               <div class="card-body">
                 <h5 class="card-title text-dark">My Listings</h5>
@@ -183,7 +184,7 @@
         </div>
 
         <div class="col-md-6">
-          <a href="{{ url_for('listings.view_loans') }}" class="text-decoration-none">
+          <a href="{{ url_for('listings.view_loans', scope='all') }}" class="text-decoration-none">
             <div class="card h-100 shadow-sm rounded-3 bg-light border-secondary hover-scale">
               <div class="card-body">
                 <h5 class="card-title text-dark">My Loans</h5>

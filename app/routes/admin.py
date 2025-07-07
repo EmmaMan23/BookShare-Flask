@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, request
 from flask import redirect, url_for, flash
 from flask_login import login_required, current_user
+from app.utils import admin_required
 from app.models import Genre, Listing, User, Loan
 from app.services.admin_service import AdminService
 from app.services.listing_service import ListingService
@@ -13,12 +14,14 @@ listing_service = ListingService(db.session, dashboard_service)
 
 admin = Blueprint('admin', __name__)
 
+
 @admin.route('/view_users')
 @login_required
+@admin_required
 def view_users():
     args = request.args
     sort_join_date = args.get('sort_join_date', 'desc')
-    filter_role = args.get('filter_role')  
+    filter_role = args.get('filter_role')
     marked_for_deletion = args.get('marked_for_deletion')
     search = args.get('search')
 
@@ -40,22 +43,23 @@ def view_users():
         sort_join_date=sort_join_date,
         role=filter_role,
         marked_for_deletion=marked_for_deletion
-        )
+    )
 
 
 @admin.route('/delete_record', methods=['POST'])
 @login_required
+@admin_required
 def delete():
     if not current_user.is_admin:
         flash("Unauthorised: Admins only", "danger")
         return redirect(url_for('dash.dashboard'))
-    
+
     form_data = request.form
 
     model = form_data.get('model')
     record_id = form_data.get('id')
 
-    model_map ={
+    model_map = {
         'user': User,
         'listing': Listing,
         'genre': Genre,
@@ -70,10 +74,13 @@ def delete():
     # Determine redirect scope if loan
     loan_user_id = None
     if model_class == Loan:
-        loan = listing_service.get_loan_by_id(int(record_id))
-        if loan:
-            loan_user_id = loan.user_id
-
+        loan_result = listing_service.get_loan_by_id(int(record_id))
+        if loan_result.success:
+            loan_obj = loan_result.data
+            loan_user_id = loan_obj.user_id
+        else:
+            flash("Loan not found.", "danger")
+            return redirect(url_for('listings.view_loans', scope='all'))
 
     result = admin_service.delete_record(model_class, int(record_id))
     flash(result.message, "success" if result.success else "danger")
@@ -91,9 +98,9 @@ def delete():
         return redirect(url_for('listings.view_all'))
 
 
-
 @admin.route('/create_genre', methods=['POST', 'GET'])
 @login_required
+@admin_required
 def create_genre():
     listing_service = ListingService(db.session, dashboard_service)
     genre_images = [
@@ -115,16 +122,17 @@ def create_genre():
             flash("Unsuccessful, please select an image when creating a genre.", "danger")
             return redirect(url_for('admin.create_genre'))
 
-
         result = admin_service.create_genre(name, image)
         flash(result.message, "success" if result.success else "danger")
         return redirect(url_for('admin.create_genre'))
-        
+
     genres_result = listing_service.get_all_genres()
     return render_template('add_genre.html', genre_images=genre_images, genres=genres_result)
 
+
 @admin.route('/edit_genre', methods=['POST'])
 @login_required
+@admin_required
 def edit_genre():
     form_data = request.form
     genre_id = form_data.get('id')
@@ -133,12 +141,13 @@ def edit_genre():
 
     result = admin_service.edit_genre(genre_id, name, image)
 
-    
     flash(result.message, "success" if result.success else "danger")
     return redirect(url_for('admin.create_genre'))
 
+
 @admin.route('/admin_edit_user', methods=['GET', 'POST'])
 @login_required
+@admin_required
 def admin_edit_user():
     user_id = request.args.get('user_id', type=int)
     if not user_id:

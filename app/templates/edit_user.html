@@ -1,27 +1,68 @@
 {% extends 'base.html' %}
 {% block content %}
 <div class="container mt-4">
-  <h2>
-    Edit your login details 
-  </h2>
+  <h2>Edit your login details</h2>
 </div>
-<form method="POST" action="{{url_for('auth.edit_user')}}">
+
+<form method="POST" action="{{ url_for('auth.edit_user') }}">
   <input type="hidden" name="user_id" value="{{ current_user.user_id }}">
-  <div class="row">
-    <div class="col">
+  <input type="hidden" name="form_type" value="edit">
+
+  <div class="row mt-4">
+    <!-- Username section -->
+    <div class="col-sm-6">
+      <h4>Change Username</h4>
+      <p>You do not need to enter your password to update your username.</p>
       <label for="username" class="form-label">Username</label>
-      <input type="hidden" name="form_type" value="edit">
-      <input type="text" class="form-control" value="{{current_user.username}}" name="username">
-      <label for="old_password" class="form-label">Current Password</label>
-      <input type="password" class="form-control" name="old_password">
+      <div class="position-relative">
+        <input type="text" class="form-control mb-2" value="{{ current_user.username }}" name="username" id="username">
+        <button type="submit" name="action" value="update_username" class="btn btn-primary mb-4">
+          Update Username
+        </button>
+      </div>
+
+      <hr>
+
+      <!-- Password Section -->
+      <h4>Change Password</h4>
+      <p>To update your password, enter your current password and the new password twice.</p>
+
+      <!-- Password inputs stacked vertically in same col-sm-4 -->
+      <label for="current_password" class="form-label">Current Password</label>
+      <div class="position-relative mb-3">
+        <input type="password" class="form-control" name="old_password" autocomplete="current-password"
+          id="current_password">
+        <button type="button" class="btn btn-sm btn-outline-secondary position-absolute top-50 end-0 translate-middle-y"
+          style="padding: 0.25rem 0.375rem;" onclick="togglePasswordVisibility('current_password', this)">
+          <i class="bi bi-eye-slash"></i>
+        </button>
+      </div>
+
       <label for="new_password" class="form-label">New Password</label>
-      <input type="password" class="form-control" name="new_password">
+      <div class="position-relative mb-3">
+        <input type="password" class="form-control" name="new_password" autocomplete="new-password" id="new_password">
+        <button type="button" class="btn btn-sm btn-outline-secondary position-absolute top-50 end-0 translate-middle-y"
+          style="padding: 0.25rem 0.375rem;" onclick="togglePasswordVisibility('new_password', this)">
+          <i class="bi bi-eye-slash"></i>
+        </button>
+      </div>
+
       <label for="confirm_password" class="form-label">Confirm New Password</label>
-      <input type="password" class="form-control" name="confirm_password">
+      <div class="position-relative mb-3">
+        <input type="password" class="form-control" name="confirm_password" autocomplete="new-password"
+          id="confirm_password">
+        <button type="button" class="btn btn-sm btn-outline-secondary position-absolute top-50 end-0 translate-middle-y"
+          style="padding: 0.25rem 0.375rem;" onclick="togglePasswordVisibility('confirm_password', this)">
+          <i class="bi bi-eye-slash"></i>
+        </button>
+      </div>
+
+      <button type="submit" name="action" value="update_password" class="btn btn-primary mt-2">
+        Update Password
+      </button>
     </div>
   </div>
-
-
-  <button type="submit" class="btn btn-primary">Submit</button>
 </form>
+
+
 {% endblock %}

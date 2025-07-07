@@ -11,10 +11,11 @@
     <title>Dashboard</title>
     <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
 </head>
-<script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
 
-<body class="p-3">
-    {% set scope = scope|default('self') %}
+
+<body class="pt-0 px-3 pb-3">
+
+    <!-- {% set scope = scope|default('self') %} -->
     {% set genre_colors = {
     'Fantasy': 'bg-purple',
     'Horror': 'bg-danger',
@@ -51,8 +52,8 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {% if request.path == url_for('listings.view_all') %}active{% endif %}"
-                            href="{{ url_for('listings.view_all') }}">
+                        <a class="nav-link {% if request.endpoint == 'listings.view_all' and request.args.get('scope') == 'all' %}active{% endif %}"
+                            href="{{ url_for('listings.view_all', scope='all') }}">
                             Browse Books
                         </a>
                     </li>
@@ -69,18 +70,22 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {% if request.path == url_for('listings.view_mine') %}active{% endif %}"
-                            href="{{ url_for('listings.view_mine') }}">
+                        <a class="nav-link {% if request.endpoint == 'listings.view_all' and (request.args.get('scope') == 'self' ) %}active{% endif %}"
+                            href="{{ url_for('listings.view_all', scope='self') }}">
                             View My Listings
                         </a>
                     </li>
                     {% if current_user.is_admin %}
                     <li class="nav-item">
-                        <a class="nav-link {% if request.path == url_for('admin.view_users') %}active{% endif %}"
+                        <a class="nav-link
+                        {% if request.path == url_for('admin.view_users')
+                        or request.path == url_for('admin.create_genre')
+                        or (request.path == url_for('listings.view_loans') and scope == 'all') %}active{% endif %}"
                             href="{{ url_for('dash.dashboard') }}">
                             Admin tools
                         </a>
                     </li>
+
                     {% endif %}
                     <form action="{{ url_for('auth.logout') }}" method="POST" class="d-inline">
                         <button type="submit" class="btn btn-outline-light btn-sm">Logout</button>
@@ -104,8 +109,9 @@
     {% endif %}
     {% endwith %}
 
-    <div class="container mt-4">
+    <div class="container mt-2">
         {% block content %}
         {% endblock %}
     </div>
+    <script src="{{ url_for('static', filename='js/login_form.js') }}"></script>
 </body>

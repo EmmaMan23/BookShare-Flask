@@ -1,11 +1,7 @@
 import pytest
-from unittest.mock import MagicMock
-from app import create_app
 from app.extensions import db as _db
-from app.services.user_service import UserService
 from app.models import User
-from app.utils import Result
-
+from datetime import date
 
 
 def test_register_success(client, app):
@@ -23,6 +19,7 @@ def test_register_success(client, app):
         user = User.query.filter_by(username="testuser").first()
         assert user is not None
 
+
 def test_register_password_mismatch(client):
     response = client.post('/register', data={
         'username': 'testuser2',
@@ -32,8 +29,9 @@ def test_register_password_mismatch(client):
         'admin_code': ""
     }, follow_redirects=True)
 
-    assert b"Unsuccessful registration, Passwords need to match!"in response.data
+    assert b"Unsuccessful registration, Passwords need to match!" in response.data
     assert b"Register" in response.data
+
 
 def test_login_success(client, app):
     with app.app_context():
@@ -58,12 +56,11 @@ def test_login_success(client, app):
     [
         ("notauser", "any_password"),
         ("testuser", "wrongpassword"),
-        ("", "password"), 
-        ("testuser", ""), 
+        ("", "password"),
+        ("testuser", ""),
         ("", ""),
     ]
 )
-
 def test_login_invalid_details(client, app, username, password):
     with app.app_context():
         if username == "testuser":
@@ -82,7 +79,6 @@ def test_login_invalid_details(client, app, username, password):
     else:
         assert b"Invalid username or password" in response.data
 
-import pytest
 
 @pytest.mark.parametrize(
     "new_username, old_password, new_password, confirm_password",
@@ -107,7 +103,8 @@ def test_edit_user(client, app, new_username, old_password, new_password, confir
 
         _db.session.commit()
 
-    client.post('/login', data={'username': 'olduser', 'password': 'oldpass'}, follow_redirects=True)
+    client.post('/login', data={'username': 'olduser',
+                'password': 'oldpass'}, follow_redirects=True)
 
     data = {
         'form_type': 'edit',
@@ -116,9 +113,8 @@ def test_edit_user(client, app, new_username, old_password, new_password, confir
         'new_password': new_password,
         'confirm_password': confirm_password,
     }
-    
+
     response = client.post('/edit_user', data=data, follow_redirects=True)
-    print(response.data.decode())  
 
 
     if new_username == "takenuser":
@@ -136,35 +132,43 @@ def test_edit_user(client, app, new_username, old_password, new_password, confir
         assert b"Details updated successfully" in response.data
     else:
         assert b"No changes made" in response.data
-    print(response.data.decode())  
+
     response = client.post('/edit_user', data=data, follow_redirects=True)
-    
 
 
+import pytest
 
 @pytest.mark.parametrize(
-    "marked_for_deletion, expected_message",
+    "initial_marked_for_deletion, form_marked_for_deletion_value, expected_message",
     [
-        ('true', b"Account deletion requested. An admin will review your request"),
-        ('false', b"Account deletion has been cancelled"),
+        (False, 'true', b"Account deletion requested. An admin will review your request"),
+        (True, 'true', b"Account deletion has been cancelled"),
+        (False, None, b"No changes made"),
+        (True, None, b"No changes made"),
     ]
 )
-def test_edit_user_marked_for_deletion(client, app, marked_for_deletion, expected_message):
+def test_edit_user_marked_for_deletion(client, app, initial_marked_for_deletion, form_marked_for_deletion_value, expected_message):
     with app.app_context():
-        user = User(username='olduser', role='regular')
+        user = User(username='olduser', role='regular', marked_for_deletion=initial_marked_for_deletion)
         user.set_password('oldpass')
         _db.session.add(user)
         _db.session.commit()
 
-    client.post('/login', data={'username': 'olduser', 'password': 'oldpass'}, follow_redirects=True)
+    client.post('/login', data={'username': 'olduser',
+                'password': 'oldpass'}, follow_redirects=True)
 
     data = {
         'form_type': 'delete',
-        'marked_for_deletion': marked_for_deletion,
     }
+    if form_marked_for_deletion_value is not None:
+        data['marked_for_deletion'] = form_marked_for_deletion_value
 
     response = client.post('/edit_user', data=data, follow_redirects=True)
-    assert expected_message in response.data
+
+    assert expected_message in response.data, \
+        f"Assertion failed for initial_marked_for_deletion={initial_marked_for_deletion}, " \
+        f"form_marked_for_deletion_value={form_marked_for_deletion_value}. " \
+        f"Expected '{expected_message.decode()}' but got '{response.data.decode()}'"
 
 def test_logout(client, app):
     with app.app_context():

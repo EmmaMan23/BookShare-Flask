@@ -1,23 +1,22 @@
 {% extends 'base.html' %}
 {% block content %}
 <div class="container mt-4">
-  <h2>
-    Create a new listing
-  </h2>
+  <h2>Create a new listing</h2>
+  <p class="mb-3 text-muted">Fill out the form below to create a new book listing.</p>
 </div>
 
-<form id="listingForm" method="POST" action="{{url_for('listings.create_listing')}}">
-  <div class="row">
+<form id="listingForm" method="POST" action="{{ url_for('listings.create_listing') }}">
+  <div class="row mb-3">
     <div class="col">
       <input type="text" class="form-control" placeholder="Title" name="title" aria-label="Title">
     </div>
     <div class="col">
-      <input type="text" class="form-control" placeholder="Author" name='author' aria-label="Author">
+      <input type="text" class="form-control" placeholder="Author" name="author" aria-label="Author">
     </div>
   </div>
 
-  <div class="form-floating">
-    <textarea class="form-control" name='description' id="floatingTextarea"></textarea>
+  <div class="form-floating mb-4">
+    <textarea class="form-control" name="description" id="floatingTextarea" style="height: 120px;"></textarea>
     <label for="floatingTextarea">Description</label>
   </div>
 
@@ -30,10 +29,10 @@
 
         {% if genre.image %}
         <img src="{{ url_for('static', filename=genre.image) }}" alt="{{ genre.name }}" class="card-img-top"
-          style="height: 150px; object-fit: cover;">
+          style="height: 160px; object-fit: cover;">
         {% else %}
         <img src="{{ url_for('static', filename='images/default.png') }}" alt="{{ genre.name }}" class="card-img-top"
-          style="height: 150px; object-fit: cover;">
+          style="height: 160px; object-fit: cover;">
         {% endif %}
 
         <div class="card-body p-2">
@@ -43,13 +42,9 @@
       {% endfor %}
     </div>
   </div>
-  </div>
-  <div class="container mt-3">
+
   <div class="d-flex justify-content-end">
     <button type="submit" class="btn btn-primary">Submit</button>
   </div>
-</div>
-
-
 </form>
 {% endblock %}
