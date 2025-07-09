@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, request
 from flask import redirect, url_for, flash
 from flask_login import login_required, current_user
 from app.services import listing_service
+from app.models import Listing, Loan
 from datetime import date
 from app.services.listing_service import ListingService
 from app.services import listing_service, dashboard_service
@@ -16,7 +17,8 @@ listing_service = ListingService(db.session, dashboard_service)
 @listings.route('/create_listing', methods=['POST', 'GET'])
 @login_required
 def create_listing():
-    genres = listing_service.get_all_genres()
+    genres_result = listing_service.get_all_genres()
+    genres = genres_result.data if genres_result.success else []
     if request.method == 'POST':
         form = request.form
         title = form.get('title')
@@ -66,8 +68,9 @@ def view_all():
         sort_order=sort_order,
         marked_for_deletion=marked_for_deletion
     )
-
-    genres = listing_service.get_all_genres()
+    
+    genres_result = listing_service.get_all_genres()
+    genres = genres_result.data if genres_result.success else []
     today = date.today()
 
     return render_template(
@@ -88,7 +91,8 @@ def view_all():
 @listings.route('/edit_listing', methods=['POST', 'GET'])
 @login_required
 def edit_listing():
-    genres = listing_service.get_all_genres()
+    genres_result = listing_service.get_all_genres()
+    genres = genres_result.data if genres_result.success else []
 
     if request.method == 'POST':
         form_data = request.form
@@ -99,7 +103,7 @@ def edit_listing():
             return redirect(url_for('listings.view_all', scope='self'))
 
         listing_id = int(listing_id_str)
-        result = listing_service.get_listing_by_id(listing_id)
+        result = listing_service.get_record_by_id(Listing, listing_id)
 
         if not result.success:
             flash("Listing not found.", "danger")
@@ -130,7 +134,7 @@ def edit_listing():
             return redirect(url_for('listings.view_all', scope='self'))
         else:
 
-            listing_result = listing_service.get_listing_by_id(listing_id)
+            listing_result = listing_service.get_record_by_id(Listing, listing_id)
             listing = listing_result.data if listing_result.success else None
             return render_template('edit_listing.html', genres=genres, listing=listing)
 
@@ -141,7 +145,7 @@ def edit_listing():
             flash("Invalid or missing listing ID.", "danger")
             return redirect(url_for('listings.view_all', scope='self'))
 
-        listing_result = listing_service.get_listing_by_id(listing_id)
+        listing_result = listing_service.get_record_by_id(Listing, listing_id)
         if not listing_result.success:
             flash("Listing not found.", "danger")
             return redirect(url_for('listings.view_all', scope='self'))
@@ -160,7 +164,7 @@ def edit_listing():
 def mark_for_deletion():
     listing_id = int(request.form.get('listing_id'))
 
-    result = listing_service.get_listing_by_id(listing_id)
+    result = listing_service.get_record_by_id(Listing, listing_id)
     if not result.success:
         flash("Listing not found.", "danger")
         return redirect(url_for('listings.view_all'))
@@ -223,7 +227,7 @@ def reserve_book():
         listing_id = int(form_data.get('listing_id'))
         user_id = current_user.user_id
 
-        listing_result = listing_service.get_listing_by_id(listing_id)
+        listing_result = listing_service.get_record_by_id(Listing, listing_id)
         if not listing_result.success:
             flash("Listing not found.", "danger")
             return redirect(url_for('listings.view_all', scope='all'))
@@ -256,7 +260,7 @@ def update_loan():
             loan_id, actual_return_date=today)
         flash(result.message, "success" if result.success else "danger")
 
-        loan_result = listing_service.get_loan_by_id(loan_id)
+        loan_result = listing_service.get_record_by_id(Loan, loan_id)
         if loan_result.success:
             loan_obj = loan_result.data
             if current_user.is_admin and loan_obj.user_id != current_user.user_id:

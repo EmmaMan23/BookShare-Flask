@@ -74,7 +74,7 @@ def delete():
     # Determine redirect scope if loan
     loan_user_id = None
     if model_class == Loan:
-        loan_result = listing_service.get_loan_by_id(int(record_id))
+        loan_result = listing_service.get_record_by_id(Loan, int(record_id))
         if loan_result.success:
             loan_obj = loan_result.data
             loan_user_id = loan_obj.user_id
@@ -127,7 +127,7 @@ def create_genre():
         return redirect(url_for('admin.create_genre'))
 
     genres_result = listing_service.get_all_genres()
-    return render_template('add_genre.html', genre_images=genre_images, genres=genres_result)
+    return render_template('add_genre.html', genre_images=genre_images, genres=genres_result.data)
 
 
 @admin.route('/edit_genre', methods=['POST'])

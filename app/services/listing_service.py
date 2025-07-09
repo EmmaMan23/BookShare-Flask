@@ -1,7 +1,7 @@
 from app.models import Listing, Loan, Genre, User
 from app.utils import Result
 from datetime import date, timedelta
-from app.services.validators import validate_non_empty_string
+from app.services.validators import validate_non_empty_string, to_bool
 from flask_login import current_user
 
 
@@ -25,9 +25,11 @@ class ListingService:
                 date_listed=date_listed,
             )
 
-            user = User.get_by_id(self.db_session, user_id)
-            if not user:
-                return Result(False, "User not found.")
+            user_result = self.get_record_by_id(User, user_id)
+            if not user_result.success:
+                return user_result
+            user = user_result.data
+
 
             user.increment_totals(self.db_session)
             new_listing.save(self.db_session)
@@ -51,19 +53,16 @@ class ListingService:
         return Result(True, "Listings returned successfully.", query)
 
     def get_all_genres(self):
-        return self.db_session.query(Genre).order_by(Genre.name).all()
+        genres = self.db_session.query(Genre).order_by(Genre.name).all()
+        return Result(True, "Genres retrieved successfully", genres)
 
-    def get_listing_by_id(self, listing_id):
-        listing = Listing.get_by_id(self.db_session, listing_id)
-        if listing:
-            return Result(True, "Listing found.", listing)
-        return Result(False, "Listing not found.", None)
 
-    def get_loan_by_id(self, loan_id):
-        loan = Loan.get_by_id(self.db_session, loan_id)
-        if loan:
-            return Result(True, "Loan found.", loan)
-        return Result(False, "Loan not found.", None)
+    def get_record_by_id(self, model_cls, record_id, not_found_msg=None):
+        record = model_cls.get_by_id(self.db_session, record_id)
+        if record:
+            return Result(True, f"{model_cls.__name__} found.", record)
+        return Result(False, not_found_msg or f"{model_cls.__name__} not found.", None)
+
 
     def edit_listing(
             self,
@@ -76,7 +75,7 @@ class ListingService:
             is_available=None,
             marked_for_deletion=None):
 
-        result = self.get_listing_by_id(listing_id)
+        result = self.get_record_by_id(Listing, listing_id)
 
         if not result.success:
             return Result(False, "Listing not found")
@@ -99,7 +98,7 @@ class ListingService:
                 listing.genre_id = None
 
             if is_available is not None:
-                new_availability = is_available in ['true', 'on', '1', True]
+                new_availability = to_bool(is_available)
 
                 if listing.active_loan:
                     if new_availability != listing.is_available:
@@ -110,9 +109,8 @@ class ListingService:
 
                 listing.is_available = new_availability
 
-            if marked_for_deletion is not None:
-                listing.marked_for_deletion = marked_for_deletion in [
-                    'true', 'on', '1', True]
+            if is_available is not None:
+                new_availability = to_bool(is_available)
 
             listing.save(self.db_session)
             return Result(True, "Listing updated successfully")
@@ -124,14 +122,14 @@ class ListingService:
             return Result(False, "An unexpected error occurred while updating listing")
 
     def update_marked_for_deletion(self, listing_id, is_marked):
-        result = self.get_listing_by_id(listing_id)
+        result = self.get_record_by_id(Listing, listing_id)
         if not result.success:
             return result
 
         listing = result.data
 
         try:
-            listing.marked_for_deletion = is_marked
+            listing.marked_for_deletion = to_bool(is_marked)
             listing.save(self.db_session)
             return Result(True, "Listing deletion status updated.")
         except Exception as e:
@@ -148,14 +146,9 @@ class ListingService:
 
         return Result(True, "Loans retrieved successfully", loans)
 
-    def get_loan_by_id(self, loan_id):
-        loan = Loan.get_by_id(self.db_session, loan_id)
-        if loan:
-            return Result(True, "Loan retrieved", loan)
-        return Result(False, "Loan not found", None)
 
     def update_loan(self, loan_id, actual_return_date):
-        loan_result = self.get_loan_by_id(loan_id)
+        loan_result = self.get_record_by_id(Loan, loan_id)
         if not loan_result.success:
             return loan_result, None
 
@@ -188,7 +181,7 @@ class ListingService:
                 is_returned=False
             )
 
-            listing_result = self.get_listing_by_id(listing_id)
+            listing_result = self.get_record_by_id(Listing, listing_id)
             if not listing_result.success:
                 return Result(False, "Listing not found")
 
@@ -200,9 +193,11 @@ class ListingService:
             listing.is_available = False
             listing.save(self.db_session)
 
-            user = User.get_by_id(self.db_session, user_id)
-            if not user:
-                return Result(False, "User not found")
+            user_result = self.get_record_by_id(User, user_id)
+            if not user_result.success:
+                return user_result  # or return Result(False, "User not found.")
+            user = user_result.data
+
 
             user.total_loans = (user.total_loans or 0) + 1
             user.save(self.db_session)
