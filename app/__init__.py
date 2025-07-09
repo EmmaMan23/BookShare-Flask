@@ -44,7 +44,6 @@ def create_app(testing=False):
     db.init_app(app)
 
     with app.app_context():
-        db.drop_all()
         db.create_all()
 
     login_manager.login_view = 'auth.login'

@@ -115,7 +115,7 @@
 
           <div class="col-md-8 d-flex flex-column">
             <div class="card-body flex-grow-1">
-              <h4 class="card-title mb-2">Title: {{ listing.title | capitalize }}</h4>
+              <h4 class="card-title mb-2">Title: {{ listing.title | title }}</h4>
               <h5 class="mb-3">Author: {{ listing.author | title }}</h5>
               <p class="card-text mb-2">Book Description: {{ listing.description }}</p>
               <p class="card-text mb-2">Listed by: {{ listing.user.username | capitalize }}</p>
