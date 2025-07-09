@@ -2,7 +2,7 @@ from werkzeug.security import generate_password_hash
 from app.models import User
 from app.utils import Result
 from flask_login import logout_user
-from app.services.validators import validate_non_empty_string
+from app.services.validators import validate_non_empty_string, validate_length
 from datetime import date
 import os
 
@@ -28,23 +28,35 @@ class UserService:
 
 
     def register_user(self, username, password, re_password, user_type, admin_code):
+        # Validate username length (max 30)
+        length_error = validate_length(username, "Username", 30)
+        if length_error:
+            return Result(False, length_error)
+
         username_result = self._validate_username(username)
         if not username_result.success:
             return username_result
         username = username_result.data
 
+        # Validate password length (max 255)
+        length_error = validate_length(password, "Password", 255)
+        if length_error:
+            return Result(False, length_error)
 
         password_result = self._validate_password(password)
         if not password_result.success:
             return password_result
         password = password_result.data
 
+        # Validate re_password length (max 255)
+        length_error = validate_length(re_password, "Confirm Password", 255)
+        if length_error:
+            return Result(False, length_error)
 
         re_password_result = self._validate_password(re_password)
         if not re_password_result.success:
             return re_password_result
         re_password = re_password_result.data
-
 
         if password != re_password:
             return Result(False, "Unsuccessful registration, Passwords need to match!")
@@ -74,11 +86,22 @@ class UserService:
 
         return Result(True, "Registration successful, please log in")
 
+
     def user_login(self, username, password):
+        # Validate username length (max 30)
+        length_error = validate_length(username, "Username", 30)
+        if length_error:
+            return Result(False, length_error)
+
         username_result = self._validate_username(username)
         if not username_result.success:
             return username_result
         username = username_result.data
+
+        # Validate password length (max 255)
+        length_error = validate_length(password, "Password", 255)
+        if length_error:
+            return Result(False, length_error)
 
         password_result = self._validate_password(password)
         if not password_result.success:
@@ -92,10 +115,15 @@ class UserService:
             return Result(False, "Invalid username or password")
 
 
+
     def update_user(self, user: User, new_username: str, old_password: str, new_password: str, confirm_password: str, marked_for_deletion=None):
         changes_made = False
 
         if new_username is not None and new_username != user.username:
+            length_error = validate_length(new_username, "Username", 30)
+            if length_error:
+                return Result(False, length_error)
+
             username_result = self._validate_username(new_username)
             if not username_result.success:
                 return username_result
@@ -115,10 +143,18 @@ class UserService:
             if not user.verify_password(old_password):
                 return Result(False, "Current Password entered incorrectly")
 
+            length_error = validate_length(new_password, "New Password", 255)
+            if length_error:
+                return Result(False, length_error)
+
             new_password_result = self._validate_password(new_password, "New Password")
             if not new_password_result.success:
                 return new_password_result
             new_password = new_password_result.data
+
+            length_error = validate_length(confirm_password, "Confirm Password", 255)
+            if length_error:
+                return Result(False, length_error)
 
             confirm_result = self._validate_password(confirm_password, "Confirm Password")
             if not confirm_result.success:
@@ -131,7 +167,6 @@ class UserService:
             user.password_hash = generate_password_hash(new_password)
             changes_made = True
 
-        # ✅ Unchanged: deletion logic preserved as requested
         deletion_requested = None
         if marked_for_deletion in ['true', 'on', '1', True]:
             if user.marked_for_deletion != True:

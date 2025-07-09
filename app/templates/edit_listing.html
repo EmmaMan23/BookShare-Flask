@@ -56,8 +56,8 @@
 
   <!-- Description -->
   <div class="form-floating mb-3">
-    <textarea class="form-control" name='description' id="floatingTextarea">{{listing.description}}</textarea>
-    <label for="floatingTextarea">Description</label>
+    <textarea class="form-control" name='description' id="floatingTextarea" maxlength="400" rows="4" cols="50">{{listing.description}}</textarea>
+    <label for="floatingTextarea">Description (max 400 characters):</label>
   </div>
   <div class="mb-4">
     <h5>Select a Genre</h5>

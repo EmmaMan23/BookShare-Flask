@@ -1,7 +1,7 @@
 from app.models import Listing, Loan, Genre, User
 from app.utils import Result
 from datetime import date, timedelta
-from app.services.validators import validate_non_empty_string, to_bool
+from app.services.validators import validate_non_empty_string, to_bool, validate_length
 from flask_login import current_user
 
 
@@ -13,6 +13,17 @@ class ListingService:
     def list_book(self, title, author, description, genre_id, user_id, is_available=True):
         try:
             title = validate_non_empty_string(title, "Title")
+            error = validate_length(title, "Title", 150)
+            if error:
+                return Result(False, error)
+
+            error = validate_length(author, "Author", 50)
+            if error:
+                return Result(False, error)
+
+            error = validate_length(description, "Description", 400)
+            if error:
+                return Result(False, error)
             date_listed = date.today()
 
             new_listing = Listing(
@@ -53,7 +64,7 @@ class ListingService:
         return Result(True, "Listings returned successfully.", query)
 
     def get_all_genres(self):
-        genres = self.db_session.query(Genre).order_by(Genre.name).all()
+        genres = Genre.get_all(self.db_session)
         return Result(True, "Genres retrieved successfully", genres)
 
 
@@ -65,15 +76,15 @@ class ListingService:
 
 
     def edit_listing(
-            self,
-            listing_id,
-            user_id,
-            title=None,
-            author=None,
-            description=None,
-            genre_id=None,
-            is_available=None,
-            marked_for_deletion=None):
+        self,
+        listing_id,
+        user_id,
+        title=None,
+        author=None,
+        description=None,
+        genre_id=None,
+        is_available=None,
+        marked_for_deletion=None):
 
         result = self.get_record_by_id(Listing, listing_id)
 
@@ -87,11 +98,26 @@ class ListingService:
 
         try:
             if title is not None:
-                listing.title = validate_non_empty_string(title, "Title")
+                title = validate_non_empty_string(title, "Title")
+                error = validate_length(title, "Title", 150)
+                if error:
+                    return Result(False, error)
+                listing.title = title
+
             if author is not None:
-                listing.author = author.strip()
+                author = author.strip()
+                error = validate_length(author, "Author", 50)
+                if error:
+                    return Result(False, error)
+                listing.author = author
+
             if description is not None:
-                listing.description = description.strip()
+                description = description.strip()
+                error = validate_length(description, "Description", 400)
+                if error:
+                    return Result(False, error)
+                listing.description = description
+
             if genre_id not in [None, '']:
                 listing.genre_id = int(genre_id)
             else:
@@ -109,9 +135,6 @@ class ListingService:
 
                 listing.is_available = new_availability
 
-            if is_available is not None:
-                new_availability = to_bool(is_available)
-
             listing.save(self.db_session)
             return Result(True, "Listing updated successfully")
 
@@ -120,6 +143,7 @@ class ListingService:
 
         except Exception as e:
             return Result(False, "An unexpected error occurred while updating listing")
+
 
     def update_marked_for_deletion(self, listing_id, is_marked):
         result = self.get_record_by_id(Listing, listing_id)
@@ -195,7 +219,7 @@ class ListingService:
 
             user_result = self.get_record_by_id(User, user_id)
             if not user_result.success:
-                return user_result  # or return Result(False, "User not found.")
+                return user_result  
             user = user_result.data
 
 

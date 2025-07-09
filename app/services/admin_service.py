@@ -2,6 +2,7 @@ from app.models import Genre, User
 from app.utils import Result
 from app.services.validators import validate_non_empty_string
 import logging
+from app.services.validators import validate_length
 
 
 class AdminService:
@@ -20,7 +21,7 @@ class AdminService:
         return Result(True, "Users retrieved successfully", users)
 
     def get_user_by_id(self, user_id):
-        user = self.db_session.query(User).filter_by(user_id=user_id).first()
+        user = User.get_by_id(self.db_session, user_id)
         if user:
             return Result(True, "User found", user)
         else:
@@ -77,11 +78,11 @@ class AdminService:
     def create_genre(self, name, image):
         try:
             name = validate_non_empty_string(name, "Genre name")
+            error = validate_length(name, "Genre name", 20)
+            if error:
+                return Result(False, error)
         except ValueError as e:
             return Result(False, str(e))
-
-        if len(name) > 20:
-            return Result(False, "Genre name must be 20 characters or fewer.")
 
         existing_genre = Genre.exists_by_name(self.db_session, name)
         if existing_genre:
@@ -113,11 +114,11 @@ class AdminService:
 
         try:
             name = validate_non_empty_string(name, "Genre name")
+            error = validate_length(name, "Genre name", 20)
+            if error:
+                return Result(False, error)
         except ValueError as e:
             return Result(False, str(e))
-
-        if len(name) > 20:
-            return Result(False, "Genre name must be 20 characters or fewer.")
 
         if image is None:
             return Result(False, "Please select an image for the genre.")
