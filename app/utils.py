@@ -9,6 +9,9 @@ class Result:
         self.message = message
         self.data = data
 
+def flash_result(result: Result):
+    flash(result.message, "success" if result.success else "danger")
+
 
 def admin_required(f):
     @wraps(f)

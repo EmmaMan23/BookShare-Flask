@@ -20,24 +20,31 @@ class AdminService:
         return Result(True, "Users retrieved successfully", users)
 
     def get_user_by_id(self, user_id):
-        return User.get_by_id(self.db_session, user_id)
+        user = self.db_session.query(User).filter_by(user_id=user_id).first()
+        if user:
+            return Result(True, "User found", user)
+        else:
+            return Result(False, "User not found", None)
+
 
     def update_user_role(self, user_id, role):
         try:
             if role not in ('admin', 'regular'):
                 return Result(False, "Invalid role type.")
 
-            user = self.get_user_by_id(user_id)
-            if not user:
+            result = self.get_user_by_id(user_id)
+            if not result.success:
                 return Result(False, "User not found.")
+
+            user = result.data
 
             if user.role == 'admin' and role != 'admin':
                 admin_count = User.count_admins(self.db_session)
                 if admin_count <= 1:
                     # Can't demote last admin
                     return Result(False,
-                                "Failed to update user role. You cannot remove admin rights from the last remaining admin. Please promote another user to admin first.",
-                                "danger")
+                        "Failed to update user role. You cannot remove admin rights from the last remaining admin. Please promote another user to admin first.",
+                        "danger")
 
             user.role = role
             user.save(self.db_session)
@@ -46,6 +53,7 @@ class AdminService:
         except Exception as e:
             logging.error(f"An unexpected error occurred while updating user role for user ID {user_id}: {str(e)}")
             return Result(False, f"An error occurred: {str(e)}")
+
 
     def delete_record(self, model_class, record_id):
         try:

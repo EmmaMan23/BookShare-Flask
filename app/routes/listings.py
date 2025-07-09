@@ -1,16 +1,14 @@
-from flask import Blueprint, render_template, request
-from flask import redirect, url_for, flash
+from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_required, current_user
-from app.services import listing_service
-from app.models import Listing, Loan
 from datetime import date
-from app.services.listing_service import ListingService
+from app.models import Listing, Loan
 from app.services import listing_service, dashboard_service
+from app.services.listing_service import ListingService
 from app.extensions import db
-
+from app.utils import flash_result
+from app.services.validators import to_bool
 
 listings = Blueprint('listings', __name__)
-
 listing_service = ListingService(db.session, dashboard_service)
 
 
@@ -33,11 +31,9 @@ def create_listing():
         result = listing_service.list_book(
             title, author, description, genre_id, user_id, is_available)
 
+        flash_result(result)
         if result.success:
-            flash(result.message, "success")
             return redirect(url_for('listings.view_all', scope='self'))
-        else:
-            flash(result.message, "danger")
 
     return render_template('create_listing.html', genres=genres)
 
@@ -46,24 +42,21 @@ def create_listing():
 @login_required
 def view_all():
     args = request.args
-    scope = args.get('scope', 'all')  # default to 'all' if not set
+    scope = args.get('scope', 'all')
     search_query = args.get('search')
     genre_filter = args.get('genre')
     availability_filter = args.get('availability')
     sort_order = args.get('sort', 'desc')
-    marked_for_deletion = args.get('marked_for_deletion')
+    marked_for_deletion_raw = args.get('marked_for_deletion')
 
-    if marked_for_deletion and marked_for_deletion.lower() == 'true':
-        marked_for_deletion = True
-    else:
-        marked_for_deletion = None
-
+    marked_for_deletion = to_bool(marked_for_deletion_raw) if marked_for_deletion_raw else None
+    availability = to_bool(availability_filter) if availability_filter else None
     user_id = current_user.user_id if scope == 'self' else None
 
     result = listing_service.get_all_listings(
         user_id=user_id,
         genre=genre_filter,
-        availability=(availability_filter == "available") if availability_filter else None,
+        availability=availability,
         search=search_query,
         sort_order=sort_order,
         marked_for_deletion=marked_for_deletion
@@ -112,10 +105,8 @@ def edit_listing():
         listing = result.data
 
         # Determine availability toggle
-        if 'is_available' in form_data:
-            new_availability = not listing.is_available
-        else:
-            new_availability = listing.is_available
+        new_availability = not listing.is_available if 'is_available' in form_data else listing.is_available
+        marked_for_deletion = to_bool(form_data.get('marked_for_deletion')) if form_data.get('marked_for_deletion') else None
 
         res = listing_service.edit_listing(
             listing_id=listing_id,
@@ -125,21 +116,19 @@ def edit_listing():
             description=form_data.get('description'),
             genre_id=form_data.get('genre_id'),
             is_available=new_availability,
-            marked_for_deletion=form_data.get('marked_for_deletion')
+            marked_for_deletion=marked_for_deletion
         )
 
-        flash(res.message, "success" if res.success else "danger")
+        flash_result(res)
 
         if res.success:
             return redirect(url_for('listings.view_all', scope='self'))
         else:
-
             listing_result = listing_service.get_record_by_id(Listing, listing_id)
             listing = listing_result.data if listing_result.success else None
             return render_template('edit_listing.html', genres=genres, listing=listing)
 
     else:
-
         listing_id = request.args.get('listing_id', type=int)
         if not listing_id:
             flash("Invalid or missing listing ID.", "danger")
@@ -175,14 +164,10 @@ def mark_for_deletion():
         flash("You are not authorised to change this listing.", "danger")
         return redirect(url_for('listings.view_all', scope='all'))
 
-    # Only take action if the checkbox was checked
-    if request.form.get('marked_for_deletion') == 'true':
-        # Flip the current deletion status
+    if to_bool(request.form.get('marked_for_deletion')):
         is_marked = not listing.marked_for_deletion
-        update_result = listing_service.update_marked_for_deletion(
-            listing_id, is_marked)
-        flash(update_result.message,
-              "success" if update_result.success else "danger")
+        update_result = listing_service.update_marked_for_deletion(listing_id, is_marked)
+        flash_result(update_result)
     else:
         flash("Please check the box to confirm your action.", "warning")
 
@@ -200,13 +185,13 @@ def view_loans():
     sort_order = args.get('sort', 'desc')
 
     if scope == 'all' and current_user.is_admin:
-        result = listing_service.get_all_loans(
-            status=status, search=search, sort_order=sort_order)
+        result = listing_service.get_all_loans(status=status, search=search, sort_order=sort_order)
     else:
-        result = listing_service.get_all_loans(
-            current_user.user_id, status=status, search=search, sort_order=sort_order)
+        result = listing_service.get_all_loans(current_user.user_id, status=status, search=search, sort_order=sort_order)
+
     listings_data = listing_service.get_all_listings()
     today = date.today()
+
     return render_template(
         'view_loans.html',
         loans=result.data,
@@ -239,10 +224,10 @@ def reserve_book():
             return redirect(url_for('listings.view_all', scope='all'))
 
         result = listing_service.reserve_book(user_id, listing_id)
-        flash(result.message, "success" if result.success else "danger")
+        flash_result(result)
 
         return redirect(url_for('listings.view_loans', scope='self'))
-    
+
     flash("Please tick the box to confirm you want to reserve this book.", "warning")
     return redirect(url_for('listings.view_all', scope='all'))
 
@@ -256,9 +241,8 @@ def update_loan():
         user_id = current_user.user_id
         today = date.today()
 
-        result, loan = listing_service.update_loan(
-            loan_id, actual_return_date=today)
-        flash(result.message, "success" if result.success else "danger")
+        result, loan = listing_service.update_loan(loan_id, actual_return_date=today)
+        flash_result(result)
 
         loan_result = listing_service.get_record_by_id(Loan, loan_id)
         if loan_result.success:
@@ -268,5 +252,5 @@ def update_loan():
 
         return redirect(url_for('listings.view_loans', scope='self'))
 
-    flash("Please tick the box to confirm you want to retrun this loan.", "warning")
+    flash("Please tick the box to confirm you want to return this loan.", "warning")
     return redirect(url_for('listings.view_loans', scope='all'))
