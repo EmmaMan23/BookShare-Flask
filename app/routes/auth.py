@@ -1,10 +1,10 @@
-from flask import Blueprint, render_template, request
-from flask import redirect, url_for, flash, session, request, render_template
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 from app.services import user_service
 from flask_login import login_user, logout_user, current_user, login_required
 from app.services.user_service import UserService
 from app.services.dashboard_service import DashboardService
 from app.extensions import db
+from app.utils import flash_result
 
 
 auth = Blueprint('auth', __name__)
@@ -26,16 +26,14 @@ def register():
         result = user_service.register_user(
             username, password, re_password, user_type, admin_code)
 
+        flash_result(result)
+
         if result.success:
-            flash(result.message, "success")
             return redirect(url_for('auth.login'))
         else:
-            flash(result.message, "danger")
-            # keep showing register form if registration failed
             return render_template('login.html', show_register=True, metrics=metrics)
 
     return render_template('login.html', show_register=False, metrics=metrics)
-
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
@@ -50,13 +48,12 @@ def login():
 
         if result.success:
             login_user(result.data)
-            flash(result.message, "success")
+            flash_result(result)
             return redirect(url_for('dash.dashboard'))
         else:
-            flash(result.message, "danger")
+            flash_result(result)
             return render_template('login.html', show_register=False)
     return render_template('login.html', show_register=False, metrics=metrics)
-
 
 @auth.route('/edit_user', methods=['POST', 'GET'])
 @login_required
@@ -74,7 +71,7 @@ def edit_user():
                 None,
                 None,
                 marked_for_deletion)
-            flash(result.message, 'success' if result.success else 'danger')
+            flash_result(result)
             return redirect(url_for('dash.dashboard'))
             
         elif form_type == 'edit':
@@ -94,15 +91,14 @@ def edit_user():
                 marked_for_deletion
             )
 
-            flash(result.message, 'success' if result.success else 'danger')
+            flash_result(result)
             return redirect(url_for('dash.dashboard' if result.success else 'auth.edit_user'))
 
     return render_template('edit_user.html')
-
 
 @auth.route('/logout', methods=['POST'])
 @login_required
 def logout():
     result = user_service.user_logout()
-    flash(result.message, "success" if result.success else "danger")
+    flash_result(result)
     return redirect(url_for('auth.login'))

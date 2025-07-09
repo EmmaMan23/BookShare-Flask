@@ -51,7 +51,7 @@ class baseModel(db.Model):
 
 class User(baseModel, UserMixin):
     user_id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(255), unique=True, nullable=False)
+    username = db.Column(db.String(30), unique=True, nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
     role = db.Column(db.String(50), nullable=False)
     marked_for_deletion = db.Column(db.Boolean, default=False)
@@ -114,8 +114,8 @@ class User(baseModel, UserMixin):
 
 class Listing(baseModel):
     listing_id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(255), nullable=False)
-    author = db.Column(db.String(255))
+    title = db.Column(db.String(150), nullable=False)
+    author = db.Column(db.String(50))
     description = db.Column(db.String(400))
     genre_id = db.Column(db.Integer, db.ForeignKey(
         'genre.genre_id'), nullable=True)
@@ -236,7 +236,7 @@ class Loan(baseModel):
 class Genre(baseModel):
     genre_id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(20), unique=True, nullable=False)
-    image = db.Column(db.String(255), nullable=True)
+    image = db.Column(db.String(50), nullable=True)
 
     @classmethod
     def exists_by_name(cls, db_session, name):

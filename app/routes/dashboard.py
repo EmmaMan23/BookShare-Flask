@@ -9,5 +9,4 @@ dash = Blueprint('dash', __name__)
 @login_required
 def dashboard():
     data = dashboard_service.read_metrics(current_user)
-    # scope='self'
     return render_template('dashboard.html', metrics=data)
