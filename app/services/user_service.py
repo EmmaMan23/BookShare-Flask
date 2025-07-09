@@ -4,6 +4,7 @@ from app.utils import Result
 from flask_login import logout_user
 from app.services.validators import validate_non_empty_string
 from datetime import date
+import os
 
 
 class UserService:
@@ -26,8 +27,9 @@ class UserService:
         if password != re_password:
             return Result(False, "Unsuccessful registration, Passwords need to match!")
 
+        admin_code_env = os.getenv('ADMIN_CODE')
         if user_type == "admin":
-            if admin_code != "Secretadmin3":
+            if admin_code != admin_code_env:
                 return Result(False, "Invalid admin registration code!")
 
         existing_user = User.existing_user(self.db_session, username)

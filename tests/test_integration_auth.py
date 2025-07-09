@@ -2,22 +2,27 @@ import pytest
 from app.extensions import db as _db
 from app.models import User
 from datetime import date
+from unittest.mock import patch
+import os
+
 
 
 def test_register_success(client, app):
-    response = client.post('/register', data={
-        'username': 'testuser',
-        'password': 'pass123',
-        're_password': 'pass123',
-        'user_type': 'admin',
-        'admin_code': "Secretadmin3"
-    }, follow_redirects=True)
+    with patch.dict(os.environ, {'ADMIN_CODE': 'Secret'}):
+        response = client.post('/register', data={
+            'username': 'testuser',
+            'password': 'pass123',
+            're_password': 'pass123',
+            'user_type': 'admin',
+            'admin_code': "Secret"
+        }, follow_redirects=True)
 
-    assert b"Registration successful" in response.data
+        assert b"Registration successful" in response.data
 
-    with app.app_context():
-        user = User.query.filter_by(username="testuser").first()
-        assert user is not None
+        with app.app_context():
+            user = User.query.filter_by(username="testuser").first()
+            assert user is not None
+
 
 
 def test_register_password_mismatch(client):
