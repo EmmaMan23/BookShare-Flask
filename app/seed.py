@@ -72,7 +72,7 @@ def seeding():
                     "marked_for_deletion": False,
                     "total_loans": 1,
                     "total_listings": 1,
-                    "join_date": date(2024, 9, 10)
+                    "join_date": date(2024, 6, 10)
 
                 },
                 {
@@ -91,7 +91,7 @@ def seeding():
                     "marked_for_deletion": False,
                     "total_loans": 4,
                     "total_listings": 6,
-                    "join_date": date(2024, 12, 10)
+                    "join_date": date(2024, 4, 10)
                 },
                 {
                     "username": "emily",
@@ -136,7 +136,7 @@ def seeding():
                     "marked_for_deletion": True,
                     "total_loans": 5,
                     "total_listings": 1,
-                    "join_date": date(2024, 12, 1)
+                    "join_date": date(2024, 8, 1)
                 },
                 {
                     "username": "chantelle",
@@ -154,7 +154,7 @@ def seeding():
                     "marked_for_deletion": False,
                     "total_loans": 5,
                     "total_listings": 1,
-                    "join_date": date(2025, 4, 5)
+                    "join_date": date(2024, 4, 5)
                 }
             ]
 
@@ -276,6 +276,46 @@ def seeding():
                     "marked_for_deletion": False,
                     "user_id": 1,
                     "date_listed": date(2024, 12, 20),
+                },
+                {
+                    "title": "Queit River",
+                    "author": "Emily Hart",
+                    "description": "Small town saga of love and loss",
+                    "genre_id": 3,
+                    "is_available": False,
+                    "marked_for_deletion": False,
+                    "user_id": 4,
+                    "date_listed": date(2025, 3, 21),
+                },
+                {
+                    "title": "Northern Lights",
+                    "author": "Jess Bean",
+                    "description": "A look at the worlds nighttime wonder",
+                    "genre_id": 8,
+                    "is_available": True,
+                    "marked_for_deletion": False,
+                    "user_id": 9,
+                    "date_listed": date(2025, 6, 20),
+                },
+                {
+                    "title": "The strange smell",
+                    "author": "John Dale",
+                    "description": "What is that i wonder, coming from the sock drawer?",
+                    "genre_id": 10,
+                    "is_available": False,
+                    "marked_for_deletion": False,
+                    "user_id": 1,
+                    "date_listed": date(2025, 2, 28),
+                },
+                {
+                    "title": "Egypt",
+                    "author": "Rachel Doyle",
+                    "description": "A look at ancient Egypt",
+                    "genre_id": 7,
+                    "is_available": False,
+                    "marked_for_deletion": False,
+                    "user_id": 2,
+                    "date_listed": date(2025, 3, 20),
                 }
             ]
 
@@ -369,6 +409,38 @@ def seeding():
                 {
                     "listing_id": 8,
                     "user_id": 9,
+                    "start_date": date(2025, 6, 1),
+                    "return_date": date(2025, 7, 3),
+                    "actual_return_date": date(2025, 7, 2),
+                    "is_returned": True
+                },
+                {
+                    "listing_id":11,
+                    "user_id": 2,
+                    "start_date": date(2025, 7, 10),
+                    "return_date": date(2025, 7, 30),
+                    "actual_return_date": None,
+                    "is_returned": False
+                },
+                {
+                    "listing_id": 14,
+                    "user_id": 4,
+                    "start_date": date(2025, 7, 11),
+                    "return_date": date(2025, 8, 1),
+                    "actual_return_date": None,
+                    "is_returned": False
+                },
+                {
+                    "listing_id": 13,
+                    "user_id": 2,
+                    "start_date": date(2025, 6, 13),
+                    "return_date": date(2025, 7, 9),
+                    "actual_return_date": None,
+                    "is_returned": False
+                },
+                {
+                    "listing_id": 1,
+                    "user_id": 1,
                     "start_date": date(2025, 6, 1),
                     "return_date": date(2025, 7, 3),
                     "actual_return_date": date(2025, 7, 2),

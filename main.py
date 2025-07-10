@@ -6,7 +6,8 @@ from flask import redirect, url_for
 app = create_app()
 
 #Populate the database with initial data (if needed)
-seeding()
+with app.app_context():
+    seeding()
 
 if __name__ == '__main__':
 
