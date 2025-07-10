@@ -14,6 +14,8 @@ user_service = UserService(db.session)
 
 @auth.route('/register', methods=['GET', 'POST'])
 def register():
+    """ Route to POST details from the register form """
+
     metrics = dashboard_service.read_metrics(user=None)
     if request.method == 'POST':
         form_data = request.form
@@ -28,6 +30,7 @@ def register():
 
         flash_result(result)
 
+#Redirect to login page if successful, continue to show register form if unsuccessful
         if result.success:
             return redirect(url_for('auth.login'))
         else:
@@ -37,6 +40,8 @@ def register():
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
+    """Route to POST details from the login form """
+
     metrics = dashboard_service.read_metrics(user=None)
     if request.method == 'POST':
         form_data = request.form
@@ -45,7 +50,8 @@ def login():
         password = form_data.get('password', '')
 
         result = user_service.user_login(username, password)
-
+        
+#Redirect to the dashboard if successful and the login page if unsuccessful
         if result.success:
             login_user(result.data)
             flash_result(result)
@@ -58,10 +64,14 @@ def login():
 @auth.route('/edit_user', methods=['POST', 'GET'])
 @login_required
 def edit_user():
+    """ POST and GET route for the edit user form, allows users to edit 
+    their account details and request a deletion of their account """
+
     if request.method == 'POST':
         form_data = request.form
         form_type = form_data.get('form_type')
 
+    #Checks if the user wants to request deletion
         if form_type == 'delete':
             marked_for_deletion = form_data.get('marked_for_deletion')
             result = user_service.update_user(
@@ -73,7 +83,8 @@ def edit_user():
                 marked_for_deletion)
             flash_result(result)
             return redirect(url_for('dash.dashboard'))
-            
+        
+    #Checks if edit details was selected, not every field needs to be edited  at the same time 
         elif form_type == 'edit':
             form_data = request.form
             new_username = form_data.get('username', '').strip()
@@ -99,6 +110,7 @@ def edit_user():
 @auth.route('/logout', methods=['POST'])
 @login_required
 def logout():
+    """POST route to log out the user and return to the login page """
     result = user_service.user_logout()
     flash_result(result)
     return redirect(url_for('auth.login'))

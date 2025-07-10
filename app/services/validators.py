@@ -1,11 +1,13 @@
 
 def validate_non_empty_string(field_value, field_name="Field"):
+    """Validate that a given string is not empty or None"""
+
     if field_value is None or str(field_value).strip() == '':
         raise ValueError(f"{field_name} cannot be empty.")
     return field_value.strip()
 
 def validate_length(value: str, field_name: str, max_length: int) -> str | None:
-    """Validate the length of a string. Return error message if invalid, else None."""
+    """Validate the length of a string. Return error message if invalid, else None """
     if not value:
         return f"{field_name} is required."
     if len(value) > max_length:
@@ -13,4 +15,6 @@ def validate_length(value: str, field_name: str, max_length: int) -> str | None:
     return None
 
 def to_bool(value):
+    """ Convert a value to boolean based on common "truthy" string representations """
+
     return str(value).lower() in ['true', 'on', '1', 'yes']
