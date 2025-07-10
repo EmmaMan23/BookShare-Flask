@@ -10,6 +10,7 @@ class baseModel(db.Model):
     __abstract__ = True
 
     def save(self, db_session):
+        """Save the current record to the database"""
         try:
             db_session.add(self)
             db_session.commit()
@@ -20,6 +21,7 @@ class baseModel(db.Model):
             return False
 
     def delete(self, db_session):
+        """Delete the current record from the database"""
         try:
             db_session.delete(self)
             db_session.commit()
@@ -31,6 +33,7 @@ class baseModel(db.Model):
 
     @classmethod
     def get_by_id(cls, db_session, record_id):
+        """Get a record by it's primary key"""
         try:
             record = db_session.get(cls, record_id)
             return record
@@ -41,6 +44,7 @@ class baseModel(db.Model):
 
     @classmethod
     def get_all(cls, db_session):
+        """Get all record for a model"""
         try:
             records = db_session.query(cls).all()
             return records
@@ -65,27 +69,34 @@ class User(baseModel, UserMixin):
 
     @property
     def is_admin(self):
+        """Check the user has admin role """
         return self.role == 'admin'
 
     def set_password(self, password):
+        """Hash and store user passwords"""
         self.password_hash = generate_password_hash(password)
 
     def verify_password(self, password):
+        """Check a password against the stored hash """
         return check_password_hash(self.password_hash, password)
 
     def get_id(self):
+        """Return user ID for Flask-Login"""
         return str(self.user_id)
 
     @classmethod
     def existing_user(cls, db_session, username):
+        """Check if a user with this username exists"""
         return db_session.query(cls).filter(func.lower(cls.username) == username.lower()).first()
 
     @classmethod
     def count_admins(cls, db_session):
+        """Count how many admin users exist"""
         return db_session.query(cls).filter_by(role='admin').count()
 
     @classmethod
     def filter_search_query(cls, db_session, search=None, filter_role=None, marked_for_deletion=None, sort_join_date='desc'):
+        """Apply filters to the user management page"""
         query = db_session.query(cls)
 
         if search:
@@ -105,6 +116,7 @@ class User(baseModel, UserMixin):
         return query.all()
 
     def increment_totals(self, db_session):
+        """Increment a user's listing count"""
         if self.total_listings is None:
             self.total_listings = 1
         else:
@@ -131,10 +143,13 @@ class Listing(baseModel):
 
     @property
     def active_loan(self):
+        """Return the current active loan for this listing (if it exists)"""
         return next((loan for loan in self.loans if not loan.is_returned), None)
 
     @classmethod
     def filter_search_listings(cls, db_session, user_id=None, search=None, filter_genre=None, filter_availability=None, sort_order='desc', marked_for_deletion=None):
+        """Apply filters and search to listing queries"""
+        
         query = db_session.query(cls)
 
         if user_id:
@@ -163,14 +178,17 @@ class Listing(baseModel):
 
     @classmethod
     def count_by_user(cls, db_session, user_id):
+        """Count current listings by a specific user"""
         return db_session.query(cls).filter(cls.user_id == user_id).count()
 
     @classmethod
     def count_all(cls, db_session):
+        """Count all current listings"""
         return db_session.query(cls).count()
 
     @classmethod
     def count_available(cls, db_session):
+        """Count all the currently available listings"""
         return db_session.query(cls).filter(cls.is_available.is_(True)).count()
 
 
@@ -189,6 +207,7 @@ class Loan(baseModel):
 
     @classmethod
     def filter_search_loans(cls, db_session, user_id=None, filter_status=None, search=None, sort_order='desc'):
+        """Apply filters and search to loan queries"""
         query = db_session.query(cls).join(cls.listing).join(cls.user)
 
         if user_id is not None:
@@ -226,10 +245,12 @@ class Loan(baseModel):
 
     @classmethod
     def count_active_by_user(cls, db_session, user_id):
+        """Count how many loans a user currently has"""
         return db_session.query(cls).filter(cls.user_id == user_id, cls.is_returned.is_(False)).count()
 
     @classmethod
     def count_active(cls, db_session):
+        """Count all current active loans"""
         return db_session.query(cls).filter(cls.is_returned.is_(False)).count()
 
 
@@ -240,4 +261,14 @@ class Genre(baseModel):
 
     @classmethod
     def exists_by_name(cls, db_session, name):
+        """Check if a genre with a given name already exists"""
         return db_session.query(cls).filter(func.lower(cls.name) == name.lower()).first()
+    
+    @staticmethod
+    def exists_by_name_excluding_id(db_session, name, exclude_id):
+        """Check if a genre name exists, excluding the given genre ID"""
+        return db_session.query(Genre).filter(
+            Genre.name == name,
+            Genre.genre_id != exclude_id
+        ).first() is not None
+

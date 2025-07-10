@@ -19,15 +19,18 @@ admin = Blueprint('admin', __name__)
 @login_required
 @admin_required
 def view_users():
+    """ GET Route to view users for the admin page manage users """
     args = request.args
     sort_join_date = args.get('sort_join_date', 'desc')
     filter_role = args.get('filter_role')
     marked_for_deletion = args.get('marked_for_deletion')
     search = args.get('search')
-
+    
+#Sort by join_date: default descending
     if sort_join_date not in ('asc', 'desc'):
         sort_join_date = 'desc'
 
+#Filter and sort options
     user_result = admin_service.view_users(
         search=search,
         sort_join_date=sort_join_date,
@@ -56,10 +59,14 @@ def view_users():
 @login_required
 @admin_required
 def delete():
+    """POST route to delete a record from the database (User, Listing, Genre, or Loan)
+    The scope variable is used to define the view of the redirect page"""
+
     form_data = request.form
     model = form_data.get('model')
     record_id = form_data.get('id')
 
+#Define the model types 
     model_map = {
         'user': User,
         'listing': Listing,
@@ -89,6 +96,7 @@ def delete():
     result = admin_service.delete_record(model_class, record_id_int)
     flash_result(result)
 
+#Define the location of the redirect 
     if model_class == User:
         return redirect(url_for('admin.view_users'))
     elif model_class == Genre:
@@ -104,6 +112,9 @@ def delete():
 @login_required
 @admin_required
 def create_genre():
+    """GET and POST route to create a new genre, admins only """
+
+    #Create a list of genre images to be displayed
     genre_images = [
         'images/adventure.png',
         'images/children.png',
@@ -114,6 +125,7 @@ def create_genre():
         'images/science.png',
     ]
 
+#New genre details and validation
     if request.method == 'POST':
         form_data = request.form
         name = form_data.get('name', '').strip().capitalize()
@@ -130,7 +142,7 @@ def create_genre():
         result = admin_service.create_genre(name, image)
         flash_result(result)
         return redirect(url_for('admin.create_genre'))
-
+#Get the current genres to display in the manage genres page
     genres_result = listing_service.get_all_genres()
     genres = genres_result.data if genres_result.success else []
 
@@ -141,17 +153,21 @@ def create_genre():
 @login_required
 @admin_required
 def edit_genre():
+    """POST route to edit an existing genre """
+
     form_data = request.form
     genre_id = form_data.get('id')
     name = form_data.get('name', '').strip().capitalize()
     image = form_data.get('image')
 
+#Validate the details of the existing genre 
     try:
         genre_id_int = int(genre_id)
     except (ValueError, TypeError):
         flash("Invalid genre ID.", "danger")
         return redirect(url_for('admin.create_genre'))
 
+#Check the changed details are vaild
     if not name:
         flash("Genre name cannot be empty.", "danger")
         return redirect(url_for('admin.create_genre'))
@@ -165,11 +181,14 @@ def edit_genre():
 @login_required
 @admin_required
 def admin_edit_user():
+    """GET and POST route for admins to edit a user """
+
     user_id = request.args.get('user_id', type=int)
     if not user_id:
         flash("User ID is missing.", "danger")
         return redirect(url_for('admin.view_users'))
 
+#Get the user details to be edited 
     user_result = admin_service.get_user_by_id(user_id)
     if not user_result.success:
         flash(user_result.message, "danger")
@@ -177,6 +196,7 @@ def admin_edit_user():
 
     user = user_result.data
 
+#Update the user role 
     if request.method == 'POST':
         role = request.form.get('role', '').strip()
         if not role:

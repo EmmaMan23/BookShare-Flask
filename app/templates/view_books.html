@@ -138,7 +138,7 @@
                 You cannot reserve your own book
               </button>
               {% else %}
-              <form action="{{ url_for('listings.reserve_book' )}}" method="post">
+              <form action="{{ url_for('listings.reserve_book') }}" method="post">
                 <input type="hidden" name="listing_id" value="{{ listing.listing_id }}">
                 <div class="form-check">
                   <input class="form-check-input" type="checkbox" name="reserve"
@@ -146,11 +146,22 @@
                     listing.marked_for_deletion %}disabled{% endif %}>
                   <label class="form-check-label" for="checkDefault{{ listing.listing_id }}">Reserve this book</label>
                 </div>
-                <button type="submit" class="btn btn-primary mt-2" {% if not listing.is_available or
-                  listing.marked_for_deletion %}disabled{% endif %}>
-                  Submit
-                </button>
+                <div class="d-flex align-items-center mt-2">
+                  <button type="submit" class="btn btn-primary me-2" {% if not listing.is_available or
+                    listing.marked_for_deletion %}disabled{% endif %}>
+                    Submit
+                  </button>
+
+                  {% if current_user.is_admin %}
+                  <a href="{{ url_for('listings.edit_listing', listing_id=listing.listing_id) }}"
+                    class="btn btn-primary" {% if listing.marked_for_deletion %} disabled aria-disabled="true"
+                    style="pointer-events: none; opacity: 0.6;" {% endif %}>
+                    Edit book details
+                  </a>
+                  {% endif %}
+                </div>
               </form>
+
               {% endif %}
               {% else %}
               <p>
@@ -161,7 +172,6 @@
                 Not currently borrowed
                 {% endif %}
               </p>
-
               <details>
                 <summary>View loan history</summary>
                 <ul>
@@ -236,11 +246,11 @@
               </form>
             </div>
             {% endif %}
-          </div> 
-        </div> 
+          </div>
+        </div>
 
-      </div> 
-    </div> 
+      </div>
+    </div>
     {% endfor %}
   </div>
 

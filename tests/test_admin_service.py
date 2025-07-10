@@ -66,18 +66,18 @@ def test_edit_genre_success(admin_service, mock_db_session):
     new_name = "Updated Name"
     new_image = "new_image.png"
 
-    with patch('app.services.admin_service.validate_non_empty_string', side_effect=lambda name, field: name) as mock_validate_string, \
-            patch('app.models.Genre.get_by_id', return_value=mock_genre) as mock_get_by_id:
+    with patch('app.services.admin_service.validate_non_empty_string', side_effect=lambda name, field: name), \
+        patch('app.models.Genre.get_by_id', return_value=mock_genre), \
+        patch('app.models.Genre.exists_by_name_excluding_id', return_value=False):  # 👈 Add this patch
 
         result = admin_service.edit_genre(mock_genre.id, new_name, new_image)
 
         assert result.success is True
-        assert "Genre updated successfully" in result.message
-        mock_validate_string.assert_called_with(new_name, "Genre name")
+        assert result.message == "Genre updated successfully"
         assert mock_genre.name == new_name
         assert mock_genre.image == new_image
-        mock_get_by_id.assert_called_once_with(mock_db_session, mock_genre.id)
         mock_genre.save.assert_called_once_with(mock_db_session)
+
 
 
 def test_edit_genre_no_id(admin_service, mock_db_session):

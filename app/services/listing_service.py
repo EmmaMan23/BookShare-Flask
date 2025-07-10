@@ -11,7 +11,10 @@ class ListingService:
         self.dashboard_service = dashboard_service
 
     def list_book(self, title, author, description, genre_id, user_id, is_available=True):
+        """Method to list a new book for the current user"""
+
         try:
+            #Validate the input data 
             title = validate_non_empty_string(title, "Title")
             error = validate_length(title, "Title", 150)
             if error:
@@ -36,11 +39,11 @@ class ListingService:
                 date_listed=date_listed,
             )
 
+            #Retrive the user and get their total listings count 
             user_result = self.get_record_by_id(User, user_id)
             if not user_result.success:
                 return user_result
             user = user_result.data
-
 
             user.increment_totals(self.db_session)
             new_listing.save(self.db_session)
@@ -51,6 +54,8 @@ class ListingService:
             return Result(False, f"Error creating Listing: {str(e)}")
 
     def get_all_listings(self, user_id=None, genre=None, availability=None, search=None, sort_order='desc', marked_for_deletion=None):
+        """ Method to retrive listings with optional filter options applied """
+
         query = Listing.filter_search_listings(
             db_session=self.db_session,
             user_id=user_id,
@@ -64,11 +69,14 @@ class ListingService:
         return Result(True, "Listings returned successfully.", query)
 
     def get_all_genres(self):
+        """Returns all genres """
         genres = Genre.get_all(self.db_session)
         return Result(True, "Genres retrieved successfully", genres)
 
 
     def get_record_by_id(self, model_cls, record_id, not_found_msg=None):
+        """Helper method to get a record from a model ID """
+
         record = model_cls.get_by_id(self.db_session, record_id)
         if record:
             return Result(True, f"{model_cls.__name__} found.", record)
@@ -86,6 +94,8 @@ class ListingService:
         is_available=None,
         marked_for_deletion=None):
 
+        """ Method to edit a book listing """
+
         result = self.get_record_by_id(Listing, listing_id)
 
         if not result.success:
@@ -93,10 +103,13 @@ class ListingService:
 
         listing = result.data
 
+        #Prevent non-admin users from editing other people's listings 
         if not (current_user.is_admin or listing.user_id == user_id):
             return Result(False, "You can't edit someone else's listing")
 
         try:
+            #Applies updates to the changed fields only
+            #Validates the data inputs
             if title is not None:
                 title = validate_non_empty_string(title, "Title")
                 error = validate_length(title, "Title", 150)
@@ -123,6 +136,7 @@ class ListingService:
             else:
                 listing.genre_id = None
 
+            #Handle availability updates with some logical restrictions
             if is_available is not None:
                 new_availability = to_bool(is_available)
 
@@ -146,6 +160,7 @@ class ListingService:
 
 
     def update_marked_for_deletion(self, listing_id, is_marked):
+        """Updates the marked_for_deletion status of a listing """
         result = self.get_record_by_id(Listing, listing_id)
         if not result.success:
             return result
@@ -160,6 +175,8 @@ class ListingService:
             return Result(False, f"Error updating deletion status: {str(e)}")
 
     def get_all_loans(self, user_id=None, status=None, sort_order='desc', search=None):
+        """Retrives all loans with the optional filters """
+
         loans = Loan.filter_search_loans(
             db_session=self.db_session,
             filter_status=status,
@@ -172,6 +189,8 @@ class ListingService:
 
 
     def update_loan(self, loan_id, actual_return_date):
+        """Updates a loan - checks for an availability change or marks as returned """
+
         loan_result = self.get_record_by_id(Loan, loan_id)
         if not loan_result.success:
             return loan_result, None
@@ -179,6 +198,7 @@ class ListingService:
         loan = loan_result.data
 
         try:
+            #If a loan is marked as returned the availability becomes available 
             loan.is_returned = True
             loan.actual_return_date = actual_return_date
 
@@ -193,7 +213,9 @@ class ListingService:
             return Result(False, f"Error updating loan: {str(e)}"), None
 
     def reserve_book(self, user_id, listing_id):
+        """Reserves a book, marking it as unavailable and creates a new loan record """
         try:
+            #Logic to determine the loan period 
             start_date = date.today() + timedelta(days=1)
             return_date = start_date + timedelta(days=21)
 
@@ -217,16 +239,17 @@ class ListingService:
             listing.is_available = False
             listing.save(self.db_session)
 
+            #Updates users loan count 
             user_result = self.get_record_by_id(User, user_id)
             if not user_result.success:
                 return user_result  
             user = user_result.data
 
-
             user.total_loans = (user.total_loans or 0) + 1
             user.save(self.db_session)
 
             loan.save(self.db_session)
+            #Updates the overall site loans
             self.dashboard_service.update_overall_loans()
 
             return Result(True, "Book reserved successfully", loan)
