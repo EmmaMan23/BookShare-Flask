@@ -9,11 +9,12 @@ app = create_app()
 with app.app_context():
     seeding()
 
+@app.route('/')
+def index():
+    return redirect(url_for('auth.login'))
+
 if __name__ == '__main__':
 
-    @app.route('/')
-    def index():
-        return redirect(url_for('auth.login'))
     
     #Run the Flask development server with debugging enabled
     app.run(debug=True)
